@@ -1,14 +1,17 @@
 ﻿using System;
-using Sando.Core;
-using System.Xml.Linq;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sando.Core;
 
 namespace Sando.Parser
 {
 	public class SrcMLParser : ParserInterface
 	{
 		private SrcMLGenerator Generator;
+
+		private static readonly XNamespace Namespace = "http://www.sdml.info/srcML/src";
 
 		public SrcMLParser()
 		{
@@ -23,62 +26,38 @@ namespace Sando.Parser
 			Generator = gen;
 		}
 
-		public ProgramElement[] parse(String filename)
+		public ProgramElement[] Parse(String filename)
 		{
+			var programElements = new List<ProgramElement>();
 			String srcml = Generator.GenerateSrcML(filename);
 
-			//now parse the important parts of the srcml and generate program elements
-			XDocument xDoc = XDocument.Parse(srcml);
-
-			var a = from namespc in xDoc.Descendants("decl")
-					where namespc.Element("type").Value == "namespace"
-					select namespc.Element("block");
-
-			String nmspace = "";
-			ProgramElement[] classes = parseClass(xDoc, filename, nmspace);
-
-			return classes;
-		}
-
-		private ProgramElement[] parseClass(XDocument xDoc, String filename, String nmspace) {
+			//now Parse the important parts of the srcml and generate program elements
+			XElement sourceElements = XElement.Parse(srcml);
 			
-			List<ClassElement> classElements = 
-				(from cls in xDoc.Descendants("class")
-				 select new ClassElement {
-					Namespace = nmspace,
-					FileName = filename,
-					Name = cls.Element("name").Value,
-					DefinitionLineNumber = Int32.Parse(cls.Attribute("pos::line").Value),
-					AccessLevel = strToAccessLevel(cls.Element("specifier").Value)
-				 }).ToList<ClassElement>();
+			ParseFunctions(programElements, sourceElements);
 
-			var Elements = from cls in xDoc.Descendants()
-						   select cls;
-
-			//foreach(String name in classNames)
-			//{
-			//    ClassElement classElement = new ClassElement();
-			//    classElement.Name = name;
-			//    classElement.FileName = filename;
-
-			//}
-
-			return classElements.ToArray();
+			return programElements.ToArray();
 		}
 
-		private AccessLevel strToAccessLevel(String level) 
+		private void ParseFunctions(List<ProgramElement> programElements, XElement elements)
 		{
-			switch(level.ToLower())
-			{
-				case "private":
-					return AccessLevel.Private;
-				case "public":
-					return AccessLevel.Public;
-				case "protected":
-					return AccessLevel.Protected;
-				default:
-					return AccessLevel.Protected;			
-			}
+			IEnumerable<XElement> functions =
+				from el in elements.Descendants(Namespace + "function")
+				select el;
+			programElements.AddRange(functions.Select(ParseFunction).ToList());
+		}
+
+		private ProgramElement ParseFunction(XElement function)
+		{
+			var method = new MethodElement();			
+			//get name
+			IEnumerable<XElement> name =
+				from el in function.Elements(Namespace + "name")
+				select el;
+			method.Name = name.First().Value;
+			//get other stuff...
+
+			return method;
 		}
 
 	}
