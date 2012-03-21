@@ -124,6 +124,8 @@ namespace Sando.Indexer
 						indexReader.Close();
 					IndexSearcher.Close();
 					LuceneIndexesDirectory.Close();
+                    IndexSearcher.GetIndexReader().Close();
+                    IndexSearcher.Close();
                 }
 
                 disposed = true;
