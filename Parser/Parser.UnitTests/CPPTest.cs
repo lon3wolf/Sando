@@ -111,7 +111,7 @@ namespace Sando.Parser.UnitTests
 
         [Test]
         public void ParseAboutDlgTest()
-        {
+        {        
             var parser = new SrcMLParser(Generator);
             var elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\AboutDlg.cpp");
             Assert.IsTrue(true);
