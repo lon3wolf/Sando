@@ -52,7 +52,7 @@ namespace Sando.UI
     // This attribute is needed to let the shell know that this package exposes some menus.
     [ProvideMenuResource("Menus.ctmenu", 1)]
     // This attribute registers a tool window exposed by this package.
-    [ProvideToolWindow(typeof(SearchToolWindow), Transient = true, MultiInstances = false, Style = VsDockStyle.Tabbed)]
+    [ProvideToolWindow(typeof(SearchToolWindow), Transient = false, MultiInstances = false, Style = VsDockStyle.Tabbed)]
     
     [Guid(GuidList.guidUIPkgString)]
 	// This attribute starts up our extension early so that it can listen to solution events    
@@ -61,24 +61,16 @@ namespace Sando.UI
     //[ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]    
 	[ProvideOptionPage(typeof(SandoDialogPage), "Sando", "General", 1000, 1001, true)]
 	[ProvideProfile(typeof(SandoDialogPage), "Sando", "General", 1002, 1003, true)]
-    public sealed class UIPackage : Package, IVsPackageDynamicToolOwnerEx
-    {    	
-    	
-		private SolutionMonitor _currentMonitor;
-		
-		//For classloading... //TODO- eliminate the need for these
-    	private List<ProgramElement> _list = new List<ProgramElement>();
-		private List<CodeSearchResult> _stuff = new List<CodeSearchResult>();
-		private string _other = Configuration.Configuration.GetValue("stuff");
-    	private TranslationCode _mycode = TranslationCode.Exception_General_IOException;
+    public sealed class UIPackage : Package, IToolWindowFinder
+    {        
 
-
-
+        private SolutionMonitor _currentMonitor;
     	private SolutionEvents _solutionEvents;
         private ILog logger;
         private string pluginDirectory;        
         private ExtensionPointsConfiguration extensionPointsConfiguration;
         private DTEEvents _dteEvents;
+        private ViewManager _viewManager;
 
         private static UIPackage MyPackage
 		{
@@ -98,45 +90,8 @@ namespace Sando.UI
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));    		
         }
 
-        /// <summary>
-        /// This function is called when the user clicks the menu item that shows the 
-        /// tool window. See the Initialize method to see how the menu item is associated to 
-        /// this function using the OleMenuCommandService service and the MenuCommand class.
-        /// </summary>
-        private void ShowToolWindow(object sender, EventArgs e)
-        {
-            ShowSando();
-        }
 
-        /// <summary>
-        /// Side affect is creating the tool window if it doesn't exist yet
-        /// </summary>
-        /// <returns></returns>
-        private IVsWindowFrame GetWindowFrame()
-        {
-            // Get the instance number 0 of this tool window. This window is single instance so this instance
-            // is actually the only one.
-            // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this.FindToolWindow(typeof (SearchToolWindow), 0, true);            
-            if ((null == window) || (null == window.Frame))
-            {
-                throw new NotSupportedException(Resources.CanNotCreateWindow);
-            }
-            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            return windowFrame;
-        }
 
-        private bool isRunning = false;
-        private int ShouldShow = 0;
-
-        public void EnsureViewExists()
-		{
-            if (!isRunning)
-            {
-                var windowFrame = GetWindowFrame();
-                isRunning = true;
-            }		    
-		}
 
    
 
@@ -181,6 +136,7 @@ namespace Sando.UI
                 FileLogger.DefaultLogger.Info("Sando initialization started.");
                 base.Initialize();
                 SetUpLogger();
+                _viewManager = new ViewManager(this);
                 AddCommand();                
                 RegisterExtensionPoints();
                 SetUpLifeCycleEvents();
@@ -201,21 +157,22 @@ namespace Sando.UI
 
         private void AddCommand()
         {
-// Add our command handlers for menu (commands must exist in the .vsct file)
+            // Add our command handlers for menu (commands must exist in the .vsct file)
             var mcs = GetService(typeof (IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
             {
                 // Create the command for the tool window
                 var toolwndCommandID = new CommandID(GuidList.guidUICmdSet, (int) PkgCmdIDList.sandoSearch);
-                var menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
+                var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand(menuToolWin);
             }
         }
 
+        
         private void StartupCompleted()
         {
-            ShouldShow = 1;
-            ShowSando();
+            if(_viewManager.ShouldShow())
+                _viewManager.ShowSando();
             RegisterSolutionEvents();
             Solution openSolution = GetOpenSolution();
             if(openSolution!=null && !"".Equals(openSolution.FullName)&& _currentMonitor==null)
@@ -223,6 +180,8 @@ namespace Sando.UI
                 SolutionHasBeenOpened();
             }
         }
+
+  
 
         private void RegisterSolutionEvents()
         {
@@ -235,13 +194,6 @@ namespace Sando.UI
             }
         }
 
-        private void ShowSando()
-        {
-            var windowFrame = GetWindowFrame();
-            // Dock Sando to the bottom of Visual Studio.
-            windowFrame.SetFramePos(VSSETFRAMEPOS.SFP_fDockRight, Guid.Empty, 0, 0, 0, 0);
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
-        }
          
 
         private void DteEventsOnOnBeginShutdown()
@@ -269,7 +221,7 @@ namespace Sando.UI
             var extensionPointsRepository = ExtensionPointsRepository.Instance;
 
             extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".cs" }, new SrcMLCSharpParser(GetSrcMLDirectory()));
-            extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".h", ".cpp", ".cxx" },
+            extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".h", ".cpp", ".cxx", ".c" },
                                                                    new SrcMLCppParser(GetSrcMLDirectory()));
             extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".xaml", ".htm", ".html", ".xml", ".resx", ".aspx"},
                                                                    new XMLFileParser());
@@ -498,10 +450,17 @@ namespace Sando.UI
             }
         }
 
-        public int QueryShowTool(ref Guid rguidPersistenceSlot, uint dwId, out int pfShowTool)
+    
+
+
+        public string PluginDirectory()
         {
-            pfShowTool =  ShouldShow;
-            return pfShowTool;
+            return pluginDirectory;
+        }
+
+        public void EnsureViewExists()
+        {
+            _viewManager.EnsureViewExists();
         }
     }
 }
