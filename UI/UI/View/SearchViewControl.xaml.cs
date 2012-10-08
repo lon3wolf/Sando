@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Sando.Core.Extensions.Logging;
+using Sando.Core.Extensions;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.Indexer;
@@ -30,6 +31,25 @@ namespace Sando.UI.View
     
 
         private static IIndexUpdateListener _instance;
+
+        public ObservableCollection<AccessWrapper> AccessLevels
+        {
+            get { return (ObservableCollection<AccessWrapper>)GetValue(AccessLevelsProperty); }
+            set
+            {
+                SetValue(AccessLevelsProperty, value);
+            }
+        }
+
+
+        public ObservableCollection<ProgramElementWrapper> ProgramElements
+        {
+            get { return (ObservableCollection<ProgramElementWrapper>)GetValue(ProgramElementsProperty); }
+            set
+            {
+                SetValue(ProgramElementsProperty, value);
+            }
+        }
 
         public ObservableCollection<CodeSearchResult> SearchResults
         {
@@ -58,7 +78,7 @@ namespace Sando.UI.View
         public SimpleSearchCriteria SearchCriteria
         {
             get
-            {
+            {                
                 return (SimpleSearchCriteria)GetValue(SearchCriteriaProperty);
             }
             set
@@ -91,24 +111,15 @@ namespace Sando.UI.View
             }
         }
 
-        public ObservableCollection<string> ProgramElementTypeList
-        {
-            get
-            {
-                ObservableCollection<string> list = (ObservableCollection<string>)GetValue(ProgramElementTypeListProperty);
-                return list;
-            }
-        }
 
-        public List<string> ProgramElementTypes
-        {
-            get
-            {
-                List<string> list = Enum.GetValues(typeof(ProgramElementType)).Cast<string>().ToList<string>();
-                list.Add("all");
-                return list;
-            }
-        }
+
+
+        public static readonly DependencyProperty AccessLevelsProperty =
+    DependencyProperty.Register("AccessLevels", typeof(ObservableCollection<AccessWrapper>), typeof(SearchViewControl), new UIPropertyMetadata(null));
+
+        public static readonly DependencyProperty ProgramElementsProperty =
+DependencyProperty.Register("ProgramElements", typeof(ObservableCollection<ProgramElementWrapper>), typeof(SearchViewControl), new UIPropertyMetadata(null));
+
 
         public static readonly DependencyProperty SearchResultsProperty =
             DependencyProperty.Register("SearchResults", typeof(ObservableCollection<CodeSearchResult>), typeof(SearchViewControl), new UIPropertyMetadata(null));
@@ -123,8 +134,7 @@ namespace Sando.UI.View
         public static readonly DependencyProperty SearchCriteriaProperty =
             DependencyProperty.Register("SearchCriteria", typeof(SimpleSearchCriteria), typeof(SearchViewControl), new UIPropertyMetadata(null));
 
-        public static readonly DependencyProperty ProgramElementTypeListProperty =
-            DependencyProperty.Register("ProgramElementTypes", typeof(ObservableCollection<string>), typeof(SearchViewControl), new UIPropertyMetadata(null));
+        
 
         private SearchManager _searchManager;
 
@@ -139,11 +149,38 @@ namespace Sando.UI.View
             _searchManager = new SearchManager(this);
             SearchResults = new ObservableCollection<CodeSearchResult>();
             SearchCriteria = new SimpleSearchCriteria();
+            InitAccessLevels();
+            InitProgramElements();
             ((INotifyCollectionChanged)searchResultListbox.Items).CollectionChanged += selectFirstResult;
 
             SearchStatus = "Enter search terms - only complete words or partial words followed by a '*' are accepted as input.";
 
             recommender = new QueryRecommender();
+        }
+
+        private void InitProgramElements()
+        {
+            ProgramElements = new ObservableCollection<ProgramElementWrapper>();
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Class));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Comment));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Custom));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.DocComment));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Enum));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Field));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Method));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.MethodPrototype));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Property));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.Struct));
+            ProgramElements.Add(new ProgramElementWrapper(true, ProgramElementType.TextLine));
+        }
+
+        private void InitAccessLevels()
+        {
+            AccessLevels = new ObservableCollection<AccessWrapper>();           
+            AccessLevels.Add(new AccessWrapper(true, AccessLevel.Private));
+            AccessLevels.Add(new AccessWrapper(true, AccessLevel.Protected));
+            AccessLevels.Add(new AccessWrapper(true, AccessLevel.Internal));
+            AccessLevels.Add(new AccessWrapper(true, AccessLevel.Public));
         }
 
         private void selectFirstResult(object sender, NotifyCollectionChangedEventArgs e)
@@ -169,21 +206,39 @@ namespace Sando.UI.View
         }
 
         private void BeginSearch(string searchString) {
-            //set search criteria
-            if(searchAccessLevel.SelectedIndex == 0) {
-                SearchCriteria.SearchByAccessLevel = false;
-            } else {
-                SearchCriteria.SearchByAccessLevel = true;
-                SearchCriteria.AccessLevels.Clear();
-                SearchCriteria.AccessLevels.Add((AccessLevel)searchAccessLevel.SelectedItem);
+            //set access type
+            SearchCriteria.SearchByAccessLevel = true;
+            bool allchecked = true;
+            SearchCriteria.AccessLevels.Clear();
+            foreach (var accessWrapper in AccessLevels)
+            {
+                if(accessWrapper.Checked)
+                {
+                    SearchCriteria.AccessLevels.Add(accessWrapper.Access);       
+                }else
+                {
+                    allchecked = false;
+                }
             }
-            if(searchElementType.SelectedIndex == 0) {
-                SearchCriteria.SearchByProgramElementType = false;
-            } else {
-                SearchCriteria.SearchByProgramElementType = true;
-                SearchCriteria.ProgramElementTypes.Clear();
-                SearchCriteria.ProgramElementTypes.Add((ProgramElementType)searchElementType.SelectedItem);
+            if (allchecked) SearchCriteria.SearchByAccessLevel = false;
+
+
+            allchecked = true;
+            SearchCriteria.SearchByProgramElementType = true;
+            SearchCriteria.ProgramElementTypes.Clear();
+            foreach (var progElement in ProgramElements)
+            {
+                if (progElement.Checked)
+                {
+                    SearchCriteria.ProgramElementTypes.Add(progElement.ProgramElement);
+                }
+                else
+                {
+                    allchecked = false;
+                }
             }
+            if (allchecked) SearchCriteria.SearchByProgramElementType = false;
+                      
             //execute search
             SearchAsync(searchString, SearchCriteria);
         }
@@ -206,6 +261,12 @@ namespace Sando.UI.View
         {
             var searchParams = (WorkerSearchParameters)e.Argument;
             var searchStatus = _searchManager.Search(searchParams.query, searchParams.criteria);
+            if (ExtensionPointsRepository.Instance.IsCloned)
+            {
+                ExtensionPointsRepository.Instance.SwitchToClonedSet();
+                _searchManager.Search(searchParams.query, searchParams.criteria);
+                ExtensionPointsRepository.Instance.SwitchToOriginalSet();
+            }
             e.Result = searchStatus;
         }
 
@@ -350,7 +411,35 @@ namespace Sando.UI.View
             searchBox.ItemsSource = recommendations;
             searchBox.PopulateComplete();
         }
+        }
+public  class AccessWrapper
+    {
+        public AccessWrapper(bool b, AccessLevel access
+            )
+        {
+            this.Checked = b;
+            this.Access = access;
+        }
+
+        public bool Checked { get; set; }
+        public AccessLevel Access { get; set; }
     }
+
+
+    public class ProgramElementWrapper
+    {
+        public ProgramElementWrapper(bool b, ProgramElementType access
+            )
+        {
+            this.Checked = b;
+            this.ProgramElement = access;
+        }
+
+        public bool Checked { get; set; }
+        public ProgramElementType ProgramElement { get; set; }
+    }
+
+
 
     #region ValueConverter of SearchResult's Icon
     [ValueConversion(typeof(string), typeof(BitmapImage))] 
