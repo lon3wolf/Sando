@@ -51,7 +51,8 @@ namespace Sando.UI.Monitoring
 				{
 					case IndexOperation.Add:
 						{
-                            _currentIndexer.DeleteDocuments(path); //just to be safe!
+							Debug.WriteLine("IndexOperation.Add");
+							_currentIndexer.DeleteDocuments(path); //just to be safe!
 							Update(indexFileState, path, physicalFileState);
                             //compute SWUM on the file, for the query recommender
                             SwumManager.Instance.AddSourceFile(path);
@@ -60,6 +61,7 @@ namespace Sando.UI.Monitoring
 						;
 					case IndexOperation.Update:
 						{
+							Debug.WriteLine("IndexOperation.Update");
 							_currentIndexer.DeleteDocuments(path);
 							Update(indexFileState, path, physicalFileState);
 						    SwumManager.Instance.UpdateSourceFile(path); //for the query recommender
@@ -68,6 +70,7 @@ namespace Sando.UI.Monitoring
 						;
 					case IndexOperation.DoNothing:
 						{
+							Debug.WriteLine("IndexOperation.DoNothing");
 							break;
 						}
 				}
