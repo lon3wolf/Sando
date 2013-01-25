@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+// Code changed by JZ: solution monitor integration
+using System.Xml.Linq;
+// End of code changes
 using Sando.Core;
 using Sando.Core.Extensions;
 using Sando.Core.Extensions.Logging;
@@ -14,7 +17,7 @@ using Sando.Recommender;
 
 namespace Sando.UI.Monitoring
 {
-	public class IndexUpdateManager
+    public class IndexUpdateManager
 	{ 
 
 		private FileOperationResolver _fileOperationResolver;
@@ -33,11 +36,29 @@ namespace Sando.UI.Monitoring
 			_fileOperationResolver = new FileOperationResolver();
 		}
 
+        // Code added by JZ: solution monitor integration
+        /// <summary>
+        /// New constructor.
+        /// The another (original) constructor should never be used any more.
+        /// </summary>
+        /// <param name="currentIndexer"></param>
+        public IndexUpdateManager(DocumentIndexer currentIndexer)
+        {
+            _currentIndexer = currentIndexer;
+        }
+        // End of code changes
 
 		public void SaveFileStates()
 		{
 			_indexFilesStatesManager.SaveIndexFilesStates();			
 		}
+
+        // Code added by JZ: To complete the Delete case (obsolete because it is called only in Sando's solution monitor)
+        public List<string> GetAllIndexedFileNames()
+        {
+            return _indexFilesStatesManager.GetAllIndexedFileNames();
+        }
+        // End of code changes
 
 		public void UpdateFile(String path)
 		{
@@ -68,7 +89,15 @@ namespace Sando.UI.Monitoring
 							break;
 						}
 						;
-					case IndexOperation.DoNothing:
+                    // Code changed by JZ: Added the Delete case (obsolete because UpdateFile() is called only in Sando's solution monitor)
+                    case IndexOperation.Delete:
+                        {
+                            _currentIndexer.DeleteDocuments(path);
+                            break;
+                        }
+                        ;
+                    // End of code changes
+                    case IndexOperation.DoNothing:
 						{
 							Debug.WriteLine("IndexOperation.DoNothing");
 							break;
@@ -132,6 +161,68 @@ namespace Sando.UI.Monitoring
 			_indexFilesStatesManager.UpdateIndexFileState(filePath, indexFileState);
 		}
 
+        // Code added by JZ: solution monitor integration
+        /// <summary>
+        /// New Update() method that takes both source file path and the XElement representation of the source file as input arguments.
+        /// TODO: what if the variable parsed is null?
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="xelement"></param>
+        public void Update(string filePath, XElement xElement)
+        {
+            FileInfo fileInfo = new FileInfo(filePath);
+            writeLog( "IndexUpdateManager.Update(): " + filePath + " [" + fileInfo.Extension + "]");
+            try
+            {
+                var parsed = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension).Parse(filePath, xElement);
+                ////var parsed = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension).Parse(filePath);
 
+                var unresolvedElements = parsed.FindAll(pe => pe is CppUnresolvedMethodElement);
+                if (unresolvedElements.Count > 0)
+                {
+                    //first generate program elements for all the included headers
+                    List<ProgramElement> headerElements = CppHeaderElementResolver.GenerateCppHeaderElements(filePath, unresolvedElements);
+
+                    //then try to resolve
+                    foreach (CppUnresolvedMethodElement unresolvedElement in unresolvedElements)
+                    {
+                        SandoDocument document = CppHeaderElementResolver.GetDocumentForUnresolvedCppMethod(unresolvedElement, headerElements);
+                        if (document != null)
+                        {
+                            writeLog( "- DI.AddDocument()");
+                            _currentIndexer.AddDocument(document);
+                        }
+                    }
+                }
+
+                foreach (var programElement in parsed)
+                {
+                    if (!(programElement is CppUnresolvedMethodElement))
+                    {
+                        var document = DocumentFactory.Create(programElement);
+                        if (document != null)
+                        {
+                            writeLog( "- DI.AddDocument()");
+                            _currentIndexer.AddDocument(document);
+                        }
+                    }
+                }
+                }
+            catch (Exception e)
+            {
+                writeLog( "Exception in IndexUpdateManager.Update() " + e.Message + "\n" + e.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// For debugging.
+        /// </summary>
+        /// <param name="logFile"></param>
+        /// <param name="str"></param>
+        private static void writeLog(string str)
+        {
+            FileLogger.DefaultLogger.Info(str);
+        }
+        // End of code changes
 	}
 }
