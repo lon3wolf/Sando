@@ -13,6 +13,7 @@ using Configuration.OptionsPages;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.CommandBars;
+using Sando.Indexer.IndexFiltering;
 using log4net; 
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -422,6 +423,7 @@ namespace Sando.UI
                 {
                     extensionPointsConfigurationDirectory = pluginDirectory;
                 }
+                ExtensionPointsRepository.Instance.RegisterIndexFilterManagerImplementation(new IndexFilterManager(GetCurrentSolutionKey().GetIndexPath()));
 
                 FileLogger.DefaultLogger.Info("extensionPointsDirectory: " + extensionPointsConfigurationDirectory);
                 bool isIndexRecreationRequired =
