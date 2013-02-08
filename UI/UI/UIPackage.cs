@@ -295,6 +295,13 @@ namespace Sando.UI
                 FileLogger.DefaultLogger.Error(e);
             }
 		}
+            RegisterEmptySolutionKey();
+		}
+
+        private void RegisterEmptySolutionKey()
+        {
+            ServiceLocator.RegisterInstance(new SolutionKey(Guid.NewGuid(),"x","x",Path.GetDirectoryName(Assembly.GetCallingAssembly().Location)));            
+        }
 
 		private void SolutionHasBeenOpened()
 		{
@@ -317,6 +324,7 @@ namespace Sando.UI
             try
             {
                 var solutionKey = ServiceLocator.Resolve<SolutionKey>();
+                ServiceLocator.RegisterInstance(solutionKey);
                 SolutionMonitorFactory.LuceneDirectory = solutionKey.SandoAssemblyDirectoryPath;
                 var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
                 FileLogger.DefaultLogger.Info("extensionPointsDirectory: " + sandoOptions.ExtensionPointsPluginDirectoryPath);
@@ -483,6 +491,7 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(GetService(typeof (DTE)) as DTE2);
             ServiceLocator.RegisterInstance(this);
             ServiceLocator.RegisterInstance(new ViewManager(this));
+            RegisterEmptySolutionKey();
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());
         }
     }
