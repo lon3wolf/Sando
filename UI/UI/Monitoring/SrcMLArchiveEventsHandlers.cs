@@ -12,36 +12,33 @@ namespace Sando.UI.Monitoring
 {
     public class SrcMLArchiveEventsHandlers
     {
-        // JZ: SrcMLService Integration
-        /// <summary>
-        /// Respond to the SourceFileChanged event from SrcMLService.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
         public void SourceFileChanged(object sender, FileEventRaisedArgs args)
         {
-            FileLogger.DefaultLogger.Info("Sando: SourceFileChanged(), File = " + args.FilePath + ", OldFile = " + args.OldFilePath + ", EventType = " + args.EventType + ", HasSrcML = " + args.HasSrcML);
+            SourceFileChanged(sender, args, false);
+        }
 
+        public void SourceFileChanged(object sender, FileEventRaisedArgs args, bool commitImmediately = false)
+        {
+            FileLogger.DefaultLogger.Info("Sando: RespondToSourceFileChangedEvent(), File = " + args.SourceFilePath + ", EventType = " + args.EventType);            
             // Ignore files that can not be indexed by Sando.
-            var fileExtension = Path.GetExtension(args.FilePath);
+		    var fileExtension = Path.GetExtension(args.SourceFilePath);
             if (fileExtension != null && !fileExtension.Equals(String.Empty))
             {
-                string sourceFilePath = args.FilePath;
-                string oldSourceFilePath = args.OldFilePath;
+                string sourceFilePath = args.SourceFilePath;
+                string oldSourceFilePath = args.OldSourceFilePath;
                 var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
-                if(ServiceLocator.Resolve<IndexFilterManager>().ShouldFileBeIndexed(args.FilePath))
+                if (ServiceLocator.Resolve<IndexFilterManager>().ShouldFileBeIndexed(args.SourceFilePath))
                 {
                     if (ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null)
                     {
-                        var service = (sender as ABB.SrcML.VisualStudio.SrcMLService.ISrcMLGlobalService);
-                        var xelement = service.GetXElementForSourceFile(args.FilePath);
-
+                        var xelement = args.SrcMLXElement;
                         var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
 
                         switch (args.EventType)
                         {
                             case FileEventType.FileAdded:
-                                documentIndexer.DeleteDocuments(sourceFilePath);    //"just to be safe!"
+                                documentIndexer.DeleteDocuments(sourceFilePath);
+                                    //"just to be safe!" from IndexUpdateManager.UpdateFile()
                                 indexUpdateManager.Update(sourceFilePath, xelement);
                                 SwumManager.Instance.AddSourceFile(sourceFilePath);
                                 break;
@@ -51,7 +48,7 @@ namespace Sando.UI.Monitoring
                                 SwumManager.Instance.UpdateSourceFile(sourceFilePath);
                                 break;
                             case FileEventType.FileDeleted:
-                                documentIndexer.DeleteDocuments(sourceFilePath);
+                                documentIndexer.DeleteDocuments(sourceFilePath,commitImmediately);
                                 SwumManager.Instance.RemoveSourceFile(sourceFilePath);
                                 break;
                             case FileEventType.FileRenamed: // FileRenamed is actually never raised.
@@ -64,43 +61,29 @@ namespace Sando.UI.Monitoring
                 }
                 else
                 {
-                    documentIndexer.DeleteDocuments(sourceFilePath);
+                    documentIndexer.DeleteDocuments(sourceFilePath,commitImmediately);
                 }
             }
         }
 
-        /// <summary>
-        /// Respond to the StartupCompleted event from SrcMLService.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
         public void StartupCompleted(object sender, EventArgs args)
         {
-            FileLogger.DefaultLogger.Info("Sando: StartupCompleted()");
-
             ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingCompleted();
             SwumManager.Instance.PrintSwumCache();
         }
 
-        /// <summary>
-        /// Respond to the MonitoringStopped event from SrcMLService.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
         public void MonitoringStopped(object sender, EventArgs args)
         {
             FileLogger.DefaultLogger.Info("Sando: MonitoringStopped()");
-
             var currentIndexer = ServiceLocator.ResolveOptional<DocumentIndexer>();
             if (currentIndexer != null)
             {
-                currentIndexer.Dispose(false);  // Because in original SolutionMonitor: public void StopMonitoring(bool killReaders = false)
+                currentIndexer.Dispose(false);  // Because in SolutionMonitor: public void StopMonitoring(bool killReaders = false)
             }
             if (SwumManager.Instance != null)
             {
                 SwumManager.Instance.PrintSwumCache();
             }
         }
-        // End of code changes
     }
 }

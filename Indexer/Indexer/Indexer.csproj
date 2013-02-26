@@ -66,12 +66,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>sandoKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ABB.SrcML.VisualStudio.SolutionMonitor, Version=2.0.46.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\LIBS\srcML.NET\ABB.SrcML.VisualStudio.SolutionMonitor.dll</HintPath>
+    </Reference>
     <Reference Include="Contrib.Regex">
       <HintPath>..\Lucene.Net-2.9.4\bin\Contrib\Contrib.Regex.dll</HintPath>
     </Reference>
@@ -118,7 +122,6 @@
     <Compile Include="IndexState\CppHeaderElementResolver.cs" />
     <Compile Include="IndexState\IndexStateManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IIndexUpdateListener.cs" />
     <Compile Include="Searching\Criteria\CriteriaBuilder.cs" />
     <Compile Include="Searching\DefaultQueryRewriter.cs" />
     <Compile Include="Searching\Criteria\SimpleSearchCriteria.cs" />

@@ -8,11 +8,14 @@ using NUnit.Framework;
 using Sando.Core;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ProgramElementContracts;
+using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.Indexer.Documents;
 using Sando.Indexer.Searching;
 using Sando.Indexer.Searching.Criteria;
 using Sando.Parser;
 using UnitTestHelpers;
+using ABB.SrcML.VisualStudio.SolutionMonitor;
+using Sando.Core.Tools;
 
 namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
 {
@@ -30,17 +33,16 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
 
         private SearchTester()
         {
+            TestUtils.InitializeDefaultExtensionPoints();
             //set up generator
             _parser = new SrcMLCSharpParser(new ABB.SrcML.SrcMLGenerator(@"LIBS\SrcML"));
-            _luceneTempIndexesDirectory = Path.Combine(Path.GetTempPath(), "basic");
+            _luceneTempIndexesDirectory = PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>());
             Directory.CreateDirectory(_luceneTempIndexesDirectory);
             TestUtils.ClearDirectory(_luceneTempIndexesDirectory);
         }
 
         public void CheckFolderForExpectedResults(string searchString, string methodNameToFind, string solutionPath)
         {
-            var key = new SolutionKey(Guid.NewGuid(), solutionPath, _luceneTempIndexesDirectory);
-            ServiceLocator.RegisterInstance(key);
             ServiceLocator.RegisterInstance<Analyzer>(new SnowballAnalyzer("English"));
             _indexer = new DocumentIndexer(TimeSpan.FromSeconds(1));
             ServiceLocator.RegisterInstance(_indexer);
@@ -48,7 +50,7 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
             try
             {
                 IndexFilesInDirectory(solutionPath);
-                var results = GetResults(searchString, key);
+                var results = GetResults(searchString);
                 Assert.IsTrue(HasResults(methodNameToFind, results), "Can't find expected results");
             }
             catch (Exception ex)
@@ -77,19 +79,21 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
             }
         }
 
-        private IEnumerable<Tuple<ProgramElement, float>> GetResults(string searchString, SolutionKey key)
+        private IEnumerable<CodeSearchResult> GetResults(string searchString)
         {
             var searcher = new IndexerSearcher();
-            var criteria = new SimpleSearchCriteria();
-            criteria.SearchTerms = new SortedSet<string>(searchString.Split(' ').ToList());
+            var criteria = new SimpleSearchCriteria
+                {
+                    SearchTerms = new SortedSet<string>(searchString.Split(' ').ToList())
+                };
             var results = searcher.Search(criteria);
             return results;
         }
 
 
-        private bool HasResults(string methodNameToFind, IEnumerable<Tuple<ProgramElement, float>> results)
+        private bool HasResults(string methodNameToFind, IEnumerable<CodeSearchResult> results)
         {
-            return results.Select(result => result.Item1).OfType<MethodElement>().Any(method => method.Name.Equals(methodNameToFind));
+            return results.Select(result => result.ProgramElement).OfType<MethodElement>().Any(method => method.Name.Equals(methodNameToFind));
         }
     }
 }

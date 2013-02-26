@@ -17,26 +17,25 @@ using Sando.Indexer.Exceptions;
 using Sando.Translation;
 using System.Linq;
 using Sando.Indexer.Documents.Converters;
-using System.Diagnostics;
+using ABB.SrcML.VisualStudio.SolutionMonitor;
+using Sando.Core.Tools;
 
 namespace Sando.Indexer
 {
 	public class DocumentIndexer : IDisposable
 	{
-        public DocumentIndexer(TimeSpan? refreshIndexSearcherThreadInterval = null, TimeSpan? commitChangesThreadInterval = null)
+        public DocumentIndexer(TimeSpan? refreshIndexSearcherThreadInterval = null, TimeSpan? commitChangesThreadInterval = null )
 		{
 			try
 			{
-                var solutionKey = ServiceLocator.Resolve<SolutionKey>();
-			
-                var directoryInfo = new System.IO.DirectoryInfo(solutionKey.IndexPath);
+                var solutionKey = ServiceLocator.Resolve<SolutionKey>();			
+                var directoryInfo = new System.IO.DirectoryInfo(PathManager.Instance.GetIndexPath(solutionKey));
 				LuceneIndexesDirectory = FSDirectory.Open(directoryInfo);
 				Analyzer = ServiceLocator.Resolve<Analyzer>();
                 IndexWriter = new IndexWriter(LuceneIndexesDirectory, Analyzer, IndexWriter.MaxFieldLength.LIMITED);
 			    var indexReader = IndexWriter.GetReader();
 				_indexSearcher = new IndexSearcher(indexReader);
                 QueryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Configuration.Configuration.GetValue("DefaultSearchFieldName"), Analyzer);
-				_indexUpdateListeners = new List<IIndexUpdateListener>();
 
 			    if (!refreshIndexSearcherThreadInterval.HasValue) 
                     refreshIndexSearcherThreadInterval = TimeSpan.FromSeconds(10);
@@ -90,7 +89,7 @@ namespace Sando.Indexer
             }
 		}
 
-        public virtual void DeleteDocuments(string fullFilePath)
+        public virtual void DeleteDocuments(string fullFilePath, bool commitImmediately = false)
         {
             if (String.IsNullOrWhiteSpace(fullFilePath))
                 return;
@@ -98,7 +97,7 @@ namespace Sando.Indexer
             lock (_lock)
             {
                 IndexWriter.DeleteDocuments(new TermQuery(term));
-                if (_synchronousCommits)
+                if (_synchronousCommits || commitImmediately)
                     CommitChanges();
                 else
                     _hasIndexChanged = true;
@@ -150,7 +149,6 @@ namespace Sando.Indexer
         {
             IndexWriter.Commit();
             UpdateSearcher();
-            NotifyIndexUpdateListeners();
             _hasIndexChanged = false;
         }
 
@@ -174,25 +172,6 @@ namespace Sando.Indexer
 		    }
 		}
 
-
-		public void AddIndexUpdateListener(IIndexUpdateListener indexUpdateListener)
-		{
-			_indexUpdateListeners.Add(indexUpdateListener);
-		}
-
-		public void RemoveIndexUpdateListener(IIndexUpdateListener indexUpdateListener)
-		{
-			_indexUpdateListeners.Remove(indexUpdateListener);
-		}
-
-		private void NotifyIndexUpdateListeners()
-		{
-			foreach(var listener in _indexUpdateListeners)
-			{
-				listener.NotifyAboutIndexUpdate();
-			}
-        }
-
         private void PeriodicallyCommitChangesIfNeeded(object sender, DoWorkEventArgs args)
         {
             var backgroundThreadInterval = args.Argument;	        
@@ -203,7 +182,7 @@ namespace Sando.Indexer
                     if (_hasIndexChanged)
                         CommitChanges();
                 }
-                Thread.Sleep(Convert.ToInt32(((System.TimeSpan)backgroundThreadInterval).TotalMilliseconds));
+                Thread.Sleep(Convert.ToInt32(((TimeSpan)backgroundThreadInterval).TotalMilliseconds));
             }
         }
 
@@ -219,7 +198,7 @@ namespace Sando.Indexer
 	                    UpdateSearcher();
 	                }
 	            }
-                Thread.Sleep(Convert.ToInt32(((System.TimeSpan)backgroundThreadInterval).TotalMilliseconds));
+                Thread.Sleep(Convert.ToInt32(((TimeSpan)backgroundThreadInterval).TotalMilliseconds));
 	        }
 	    }
 
@@ -255,7 +234,7 @@ namespace Sando.Indexer
                 {
                     CommitChanges();
                 }
-                catch (AlreadyClosedException e)
+                catch (AlreadyClosedException)
                 {
                     //This is expected in some cases
                 }
@@ -280,7 +259,7 @@ namespace Sando.Indexer
                     {
                         Analyzer.Close();
                     }
-                    catch (NullReferenceException e)
+                    catch (NullReferenceException)
                     {
                         //already closed, ignore
                     }
@@ -290,26 +269,15 @@ namespace Sando.Indexer
             }
         }
 
-        ~DocumentIndexer()
-        {
-            //Dispose(false);
-        }
-
-		public Directory LuceneIndexesDirectory { get; set; }
+	    public Directory LuceneIndexesDirectory { get; set; }
 		public QueryParser QueryParser { get; protected set; }
 		protected Analyzer Analyzer { get; set; }
 		protected IndexWriter IndexWriter { get; set; }
 
-	    private IndexSearcher _indexSearcher;
-        private readonly List<IIndexUpdateListener> _indexUpdateListeners;
         private bool _hasIndexChanged;
-        private bool _synchronousCommits;
-		private bool _disposed=false;
+        private bool _disposed;
+	    private IndexSearcher _indexSearcher;
+        private readonly bool _synchronousCommits;
 	    private readonly object _lock = new object();
-	}
-
-	public enum AnalyzerType
-	{
-		Simple, Snowball, Standard, Default
 	}
 }

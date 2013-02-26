@@ -31,7 +31,9 @@ using Sando.UI.Monitoring;
 using Sando.UI.View;
 using Sando.Indexer.IndexState;
 using Sando.Recommender;
-using SolutionKey = Sando.Core.SolutionKey;
+using System.Reflection;
+
+
 
 namespace Sando.UI
 {
@@ -86,7 +88,8 @@ namespace Sando.UI
         /// initialization is the Initialize method.
         /// </summary>
         public UIPackage()
-        {
+        {            
+            PathManager.Create(Assembly.GetAssembly(typeof(UIPackage)).Location);
             FileLogger.SetupDefautlFileLogger(PathManager.Instance.GetExtensionRoot());
             FileLogger.DefaultLogger.Info(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this));
         }
@@ -110,6 +113,7 @@ namespace Sando.UI
         {
             try
             {
+                base.Initialize();                
                 FileLogger.DefaultLogger.Info("Sando initialization started.");
                 base.Initialize();
 
@@ -124,6 +128,7 @@ namespace Sando.UI
                 FileLogger.DefaultLogger.Error(ExceptionFormatter.CreateMessage(e));
             }
         }
+
 
         private void SetUpLifeCycleEvents()
         {
@@ -322,9 +327,9 @@ namespace Sando.UI
                 //TODO if solution is reopen - the guid should be read from file - future change
                 var solutionId = Guid.NewGuid();
                 var openSolution = ServiceLocator.Resolve<DTE2>().Solution;
-                var solutionPath = openSolution.FileName;                
-                var luceneDirectoryForSolution = LuceneDirectoryHelper.GetOrCreateLuceneDirectoryForSolution(openSolution.FullName, PathManager.Instance.GetExtensionRoot());                
-                ServiceLocator.RegisterInstance(new SolutionKey(solutionId, solutionPath, luceneDirectoryForSolution));
+                var solutionPath = openSolution.FileName;
+                var key = new SolutionKey(solutionId, solutionPath);              
+                ServiceLocator.RegisterInstance(key);
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
 
                 var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
@@ -383,7 +388,7 @@ namespace Sando.UI
                 //However, registration must happen before file monitoring begins below.
                 RegisterExtensionPoints();
 
-                SwumManager.Instance.Initialize(ServiceLocator.Resolve<SolutionKey>().IndexPath, !isIndexRecreationRequired);
+                SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()), !isIndexRecreationRequired);
                 //SwumManager.Instance.Archive = _srcMLArchive;
                 
                 // SrcML Service starts monitoring the opened solution.
@@ -393,8 +398,6 @@ namespace Sando.UI
                 // End of code changes
 
 
-
-                currentIndexer.AddIndexUpdateListener(SearchViewControl.GetInstance());
             }
             catch (Exception e)
             {
@@ -429,6 +432,7 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());
             ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers());
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
+            ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
         }
     }
 }
