@@ -44,8 +44,8 @@ namespace Sando.Core.UnitTests
             Assert.IsFalse(String.IsNullOrWhiteSpace(dir), "Directory path must be a non empty string");
             var luceneDirectoryPath = Path.Combine(Path.GetTempPath(), Path.GetTempPath());
             Assert.IsTrue(Directory.Exists(luceneDirectoryPath), "Lucene directory path must be a valid directory path");
-            var solutionDirectoryPath = Path.Combine(Path.GetTempPath(), "lucene", _hash.ToString(CultureInfo.InvariantCulture));
-            Assert.IsTrue(Directory.Exists(solutionDirectoryPath), "Solution lucene directory path must be a valid directory path");
+            var solutionDirectoryPath = Path.Combine(Path.GetTempPath(), "lucene", Path.GetFileName(dir).ToString(CultureInfo.InvariantCulture));
+            Assert.IsTrue(Directory.Exists(solutionDirectoryPath), "Solution lucene directory path must be a valid directory path: "+ solutionDirectoryPath);
         }
 
         [Test]
@@ -83,8 +83,8 @@ namespace Sando.Core.UnitTests
             Assert.IsFalse(String.IsNullOrWhiteSpace(dir), "Directory path must be a non empty string");
             var srcMlArchivesDirectoryPath = Path.Combine(Path.GetTempPath(), Path.GetTempPath());
             Assert.IsTrue(Directory.Exists(srcMlArchivesDirectoryPath), "Lucene directory path must be a valid directory path");
-            var solutionDirectoryPath = Path.Combine(Path.GetTempPath(), "srcMlArchives", _hash.ToString(CultureInfo.InvariantCulture));
-            Assert.IsTrue(Directory.Exists(solutionDirectoryPath), "Solution srcMlArchives directory path must be a valid directory path");
+            var solutionDirectoryPath = Path.Combine(Path.GetTempPath(), "srcMlArchives", Path.GetFileName(dir).ToString(CultureInfo.InvariantCulture));
+            Assert.IsTrue(Directory.Exists(solutionDirectoryPath), "Solution srcMlArchives directory path must be a valid directory path: "+ solutionDirectoryPath);
         }
 
         [TestFixtureSetUp]
