@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ABB.SrcML;
+using ABB.SrcML.VisualStudio.SrcMLService;
 using Sando.Core.Extensions;
 using Sando.Core.Extensions.Logging;
 using Sando.DependencyInjection;
@@ -19,51 +20,57 @@ namespace Sando.UI.Monitoring
 
         public void SourceFileChanged(object sender, FileEventRaisedArgs args, bool commitImmediately = false)
         {
-            FileLogger.DefaultLogger.Info("Sando: RespondToSourceFileChangedEvent(), File = " + args.SourceFilePath + ", EventType = " + args.EventType);            
-            // Ignore files that can not be indexed by Sando.
-		    var fileExtension = Path.GetExtension(args.SourceFilePath);
-            if (fileExtension != null && !fileExtension.Equals(String.Empty))
-            {
-                string sourceFilePath = args.SourceFilePath;
-                string oldSourceFilePath = args.OldSourceFilePath;
-                var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
-                if (ServiceLocator.Resolve<IndexFilterManager>().ShouldFileBeIndexed(args.SourceFilePath))
-                {
-                    if (ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null)
-                    {
-                        var xelement = args.SrcMLXElement;
-                        var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
 
-                        switch (args.EventType)
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {             
+                // Ignore files that can not be indexed by Sando.
+                var fileExtension = Path.GetExtension(args.FilePath);
+                if (fileExtension != null && !fileExtension.Equals(String.Empty))
+                {
+                    string sourceFilePath = args.FilePath;
+                    string oldSourceFilePath = args.OldFilePath;
+                    var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
+                    if (ServiceLocator.Resolve<IndexFilterManager>().ShouldFileBeIndexed(args.FilePath))
+                    {
+                        if (ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null)
                         {
-                            case FileEventType.FileAdded:
-                                documentIndexer.DeleteDocuments(sourceFilePath);
-                                    //"just to be safe!" from IndexUpdateManager.UpdateFile()
-                                indexUpdateManager.Update(sourceFilePath, xelement);
-                                SwumManager.Instance.AddSourceFile(sourceFilePath);
-                                break;
-                            case FileEventType.FileChanged:
-                                documentIndexer.DeleteDocuments(sourceFilePath);
-                                indexUpdateManager.Update(sourceFilePath, xelement);
-                                SwumManager.Instance.UpdateSourceFile(sourceFilePath);
-                                break;
-                            case FileEventType.FileDeleted:
-                                documentIndexer.DeleteDocuments(sourceFilePath,commitImmediately);
-                                SwumManager.Instance.RemoveSourceFile(sourceFilePath);
-                                break;
-                            case FileEventType.FileRenamed: // FileRenamed is actually never raised.
-                                documentIndexer.DeleteDocuments(oldSourceFilePath);
-                                indexUpdateManager.Update(sourceFilePath, xelement);
-                                SwumManager.Instance.UpdateSourceFile(sourceFilePath);
-                                break;
+                            // Get SrcMLService and use its API to get the XElement
+                            var srcMLService = (sender as ISrcMLGlobalService);
+                            var xelement = srcMLService.GetXElementForSourceFile(args.FilePath);
+                            //var xelement = args.SrcMLXElement;
+
+                            var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
+
+                            switch (args.EventType)
+                            {
+                                case FileEventType.FileAdded:
+                                    documentIndexer.DeleteDocuments(sourceFilePath);    //"just to be safe!"
+                                    indexUpdateManager.Update(sourceFilePath, xelement);
+                                    SwumManager.Instance.AddSourceFile(sourceFilePath, xelement);
+                                    break;
+                                case FileEventType.FileChanged:
+                                    documentIndexer.DeleteDocuments(sourceFilePath);
+                                    indexUpdateManager.Update(sourceFilePath, xelement);
+                                    SwumManager.Instance.UpdateSourceFile(sourceFilePath, xelement);
+                                    break;
+                                case FileEventType.FileDeleted:
+                                    documentIndexer.DeleteDocuments(sourceFilePath, commitImmediately);
+                                    SwumManager.Instance.RemoveSourceFile(sourceFilePath);
+                                    break;
+                                case FileEventType.FileRenamed: // FileRenamed is actually never raised.
+                                    documentIndexer.DeleteDocuments(oldSourceFilePath);
+                                    indexUpdateManager.Update(sourceFilePath, xelement);
+                                    SwumManager.Instance.UpdateSourceFile(sourceFilePath, xelement);
+                                    break;
+                            }
                         }
                     }
+                    else
+                    {
+                        documentIndexer.DeleteDocuments(sourceFilePath, commitImmediately);
+                    }
                 }
-                else
-                {
-                    documentIndexer.DeleteDocuments(sourceFilePath,commitImmediately);
-                }
-            }
+            });
         }
 
         public void StartupCompleted(object sender, EventArgs args)
