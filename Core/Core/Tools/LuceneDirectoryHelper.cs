@@ -11,17 +11,23 @@ namespace Sando.Core.Tools
             return CreateNewDirectory(solutionFullName, luceneDirectoryParentPath, LuceneDirectoryName);
         }
 
-        private static string CreateNewDirectory(string solutionFullName, string luceneDirectoryParentPath, string folderName)
+        public static bool DoesLuceneDirectoryForSolutionExist(string solutionFullName, string luceneDirectoryParentPath)
+        {
+            string dir = CreateNewDirectory(solutionFullName, luceneDirectoryParentPath, LuceneDirectoryName, false);
+            return Directory.Exists(dir);
+        }
+
+        private static string CreateNewDirectory(string solutionFullName, string luceneDirectoryParentPath, string folderName, bool create = true)
         {
             if (String.IsNullOrWhiteSpace(solutionFullName) || String.IsNullOrWhiteSpace(luceneDirectoryParentPath) || !Directory.Exists(luceneDirectoryParentPath))
                 return String.Empty;
 
             var solutionName = Path.GetFileNameWithoutExtension(solutionFullName) ?? Guid.NewGuid().ToString();
-            var solutionNameHash = solutionName.GetHashCode();
+            var solutionNameHash = solutionFullName.GetHashCode();
             var totalName = solutionName + "-" + solutionNameHash;
 
             var luceneDirectoryPath = Path.Combine(luceneDirectoryParentPath, folderName, totalName.ToString(CultureInfo.InvariantCulture));
-            if (!Directory.Exists(luceneDirectoryPath))
+            if (!Directory.Exists(luceneDirectoryPath) && create)
                 Directory.CreateDirectory(luceneDirectoryPath);
             return luceneDirectoryPath;
         }
