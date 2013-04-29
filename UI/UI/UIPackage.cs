@@ -32,8 +32,8 @@ using Sando.Indexer.IndexState;
 using Sando.Recommender;
 using System.Reflection;
 using System.Threading.Tasks;
-using Sando.Core.Logging.Events;
-using Sando.Core.Logging.Persistence;
+using Sando.Indexer.Documents;
+using Lucene.Net.Analysis.Standard;
 using Sando.Core.Logging;
 
 
@@ -243,7 +243,7 @@ namespace Sando.UI
 
             // JZ: SrcMLService Integration
             extensionPointsRepository.RegisterParserImplementation(new List<string> { ".cs" }, new SrcMLCSharpParser());
-            extensionPointsRepository.RegisterParserImplementation(new List<string> { ".h", ".cpp", ".cxx", ".c" }, new SrcMLCppParser());
+            extensionPointsRepository.RegisterParserImplementation(new List<string> { ".h", ".cpp", ".cxx", ".c" }, new SrcMLCppParser(srcMLService));
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".cs" }, new SrcMLCSharpParser(_srcMLArchive));
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".h", ".cpp", ".cxx", ".c" }, new SrcMLCppParser(_srcMLArchive));
             // JZ: End of code changes
@@ -339,7 +339,7 @@ namespace Sando.UI
                 
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
 
-                ServiceLocator.RegisterInstance<Analyzer>(new SnowballAnalyzer("English"));
+                ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());
                 var currentIndexer = new DocumentIndexer(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(4));
                 ServiceLocator.RegisterInstance(currentIndexer);
 
@@ -395,7 +395,15 @@ namespace Sando.UI
                 LogEvents.UIRespondToSolutionOpeningError(this, e);
             }    
         }
- 
+
+        private Analyzer GetAnalyzer()
+        {
+            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new SnowballAnalyzer("English"));
+            analyzer.AddAnalyzer(SandoField.Source.ToString(), new KeywordAnalyzer());
+            analyzer.AddAnalyzer(SandoField.AccessLevel.ToString(), new KeywordAnalyzer());
+            analyzer.AddAnalyzer(SandoField.ProgramElementType.ToString(), new KeywordAnalyzer());
+            return analyzer;
+        }  
 
         #endregion
 

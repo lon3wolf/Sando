@@ -14,6 +14,7 @@ using UnitTestHelpers;
 using ABB.SrcML.VisualStudio.SolutionMonitor;
 using Sando.Core.Tools;
 using Sando.Indexer.Searching.Criteria;
+using Sando.Indexer.Searching;
 
 namespace Sando.Indexer.UnitTests
 {
@@ -131,6 +132,38 @@ namespace Sando.Indexer.UnitTests
                 Assert.Fail(ex.Message + ". " + ex.StackTrace);
             }
         }
+
+        [Test]
+        public void EscapeDoubleQuotesSetInQuery(){
+            var transformed = LuceneQueryStringBuilder.GetTransformed("var split = (\"✉ ∞ \" + searchTerm + \"✉ ∞ \")");
+            Assert.AreEqual(transformed, "var?split?\\=?\\(\\\"✉?∞?\\\"?\\+?searchTerm?\\+?\\\"✉?∞?\\\"\\)");
+
+            transformed = LuceneQueryStringBuilder.GetTransformed("var a = \"a\", \"d\"");
+            Assert.AreEqual(transformed, "var?a?\\=?\\\"a\\\",?\\\"d\\\"");
+        }
+
+        
+
+        [Test]
+        public void EscapeQuotesInQuotesInQuery()
+        {
+            var transformed = LuceneQueryStringBuilder.GetTransformed("return \"..\\\\..\\\\Parser\"");
+            Assert.AreEqual(transformed, "return?\\\"\\.\\.\\\\\\\\\\\\\\\\\\.\\.\\\\\\\\\\\\\\\\Parser\\\"");
+       
+            var input = @"stringBuilder.Append('\'";
+            transformed = LuceneQueryStringBuilder.GetTransformed(input);
+            Assert.AreEqual(transformed, @"stringBuilder\.Append\(\'\\\'");
+            
+            input = @"'""'";
+            transformed = LuceneQueryStringBuilder.GetTransformed(input);
+            Assert.AreEqual(transformed, @"\'\""\'");
+
+            input = @"""*"" : '\""'";
+            transformed = LuceneQueryStringBuilder.GetTransformed(input);
+            Assert.AreEqual(transformed, @"\""*\""?\:?\'\\\""\'");
+
+        }
+
 
         [SetUp]
         public void ResetContract()
