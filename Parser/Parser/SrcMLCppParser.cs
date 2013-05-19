@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using ABB.SrcML.VisualStudio.SrcMLService;
-using Sando.Core.Extensions.Logging;
 using Sando.ExtensionContracts.ParserContracts;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using ABB.SrcML;
+using Sando.Core.Logging.Events;
+using Sando.Core.Logging.Persistence;
 
 namespace Sando.Parser
 {
@@ -47,7 +48,7 @@ namespace Sando.Parser
                 if(sourceElements != null) {
                     programElements = Parse(fileName, sourceElements);
                 } else {
-                    FileLogger.DefaultLogger.ErrorFormat("SrcMLCppParser: File not found in archive: {0}", fileName);
+                    LogEvents.ParserFileNotFoundInArchiveError(this, fileName);
                 }
             } else if(Generator != null) {
                 string outFile = Path.GetTempFileName();
