@@ -14,61 +14,57 @@ namespace Sando.Core.Tools
     /// This class keeps records of used words in the code under searching. Also, it can greedily 
     /// split a given string by matching words in the dictionary. 
     /// </summary>
-    public class DictionaryBasedSplitter : IWordSplitter
+    public class DictionaryBasedSplitter : IWordSplitter, IDisposable
     {
-        private static DictionaryBasedSplitter instance;   
-      
-        public static DictionaryBasedSplitter GetInstance()
+        private readonly FileDictionary dictionary;
+        
+        public DictionaryBasedSplitter()
         {
-            return instance ?? (instance = new DictionaryBasedSplitter());
+            this.dictionary = new FileDictionary();
         }
-
-        private readonly FileDictionary dictionary = new FileDictionary();   
-
-        private DictionaryBasedSplitter(){}
-
-
 
         public void Initialize(String directory)
         {
-            lock (dictionary)
-            {
-                dictionary.Initialize(directory);
-            }
+            dictionary.Initialize(directory);
         }
 
         public void AddWords(IEnumerable<String> words)
         {
-            lock (dictionary)
-            {
-                dictionary.AddWords(words);
-            }
+            words = words.ToList();
+            dictionary.AddWords(words);
         }
 
-        private sealed class FileDictionary
+        private sealed class FileDictionary : IDisposable
         {
             const string dictionaryName = "dictionary.txt";
             private string directory;
-            private static readonly IEnumerable<String> keyWords = GetCSharpKeyWords(); 
             private readonly List<string> allWords = new List<string>();
+            private WordCorrector corrector;
             
+            private delegate void NewWordsAdded(IEnumerable<String> words);
+            private event NewWordsAdded addWordsEvent;
+      
             public void Initialize(String directory)
             {
-                WriteWordsToFile();
-                this.directory = directory;
-                ReadWordsFromFile();
+                lock (allWords)
+                {
+                    allWords.Clear();
+                    this.directory = directory;
+
+                    corrector = new WordCorrector();
+                    addWordsEvent += corrector.AddWords;
+
+                    ReadWordsFromFile();
+                }
             }
 
             private void WriteWordsToFile()
             {
-                if (directory != null)
-                {
-                    using (var writer = new StreamWriter(GetDicFilePath(), false, Encoding.ASCII))
+                using (var writer = new StreamWriter(GetDicFilePath(), false, Encoding.ASCII))
+                {        
+                    foreach (string word in allWords)
                     {
-                        foreach (string word in allWords)
-                        {
-                            writer.WriteLine(word.Trim());
-                        }
+                        writer.WriteLine(word.Trim());
                     }
                 }
             }
@@ -80,12 +76,8 @@ namespace Sando.Core.Tools
                     var allLines = File.ReadAllLines(GetDicFilePath());
                     allWords.Clear();
                     allWords.AddRange(allLines);
+                    addWordsEvent(allLines);
                 }
-            }
-
-            ~FileDictionary()
-            {
-                WriteWordsToFile();
             }
 
             private String GetDicFilePath()
@@ -94,43 +86,35 @@ namespace Sando.Core.Tools
                 return path;
             }
 
-            private static IEnumerable<String> GetCSharpKeyWords()
-            {
-                const string pull = @"abstract event new struct as explicit null switch
-                base extern object this bool false operator	throw
-                break finally out true byte	fixed override try case	float params typeof
-                catch for private uint char	foreach	protected ulong checked	goto public	unchecked
-                class if readonly unsafe const implicit	ref	ushort continue	in return using
-                decimal	int	sbyte virtual default interface	sealed volatile delegate internal short	void
-                do is sizeof while double lock stackalloc else long	static enum	namespace string";
-                return pull.Split(null);
-            }
-
             public void AddWords(IEnumerable<String> words)
             {
-                foreach (string word in words)
+                words = words.ToList();
+                lock (allWords)
                 {
-                    var trimedWord = word.Trim().ToLower();
-                    if (!String.IsNullOrEmpty(trimedWord) && !keyWords.Contains(trimedWord))
+                    foreach (string word in words)
                     {
-                        bool found;
-                        int smallerWordsCount = GetSmallerWordCount(trimedWord, out found);
-                        if (!found)
-                            allWords.Insert(smallerWordsCount, trimedWord);
+                        var trimedWord = word.Trim().ToLower();
+                        if (!String.IsNullOrEmpty(trimedWord))
+                        {
+                            bool found = false;
+                            int smallerWordsCount = GetSmallerWordCount(trimedWord, out found);
+                            if (!found)
+                                allWords.Insert(smallerWordsCount, trimedWord);
+                        }
                     }
                 }
+                addWordsEvent(words);
             }
 
             public Boolean DoesWordExist(String word)
             {
                 var trimmedWord = word.Trim().ToLower();
-                if (!keyWords.Contains(trimmedWord))
+                bool found = false;
+                lock (allWords)
                 {
-                    bool found;
                     GetSmallerWordCount(trimmedWord, out found);
                     return found;
                 }
-                return true;
             }
 
             private int GetSmallerWordCount(string word, out bool found)
@@ -159,9 +143,21 @@ namespace Sando.Core.Tools
                 return min;
             }
 
-            public void StartSelectingWords(IDictionaryQuery query)
+            public IEnumerable<String> FindSimilarWords(String word)
             {
-                query.StartSelectingWordsAsync(allWords);
+                return corrector.FindSimilarWords(word).Select(p => p.Key);
+            }
+
+            public void Dispose()
+            {
+                lock (allWords)
+                {
+                    if (directory != null && allWords.Any())
+                    {
+                        WriteWordsToFile();
+                        directory = null;
+                    }
+                }
             }
         }
 
@@ -169,7 +165,7 @@ namespace Sando.Core.Tools
         {
             foreach (ProgramElement element in elements)
             {
-                AddWords(DictionaryBuilder.ExtractElementWords(element));
+                AddWords(DictionaryHelper.ExtractElementWords(element));
             }
         }
 
@@ -177,13 +173,51 @@ namespace Sando.Core.Tools
         public Boolean DoesWordExist(String word)
         {
             word = word.Trim();   
-            lock (dictionary)
-            {
-                return word.Equals(String.Empty) || dictionary.DoesWordExist(word);
-            }
+            return word.Equals(String.Empty) || dictionary.DoesWordExist(word);
         }
 
-        public string[] ExtractWords(string text)
+        private bool IsQuoted(String text)
+        {
+            text = text.Trim();
+            return text.StartsWith("\"") && text.EndsWith("\"");
+        }
+
+        public string[] ExtractWords (string text)
+        {
+            if (IsQuoted(text))
+            {
+                return new string[]{text};    
+            }
+
+            var allSplits = new List<String>();
+            var starts = DictionaryHelper.GetQuoteStarts(text).ToList();
+            starts.Add(text.Length);
+            var ends = DictionaryHelper.GetQuoteEnds(text).ToList();
+            ends.Insert(0, -1);
+
+            for (int i = 0; i < starts.Count; i++)
+            {
+                // Split the non-quotes part.
+                int nonQuoteLength = starts.ElementAt(i) - ends.ElementAt(i) - 1;
+                if (nonQuoteLength > 0)
+                {
+                    var nonQuote = text.Substring(ends.ElementAt(i) + 1, nonQuoteLength);
+                    allSplits.AddRange(SplitNonQuote(nonQuote));
+                }
+
+                // Keep the quotes part.
+                if (i != starts.Count - 1)
+                {
+                    var quote = text.Substring(starts.ElementAt(i), ends.ElementAt(i + 1) -
+                        starts.ElementAt(i) + 1);
+                    allSplits.Add(quote);
+                }
+            }
+            return allSplits.ToArray();
+
+        }
+
+        private IEnumerable<String> SplitNonQuote(string text)
         {
             var allSplits = new List<String>();
             var allWords = text.Split(null).Select(w => w.ToLower().Trim()).
@@ -194,16 +228,21 @@ namespace Sando.Core.Tools
             {
                 allSplits.AddRange(strategy.SplitWord(word, DoesWordExist));
             }
-            return allSplits.ToArray();
+            return allSplits;
         }
 
-        public void QueryDictionary(IDictionaryQuery query)
+
+        public IEnumerable<string> FindSimilarWords(String word)
         {
-            lock (dictionary)
-            {
-                dictionary.StartSelectingWords(query);
-            }
+            return dictionary.FindSimilarWords(word);
         }
+
+
+        public void Dispose()
+        {
+            dictionary.Dispose();
+        }
+
 
         private interface IWordSplitStrategy
         {
@@ -320,5 +359,6 @@ namespace Sando.Core.Tools
                 return allSubWords;
             }
         }
+
     }
 }

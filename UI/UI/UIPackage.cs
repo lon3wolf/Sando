@@ -38,6 +38,7 @@ using Sando.Core.Logging;
 using Sando.Core.Logging.Events;
 using Sando.Core.Logging.Persistence;
 using Sando.Service;
+using ABB.SrcML.Utilities;
 using System.Diagnostics;
 
 
@@ -368,6 +369,8 @@ namespace Sando.UI
                     ServiceLocator.Resolve<IndexFilterManager>().Dispose();
                     ServiceLocator.Resolve<DocumentIndexer>().Dispose();
                 }
+                // XiGe: dispose the dictionary.
+                ServiceLocator.Resolve<DictionaryBasedSplitter>().Dispose();
             }
             catch (Exception e)
             {
@@ -386,7 +389,7 @@ namespace Sando.UI
 
         public void HandleIndexingFinish(object sender, IsReadyChangedEventArgs args)
         {
-            if(args.UpdatedReadyState)
+            if(args.ReadyState)
                 CallShowProgressBar(false);
         }
 
@@ -474,8 +477,13 @@ namespace Sando.UI
                 SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()), !isIndexRecreationRequired);
                 //SwumManager.Instance.Archive = _srcMLArchive;
 
-                DictionaryBasedSplitter.GetInstance().Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                
+                // xige
+                var dictionary = new DictionaryBasedSplitter();
+                dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
+                ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated += dictionary.UpdateProgramElement;
+                ServiceLocator.RegisterInstance(dictionary);
+
+
                 // SrcML Service starts monitoring the opened solution.
                 // Sando may define the directory of storing srcML archives
                 string src2SrcmlDir = Path.Combine(PathManager.Instance.GetExtensionRoot(), "SrcML");                
@@ -484,8 +492,8 @@ namespace Sando.UI
 
                 // SrcMLService also has a StartMonitering() API, if Sando wants SrcML.NET to manage
                 // the directory of storing srcML archives and whether to use existing srcML archives.
-                srcMLService.StartMonitoring(useExistingSrcML, src2SrcmlDir);
-                if (srcMLService.GetSrcMLArchive().IsReady)
+                //srcMLService.StartMonitoring(useExistingSrcML, src2SrcmlDir);                
+                if (srcMLService.GetSrcMLArchive()!=null && srcMLService.IsReady)
                 {
                     srcMLArchiveEventsHandlers.StartupCompleted(null, new IsReadyChangedEventArgs(true));                    
                     HandleIndexingFinish(null, new IsReadyChangedEventArgs(true));
@@ -501,7 +509,7 @@ namespace Sando.UI
                 {
                     SandoLogManager.StopDataCollectionLogging();
                 }
-
+                // TODO: xige
 
 				LogEvents.SolutionOpened(this, Path.GetFileName(solutionPath));
             }
