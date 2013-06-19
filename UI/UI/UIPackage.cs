@@ -15,6 +15,7 @@ using EnvDTE;
 using EnvDTE80;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Snowball;
+using Sando.Core.QueryRefomers;
 using Sando.DependencyInjection;
 using Sando.Indexer;
 using Sando.Indexer.IndexFiltering;
@@ -379,18 +380,16 @@ namespace Sando.UI
 		}
 
 		private void SolutionHasBeenOpened()
-		{
-            CallShowProgressBar(true);
+		{            
             var bw = new BackgroundWorker {WorkerReportsProgress = false, WorkerSupportsCancellation = false};
 		    bw.DoWork += RespondToSolutionOpened;
 		    bw.RunWorkerAsync();
 		}
 
 
-        public void HandleIndexingFinish(object sender, IsReadyChangedEventArgs args)
-        {
-            if(args.ReadyState)
-                CallShowProgressBar(false);
+        public void HandleIndexingStateChange(object sender, IsReadyChangedEventArgs args)
+        {            
+            CallShowProgressBar(!args.ReadyState);
         }
 
         private void CallShowProgressBar(bool show)
@@ -461,8 +460,7 @@ namespace Sando.UI
                 {
                     SetupHandlers = true;
                     srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
-                    srcMLService.IsReadyChanged += srcMLArchiveEventsHandlers.StartupCompleted;
-                    srcMLService.IsReadyChanged += HandleIndexingFinish;
+                    srcMLService.IsReadyChanged += HandleIndexingStateChange;
                     srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
                 }
 
@@ -483,25 +481,13 @@ namespace Sando.UI
                 ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated += dictionary.UpdateProgramElement;
                 ServiceLocator.RegisterInstance(dictionary);
 
-                var reformer = new QueryReformer(dictionary);
+                var reformer = new QueryReformerManager(dictionary);
                 reformer.Initialize();
                 ServiceLocator.RegisterInstance(reformer);
 
-
-
-                // SrcML Service starts monitoring the opened solution.
-                // Sando may define the directory of storing srcML archives
-                string src2SrcmlDir = Path.Combine(PathManager.Instance.GetExtensionRoot(), "SrcML");                
-                // Sando may decide whether to use existing srcML archives
-                bool useExistingSrcML = !isIndexRecreationRequired;
-
-                // SrcMLService also has a StartMonitering() API, if Sando wants SrcML.NET to manage
-                // the directory of storing srcML archives and whether to use existing srcML archives.
-                //srcMLService.StartMonitoring(useExistingSrcML, src2SrcmlDir);                
                 if (srcMLService.GetSrcMLArchive()!=null && srcMLService.IsReady)
                 {
-                    srcMLArchiveEventsHandlers.StartupCompleted(null, new IsReadyChangedEventArgs(true));                    
-                    HandleIndexingFinish(null, new IsReadyChangedEventArgs(true));
+                    srcMLArchiveEventsHandlers.StartupCompleted(null, new IsReadyChangedEventArgs(true));                                        
                 }
 
                 // End of code changes
@@ -517,7 +503,25 @@ namespace Sando.UI
                 // TODO: xige
 
 				LogEvents.SolutionOpened(this, Path.GetFileName(solutionPath));
-                                
+
+                if (isIndexRecreationRequired)
+                {
+                    CallShowProgressBar(true);
+                    var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+                        {
+                            var files = srcMLService.GetSrcMLArchive().GetFiles();
+                            foreach (var file in files)
+                            {
+                                srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, file));
+                            }
+                            srcMLArchiveEventsHandlers.WaitForIndexing();
+                        });
+                    indexingTask.ContinueWith(uiUpdate => CallShowProgressBar(false));
+                }
+                else
+                {
+                    CallShowProgressBar(!srcMLService.IsReady);
+                }
             }
             catch (Exception e)
             {
