@@ -32,11 +32,13 @@ namespace Sando.Core.QueryRefomers
             if (IsReformingWord(target))
             {
                 return GetReformedTargetInternal(target).Where(w => this.localDictionary.
-                    DoesWordExist(w.NewTerm, DictionaryOption.IncludingStemming));
+                    DoesWordExist(w.NewTerm, DictionaryOption.IncludingStemming)).
+                        TrimIfOverlyLong(GetMaximumReformCount());
             }
             return Enumerable.Empty<ReformedWord>();
         }
 
+      
         private bool IsReformingWord(string target)
         {
             return !localDictionary.DoesWordExist(target, DictionaryOption.IncludingStemming) && target.Length 
@@ -44,6 +46,7 @@ namespace Sando.Core.QueryRefomers
         }
 
         protected abstract IEnumerable<ReformedWord> GetReformedTargetInternal(String target);
+        protected abstract int GetMaximumReformCount();
     }
 
     public abstract class AbstractContextSensitiveWordReformer : AbstractWordReformer
@@ -63,6 +66,7 @@ namespace Sando.Core.QueryRefomers
         SE_SYNONYM,
         GENERAL_SYNONYM,
         COOCCUR,
+        ACRONYM_EXPAND
     }
 
     public interface IReformedQuery : IEquatable<IReformedQuery>
@@ -99,5 +103,17 @@ namespace Sando.Core.QueryRefomers
         {
             return this.OriginalTerm.Equals(other.OriginalTerm) && this.NewTerm.Equals(other.NewTerm);
         }
+    }
+
+    public class SynonymReformedWord : ReformedWord
+    {
+        public SynonymReformedWord(TermChangeCategory category, string originalTerm, string
+            newTerm, string reformExplanation, int SynonymSimilarityScore)
+                : base(category, originalTerm, newTerm, reformExplanation)
+        {
+            this.SynonymSimilarityScore = SynonymSimilarityScore;
+        }
+
+        public int SynonymSimilarityScore { private set; get; }
     }
 }

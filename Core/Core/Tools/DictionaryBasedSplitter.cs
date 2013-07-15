@@ -22,7 +22,7 @@ namespace Sando.Core.Tools
     /// This class keeps records of used words in the code under searching. Also, it can greedily 
     /// split a given string by matching words in the dictionary. 
     /// </summary>
-    public class DictionaryBasedSplitter : IWordSplitter, IDisposable, IWordCoOccurrenceMatrix
+    public partial class DictionaryBasedSplitter : IWordSplitter, IDisposable, IWordCoOccurrenceMatrix
     {
         private readonly FileDictionary dictionary;
         private readonly InternalWordCoOccurrenceMatrix matrix;
@@ -31,7 +31,7 @@ namespace Sando.Core.Tools
         {
             this.dictionary = new FileDictionary();
             this.matrix = new InternalWordCoOccurrenceMatrix();
-            this.dictionary.addWordsEvent += matrix.HandleCoOcurrentWords;
+            this.dictionary.rawWordsEvent += matrix.HandleCoOcurrentWordsAsync;
         }
 
         public void Initialize(String directory)
@@ -50,158 +50,18 @@ namespace Sando.Core.Tools
             words = words.ToList();
             dictionary.AddWords(words, DictionaryOption.IncludingStemming);
         }
-       
 
-        private sealed class FileDictionary : IDisposable
+
+        public Dictionary<String, int> GetAllWordsAndCount()
         {
-            private const int TERM_MINIMUM_LENGTH = 2;
-            const string dictionaryName = "dictionary.txt";
-            private string directory;
-            private readonly List<string> allWords = new List<string>();
-            private WordCorrector corrector = new WordCorrector();
-            public event NewWordsAdded addWordsEvent;
-
-            public FileDictionary()
-            {
-                this.corrector = new WordCorrector();
-                addWordsEvent += corrector.AddWords;
-            }
-
-            public void Initialize(String directory)
-            {
-                lock (allWords)
-                {
-                    allWords.Clear();
-                    this.directory = directory;
-                    ReadWordsFromFile();
-                }
-            }
-
-            private void WriteWordsToFile()
-            {
-                using (var writer = new StreamWriter(GetDicFilePath(), false, Encoding.ASCII))
-                {        
-                    foreach (string word in allWords)
-                    {
-                        writer.WriteLine(word.Trim());
-                    }
-                }
-            }
-
-            private void ReadWordsFromFile()
-            {
-                if (File.Exists(GetDicFilePath()))
-                {
-                    var allLines = File.ReadAllLines(GetDicFilePath());
-                    allWords.Clear();
-                    allWords.AddRange(allLines);
-                    addWordsEvent(allLines);
-                }
-            }
-
-            private String GetDicFilePath()
-            {
-                var path = Path.Combine(directory, dictionaryName);
-                return path;
-            }
-
-            public void AddWords(IEnumerable<String> words, DictionaryOption option)
-            {
-                var wordsMaybeAdded = words.ToList();
-
-                if (option == DictionaryOption.IncludingStemming)
-                {
-                    var stemmedWords = wordsMaybeAdded.Select(DictionaryHelper.GetStemmedQuery).ToList();
-                    wordsMaybeAdded.AddRange(stemmedWords);
-                }
-
-                wordsMaybeAdded = SelectingWordsAddToDictionary(wordsMaybeAdded).ToList();
-
-                lock (allWords)
-                {
-                    foreach (string word in wordsMaybeAdded)
-                    {
-                        var found = false;
-                        var smallerWordsCount = GetSmallerWordsCount(word, out found);
-                        if (!found)
-                            allWords.Insert(smallerWordsCount, word);
-                    }
-                }
-                addWordsEvent(wordsMaybeAdded);
-            }
-
-            private IEnumerable<String> SelectingWordsAddToDictionary(IEnumerable<String> words)
-            {
-                return words.Select(w => w.Trim().ToLower()).Distinct().Where(w => !String.IsNullOrEmpty(w) 
-                    && w.Length > TERM_MINIMUM_LENGTH);
-            }
-
-
-            public Boolean DoesWordExist(String word, DictionaryOption option)
-            {
-                var trimmedWord = word.Trim().ToLower();
-                bool found = false;
-                lock (allWords)
-                {
-                    GetSmallerWordsCount(trimmedWord, out found);
-                    if (!found && option == DictionaryOption.IncludingStemming)
-                    {
-                        var stemmedWord = DictionaryHelper.GetStemmedQuery(trimmedWord);
-                        if (!stemmedWord.Equals(word))
-                        {
-                            GetSmallerWordsCount(stemmedWord, out found);
-                        }
-                    }
-                    return found;
-                }
-            }
-
-            private int GetSmallerWordsCount(string word, out bool found)
-            {
-                int min = 0;
-                int max = allWords.Count - 1;
-                found = false;
-               
-                // If no words, then return directly.
-                if (max == -1)
-                {
-                    return 0;
-                }
-
-                while (!found && min <= max)
-                {
-                    int current = (min + max)/2;
-                    var currentWord = allWords.ElementAt(current);
-                    if (word.CompareTo(currentWord) < 0)
-                        max = current - 1;
-                    else if (word.CompareTo(currentWord) > 0)
-                        min = current + 1;
-                    else
-                        found = true;
-                }
-                return min;
-            }
-
-            public IEnumerable<String> FindSimilarWords(String word)
-            {
-                var similarWords = corrector.FindSimilarWords(word).ToList();
-                if(similarWords.Any())
-                    return similarWords.Select(p => p.Key);
-                return Enumerable.Empty<string>();
-            }
-
-            public void Dispose()
-            {
-                lock (allWords)
-                {
-                    if (directory != null && allWords.Any())
-                    {
-                        WriteWordsToFile();
-                        directory = null;
-                    }
-                }
-            }
+            return matrix.GetAllWordsAndCount();
         }
+
+        public IEnumerable<IMatrixEntry> GetEntries(Predicate<IMatrixEntry> predicate)
+        {
+            return matrix.GetEntries(predicate);
+        }
+
 
         public void UpdateProgramElement(ReadOnlyCollection<ProgramElement> elements)
         {
@@ -218,15 +78,10 @@ namespace Sando.Core.Tools
             return word.Equals(String.Empty) || dictionary.DoesWordExist(word, option);
         }
 
-        private bool IsQuoted(String text)
-        {
-            text = text.Trim();
-            return text.StartsWith("\"") && text.EndsWith("\"");
-        }
-
         public string[] ExtractWords (string text)
         {
-            if (IsQuoted(text) || DoesWordExist(text, DictionaryOption.IncludingStemming))
+            if (text.IsWordQuoted() || text.IsWordFlag() || 
+                DoesWordExist(text, DictionaryOption.IncludingStemming))
             {
                 return new string[]{text};    
             }

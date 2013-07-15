@@ -54,5 +54,75 @@ namespace Sando.Core.Tools
                 return 0;
             }
         }
+
+        public static T[] SubArray<T>(this T[] data, int index, int length)
+        {
+            T[] result = new T[length];
+            Array.Copy(data, index, result, 0, length);
+            return result;
+        }
+
+        public static IEqualityComparer<String> GetCaseInsensitiveEqualityComparer()
+        {
+            return new InternalStringComparer();
+        }
+
+        private class InternalStringComparer : IEqualityComparer<string>
+        {
+            public bool Equals(string x, string y)
+            {
+                return x.Equals(y, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            public int GetHashCode(string obj)
+            {
+                return 0;
+            }
+        }
+
+        public static bool IsIndexInRange<T>(this IEnumerable<T> list, int index)
+        {
+            var array = list.ToArray();
+            return index >= 0 && index < array.Count();
+        }
+
+        public static IEnumerable<T> CustomBinarySearch<T>(this List<T> list, T target, IComparer<T> comparer)
+        {
+            var endIndex = list.BinarySearch(target, comparer);
+            if (endIndex > -1 && endIndex < list.Count)
+            {
+                int startInex = endIndex;
+                for (; comparer.Compare(list.ElementAt(startInex - 1), target) == 0; startInex--);
+                return list.GetRange(startInex, endIndex - startInex + 1);
+            }
+            return Enumerable.Empty<T>();
+        }
+
+        public static bool IsWordFlag(this string word)
+        {
+            return word.StartsWith("-");
+        }
+
+        public static bool IsWordQuoted(this string word)
+        {
+            return word.Trim().StartsWith("\"") && word.EndsWith("\"");
+        }
+
+        public static String ToLowerAndTrim(this string text)
+        {
+            return text.ToLower().Trim();
+        }
+
+        public static bool IsStemSameTo(this string word1, string word2)
+        {
+            return word1.GetStemmedQuery().Equals(word2.GetStemmedQuery());
+        }
+
+        public static List<T> AddImmutably<T>(this List<T> list, T element)
+        {
+            var newList = list.ToList();
+            newList.Add(element);
+            return newList;
+        }
     }
 }

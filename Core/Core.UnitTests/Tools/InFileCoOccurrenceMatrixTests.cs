@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -65,6 +66,14 @@ namespace Sando.Core.UnitTests.Tools
             AssertWordPairNonExist("confidence", "lackof");
             AssertWordPairNonExist("confidence", "configuration");
             AssertWordPairNonExist("configuration", "nomad");   
+        }
+
+        [Test]
+        public void AssertCanGetWordsAndCount()
+        {
+            var dic = matrix.GetAllWordsAndCount();
+            Assert.IsNotNull(dic);
+            Assert.IsTrue(dic.Any());
         }
     }
 }

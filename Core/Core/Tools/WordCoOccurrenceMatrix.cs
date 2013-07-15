@@ -9,16 +9,25 @@ using Sando.Core.QueryRefomers;
 
 namespace Sando.Core.Tools
 {
+    public interface IMatrixEntry
+    {
+        string Row { get; }
+        string Column { get; }
+        int Count { get; }
+    }
+
     public interface IWordCoOccurrenceMatrix
     {
         int GetCoOccurrenceCount(String word1, String word2);
         void Initialize(String directory);
         Dictionary<String, int> GetCoOccurredWordsAndCount(String word);
+        Dictionary<string, int> GetAllWordsAndCount();
+        IEnumerable<IMatrixEntry> GetEntries(Predicate<IMatrixEntry> predicate);
     }
 
     public class InternalWordCoOccurrenceMatrix : IDisposable, IWordCoOccurrenceMatrix
     {
-        private class MatrixEntry : IComparable<MatrixEntry>, IEquatable<MatrixEntry>
+        private class MatrixEntry : IComparable<MatrixEntry>, IEquatable<MatrixEntry>, IMatrixEntry
         {
             public String Row { get; private set; }
             public String Column { get; private set; }
@@ -54,12 +63,17 @@ namespace Sando.Core.Tools
 
         private readonly object locker = new object();
         private List<MatrixEntry> matrix = new List<MatrixEntry>();
+        private readonly WorkQueueBasedProcess queue = new WorkQueueBasedProcess();
 
         private string directory;
+        private Action saveAction;
+
         private const string fileName = "CooccurenceMatrix.txt";
 
         private const int MAX_WORD_LENGTH = 3;
         private const int MAX_COOCCURRENCE_WORDS_COUNT = 100;
+        private const int GRAM_NUMBER = 3;
+        private const int SAVE_EVERY_MINUTES = 10;
 
         public void Initialize(String directory)
         {
@@ -68,6 +82,10 @@ namespace Sando.Core.Tools
                 matrix.Clear();
                 this.directory = directory;
                 ReadMatrixFromFile();
+
+                saveAction = new Action(WriteMatrixToFile);
+                TimedProcessor.GetInstance().AddTimedTask(saveAction, 
+                    SAVE_EVERY_MINUTES * 60 * 1000);
             }
         }
 
@@ -76,7 +94,22 @@ namespace Sando.Core.Tools
             lock (locker)
             {
                 var columns = new Dictionary<String, int>();
+                foreach (var entry in matrix)
+                {
+                    if (entry.Column.CompareTo(word) == 0 || entry.Row.CompareTo(word) == 0)
+                    {
+                        var key = entry.Column.CompareTo(word) == 0 ? entry.Row : entry.Column;
+                        columns.Add(key, entry.Count);
+                    }
+                }
+                return columns;
+                /*
                 int start = ~matrix.BinarySearch(CreateEntry(word, ""));
+                if (start < 0 || start >= matrix.Count)
+                    return columns;
+
+                for (; !matrix.ElementAt(start).Row.Equals(word); start ++);
+                
                 for (int i = start; i < matrix.Count; i++)
                 {
                     var entry = matrix.ElementAt(i);
@@ -86,11 +119,9 @@ namespace Sando.Core.Tools
                     }
                     columns.Add(entry.Column, entry.Count);
                 }
-                return columns;
+                return columns;*/
             }
         }
-
-
 
         private void ReadMatrixFromFile()
         {
@@ -147,11 +178,22 @@ namespace Sando.Core.Tools
                 return index >= 0 ? matrix.ElementAt(index).Count : 0;
             }
         }
+ 
 
-        public void HandleCoOcurrentWords(IEnumerable<String> words)
+        public void HandleCoOcurrentWordsSync(IEnumerable<String> words)
+        {
+            AddMatrixEntriesSync(words);
+        }
+
+        public void HandleCoOcurrentWordsAsync(IEnumerable<String> words)
+        {
+            queue.Enqueue(AddMatrixEntriesSync, words);
+        }
+
+        private IEnumerable<MatrixEntry> GetEntries(IEnumerable<string> words)
         {
             var list = LimitWordNumber(FilterOutBadWords(words).
-                Distinct().ToList()).ToList();
+                                           Distinct().ToList()).ToList();
             var allEntries = new List<MatrixEntry>();
             for (int i = 0; i < list.Count; i++)
             {
@@ -162,7 +204,26 @@ namespace Sando.Core.Tools
                     allEntries.Add(CreateEntry(word1, word2));
                 }
             }
-            AddMatrixEntriesSync(allEntries);
+            return allEntries;
+        }
+
+        private IEnumerable<MatrixEntry> GetBigramEntries(IEnumerable<string> words)
+        {
+            var list = words.ToList();
+            var allEntries = new List<MatrixEntry>();
+            int i;
+            for (i = 0; i + GRAM_NUMBER - 1 < list.Count; i++)
+            {
+                allEntries.AddRange(GetEntries(list.GetRange(i, GRAM_NUMBER)));
+            }
+
+            // Check if having leftovers.
+            if (i + GRAM_NUMBER - 1 != list.Count - 1 && list.Any())
+            {
+                allEntries.AddRange(GetEntries(list.GetRange(i, list.Count - i)));
+            }
+            
+            return allEntries;
         }
 
 
@@ -174,8 +235,9 @@ namespace Sando.Core.Tools
         }
 
 
-        private void AddMatrixEntriesSync(IEnumerable<MatrixEntry> allEntries)
+        private int AddMatrixEntriesSync(IEnumerable<String> words)
         {
+            var allEntries = GetBigramEntries(words);
             lock (locker)
             {
                 foreach (var target in allEntries)
@@ -193,6 +255,7 @@ namespace Sando.Core.Tools
                     }
                 }
             }
+            return 0;
         }
 
         private IEnumerable<String> FilterOutBadWords(IEnumerable<String> words)
@@ -221,6 +284,25 @@ namespace Sando.Core.Tools
             {
                 WriteMatrixToFile();
                 matrix.Clear();
+                TimedProcessor.GetInstance().RemoveTimedTask(saveAction);
+                directory = null;
+            }
+        }
+
+        public Dictionary<string, int> GetAllWordsAndCount()
+        {
+            lock (locker)
+            {
+                return matrix.Where(entry => entry.Column.Equals(entry.Row)).
+                    ToDictionary(entry => entry.Row, entry => entry.Count);
+            }
+        }
+
+        public IEnumerable<IMatrixEntry> GetEntries(Predicate<IMatrixEntry> predicate)
+        {
+            lock (locker)
+            {
+                return matrix.Where(predicate.Invoke);
             }
         }
     }

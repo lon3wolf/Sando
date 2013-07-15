@@ -6,6 +6,8 @@ using System.Text;
 using ABB.Swum;
 using ABB.Swum.Nodes;
 using System.Diagnostics;
+using Sando.Core.Tools;
+using Sando.DependencyInjection;
 
 namespace Sando.Recommender {
     public class QueryRecommender {
@@ -22,6 +24,10 @@ namespace Sando.Recommender {
 
         public string[] GenerateRecommendations(string query) {
             if(string.IsNullOrEmpty(query)) {
+                if (query != null)
+                {
+                    return GetAllSearchHistoryItems();
+                }
                 return new string[0];
             }
             try
@@ -34,7 +40,7 @@ namespace Sando.Recommender {
                 //WeightByFrequency(query);
                 //WeightBySameField(query);
                 //WeightBySameField_WordsInOrder(query);
-                WeightByPartOfSpeech(query, recommendations);
+                AddRecommendationForEachTerm(query, recommendations);
 
                 //return the recommendations sorted by score in descending order
                 List<KeyValuePair<string, int>> listForSorting = recommendations.ToList();
@@ -53,7 +59,14 @@ namespace Sando.Recommender {
 
         private string[] SortRecommendations(string query, string[] queries)
         {
-            return new SwumQueriesSorter().SortSwumRecommendations(query, queries);
+            return new SwumQueriesSorter().SelectSortSwumRecommendations(query, queries);
+        }
+
+
+        private string[] GetAllSearchHistoryItems()
+        {
+            var history = ServiceLocator.Resolve<SearchHistory>();
+            return history.GetSearchHistoryItems(i => true).Select(i => i.SearchString).ToArray();
         }
 
 
@@ -76,6 +89,15 @@ namespace Sando.Recommender {
                 AddRecommendation(methodDeclarationNode.Name.Trim(), NormalWeight, recommendations);
         }
 
+
+        private void AddRecommendationForEachTerm(String query, Dictionary<String, int> recommendations)
+        {
+            var terms = query.Split().Where(t => !String.IsNullOrWhiteSpace(t));
+            foreach (var term in terms)
+            {
+                WeightByPartOfSpeech(term, recommendations);
+            }
+        }
 
         /// <summary>
         /// Generates query recommendations. Nouns and verbs are weighted higher than other parts of speech.

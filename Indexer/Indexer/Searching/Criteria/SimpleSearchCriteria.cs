@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Sando.ExtensionContracts.ProgramElementContracts;
+using System;
 
 namespace Sando.Indexer.Searching.Criteria
 {
@@ -8,16 +9,19 @@ namespace Sando.Indexer.Searching.Criteria
     {
         public SimpleSearchCriteria()
         {
-            SearchTerms = new SortedSet<string>();
-            MatchCase = false;
-            ExactMode = true;
-            SearchByAccessLevel = false;
             AccessLevels = new SortedSet<AccessLevel>();
-            SearchByProgramElementType = false;
-            ProgramElementTypes = new SortedSet<ProgramElementType>();
-            SearchByUsageType = false;
-            UsageTypes = new SortedSet<UsageType>();
+            ExactMode = true;
+            FileExtensions = new SortedSet<string>();
             Locations = new SortedSet<string>();
+            MatchCase = false;
+            ProgramElementTypes = new SortedSet<ProgramElementType>();
+            SearchByAccessLevel = false;
+			AccessLevels = new SortedSet<AccessLevel>();
+            SearchByProgramElementType = false;
+            SearchTerms = new SortedSet<string>();									
+            SearchByUsageType = false;
+			UsageTypes = new SortedSet<UsageType>();
+			Locations = new SortedSet<string>();
         }
 
 
@@ -60,15 +64,48 @@ namespace Sando.Indexer.Searching.Criteria
         public bool SearchByFileExtension { get; set; }
         public SortedSet<string> FileExtensions { get; set; }
 
-        public bool RequiresWildcards()
+        public bool IsLiteralSearch()
         {
             foreach (var term in SearchTerms)
-            {
-                var temp = LuceneQueryStringBuilder.GetTransformed(term);
-                if (!temp.Equals(term))
+            {                
+                if (term.StartsWith("\""))             
                     return true;
             }
             return false;
+        }
+
+        internal void AddAccessLevels(List<string> list)
+        {
+            foreach (var accessLevel in list)
+            {
+                try
+                {
+                    AccessLevel value = (AccessLevel)Enum.Parse(typeof(AccessLevel), accessLevel);
+                    if (value != null)
+                        AccessLevels.Add(value);
+                }
+                catch (ArgumentException)
+                {
+                    //ignore invalid values
+                }
+            }                
+        }
+
+        internal void AddProgramElementTypes(List<string> list)
+        {
+            foreach (var elementType in list)
+            {
+                try
+                {
+                    ProgramElementType value = (ProgramElementType)Enum.Parse(typeof(ProgramElementType), elementType);
+                    if (value != null)
+                        ProgramElementTypes.Add(value);
+                }
+                catch (ArgumentException)
+                {
+                    //ignore invalid values
+                }
+            }   
         }
     }
 }

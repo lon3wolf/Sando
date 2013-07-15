@@ -15,8 +15,9 @@ namespace Sando.Indexer.Searching.Criteria
         public static void ReformSearchCriteria(SimpleSearchCriteria criteria, List<String> terms)
         {
             var originalTerms = terms.ToList();
-            var dictionarySplittedTerms = terms.SelectMany(ServiceLocator.Resolve<DictionaryBasedSplitter>
-                ().ExtractWords).Where(t => t.Length >= TERM_MINIMUM_LENGTH).ToList();
+            var dictionarySplittedTerms = terms.SelectMany
+                    (ServiceLocator.Resolve<DictionaryBasedSplitter>().
+                        ExtractWords).Where(t => t.Length >= TERM_MINIMUM_LENGTH).ToList();
             terms.AddRange(dictionarySplittedTerms);
             var queries = GetReformedQuery(terms.Distinct()).ToList();
             if (queries.Count > 0)
@@ -38,13 +39,15 @@ namespace Sando.Indexer.Searching.Criteria
 
         private static String GetExplanation(IReformedQuery query, List<String> originalTerms)
         {
+            var appended = false;
             var sb = new StringBuilder();
-            sb.Append("Added search terms:");
+            sb.Append("Added search term(s):");
             foreach (var term in query.ReformedWords.Where(term => !originalTerms.Contains(term.NewTerm)))
             {
-                sb.Append(term.NewTerm + ", ");
+                appended = true;
+                sb.Append(" " + term.NewTerm + ", ");
             }
-            return sb.ToString().TrimEnd(new char[]{',', ' '}) + ". ";
+            return appended ? sb.ToString().TrimEnd(new char[]{',', ' '}) + ". " : String.Empty;
         }
 
         private static IEnumerable<IReformedQuery> GetReformedQuery(IEnumerable<string> words)

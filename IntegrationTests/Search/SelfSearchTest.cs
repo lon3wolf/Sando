@@ -15,6 +15,7 @@ using Sando.SearchEngine;
 using Sando.UI.Monitoring;
 using UnitTestHelpers;
 using Sando.Recommender;
+using Sando.Core.Tools;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -27,7 +28,7 @@ namespace Sando.IntegrationTests.Search
         public void FindBodyText()
         {
             string keywords = "document add";
-            var expectedLowestRank = 6;
+            var expectedLowestRank = 7;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "GetLuceneDocument");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
@@ -46,7 +47,7 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void QuotedNoQuotesWithQuotesInside()
         {
-            string keywords = "\"return \"..\\..\\Parser\";\"";
+            string keywords = "\"return \\\"..\\\\\\\\..\\\\\\\\Parser\\\";\"";
             var expectedLowestRank = 5;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "GetFilesDirectory");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);            
@@ -87,17 +88,17 @@ namespace Sando.IntegrationTests.Search
         {
             string keywords = "\"foreach (var term in SearchTerms)\"";
             var expectedLowestRank = 10;
-            Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "RequiresWildcards");
+            Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "IsLiteralSearch");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 
         [Test]
         public void ExcludeTestIfClassNameHasTest()
-        {
-            string keywords = "reorder search results -test";
+        {            
+            string keywords = "reorder search results -test";            
             var expectedLowestRank = 20;
             try{
-                Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "ReorderSearchResults") && (el.ProgramElement.FullFilePath.Contains("Test"));
+                Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "ReorderSearchResults") && (el.ProgramElement.Name.Contains("Test"));
                 EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);                
             }catch(Exception e){
                 //expected
@@ -131,7 +132,7 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void FileTypeWithTerm()
         {
-            string keywords = "hello world filetype:cpp";
+            string keywords = "hello world file:cpp";
             var expectedLowestRank = 2;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "MyFunction");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);                
@@ -140,7 +141,7 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void FileTypeH()
         {
-            string keywords = "session file info filetype:h";
+            string keywords = "session file info file:h";
             var expectedLowestRank = 3;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Struct && (el.ProgramElement.Name == "sessionFileInfo");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);

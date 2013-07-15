@@ -35,6 +35,11 @@ namespace Sando.Indexer.Searching.Criteria
 
         public SearchCriteria GetCriteria()
         {
+            _searchCriteria.SearchByAccessLevel = _searchCriteria.AccessLevels.Any();
+            _searchCriteria.SearchByLocation = _searchCriteria.Locations.Any();
+            _searchCriteria.SearchByProgramElementType = _searchCriteria.ProgramElementTypes.Any();
+            _searchCriteria.SearchByUsageType = _searchCriteria.UsageTypes.Any();
+            _searchCriteria.SearchByFileExtension = _searchCriteria.FileExtensions.Any();
             return _searchCriteria;
         }
 
@@ -56,6 +61,19 @@ namespace Sando.Indexer.Searching.Criteria
             Initialze(searchCriteria);
             _searchCriteria.FileExtensions = WordSplitter.GetFileExtensions(searchString);
             _searchCriteria.SearchByFileExtension = _searchCriteria.FileExtensions.Any();
+            return this;
+        }
+
+        public CriteriaBuilder AddFromDescription(SandoQueryDescription description, SimpleSearchCriteria searchCriteria = null)
+        {
+            Initialze(searchCriteria);
+            _searchCriteria.AddAccessLevels(description.AccessLevels);
+            _searchCriteria.FileExtensions.UnionWith(description.FileExtensions);
+            _searchCriteria.SearchTerms.UnionWith(description.LiteralSearchTerms);
+            _searchCriteria.Locations.UnionWith(description.Locations);
+            _searchCriteria.AddProgramElementTypes(description.ProgramElementTypes);
+            _searchCriteria.SearchTerms.UnionWith(description.SearchTerms);
+            SearchCriteriaReformer.ReformSearchCriteria(_searchCriteria, description.SearchTerms);            
             return this;
         }
     }
