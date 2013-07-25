@@ -5,11 +5,8 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-// JZ: SrcMLService Integration
-using ABB.SrcML.VisualStudio.SolutionMonitor;
 using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
-// End of code changes
 using Configuration.OptionsPages;
 using EnvDTE;
 using EnvDTE80;
@@ -39,7 +36,6 @@ using Sando.Core.Logging;
 using Sando.Core.Logging.Events;
 using Sando.Core.Logging.Persistence;
 using Sando.UI.Service;
-using ABB.SrcML.Utilities;
 using System.Diagnostics;
 using Sando.ExtensionContracts.ServiceContracts;
 
@@ -87,7 +83,7 @@ namespace Sando.UI
     {
         // JZ: SrcMLService Integration
         //private ABB.SrcML.VisualStudio.SolutionMonitor.SolutionMonitor _currentMonitor;
-        private SrcMLArchive _srcMLArchive;
+        private ISrcMLArchive _srcMLArchive;
         private ISrcMLGlobalService srcMLService;
         // End of code changes
 
@@ -183,8 +179,7 @@ namespace Sando.UI
             try
             {
                 base.Initialize();
-                LogEvents.UISandoBeginInitialization(this);
-                base.Initialize();
+                LogEvents.UISandoBeginInitialization(this);                
 
                 SetupDependencyInjectionObjects();
 
@@ -195,7 +190,7 @@ namespace Sando.UI
             catch(Exception e)
             {
                 LogEvents.UISandoInitializationError(this, e);
-            }
+            }            
         }
 
 
@@ -248,14 +243,22 @@ namespace Sando.UI
             }
         }
         
-        private void StartupCompleted()
+        public void StartupCompleted()
         {
             try
             {
                 if (_viewManager.ShouldShow())
                 {
                     _viewManager.ShowSando();
-                    _viewManager.ShowToolbar();
+                    try
+                    {
+                        //will fail during testing in VS IDE host
+                        _viewManager.ShowToolbar();
+                    }
+                    catch (Exception e)
+                    {
+                        //ignore
+                    }
                 }
 
                 if (ServiceLocator.Resolve<DTE2>().Version.StartsWith("10"))
@@ -280,7 +283,7 @@ namespace Sando.UI
             }
         }  
 
-        private void RegisterSolutionEvents()
+        public void RegisterSolutionEvents()
         {
             var dte = ServiceLocator.Resolve<DTE2>();
             if (dte != null)
@@ -358,7 +361,7 @@ namespace Sando.UI
 			try
             {
                 // JZ: SrcMLService Integration
-                srcMLService.StopMonitoring();
+                //srcMLService.StopMonitoring();
                 // TODO: DocumentIndexer.CommitChanges(); DocumentIndexer.Dispose(false);
                 // End of code changes
 

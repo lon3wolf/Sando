@@ -26,7 +26,7 @@ using System.Diagnostics;
 using System.Text;
 using Sando.Indexer.Documents;
 using Lucene.Net.Analysis.Standard;
-using ABB.SrcML.Utilities;
+using Sando.Core.QueryRefomers;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -106,7 +106,7 @@ namespace Sando.IntegrationTests.Search
 
         private void CreateSwum()
         {
-            SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()), false);
+            SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<Sando.Core.Tools.SolutionKey>()), false);
             SwumManager.Instance.Archive = _srcMLArchive;
         }
 
@@ -116,7 +116,7 @@ namespace Sando.IntegrationTests.Search
             var srcMlArchiveFolder = Path.Combine(_indexPath, "archive");
             var srcMLFolder = Path.Combine(".", "SrcML", "CSharp");
             Directory.CreateDirectory(srcMlArchiveFolder);
-            var generator = new SrcMLGenerator(Path.GetFullPath(srcMLFolder));
+            var generator = new SrcMLGenerator(TestUtils.SrcMLDirectory);
             _srcMLArchive = new SrcMLArchive(_indexPath,  false, generator);
         }
 
@@ -137,6 +137,19 @@ namespace Sando.IntegrationTests.Search
             ServiceLocator.RegisterInstance(new IndexUpdateManager());
             currentIndexer.ClearIndex();            
             ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingStarted();
+
+            var dictionary = new DictionaryBasedSplitter();
+            dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
+
+            var reformer = new QueryReformerManager(dictionary);
+            reformer.Initialize();
+            ServiceLocator.RegisterInstance(reformer);
+
+            var history = new SearchHistory();
+            history.Initiatalize(PathManager.Instance.GetIndexPath
+                (ServiceLocator.Resolve<SolutionKey>()));
+            ServiceLocator.RegisterInstance(history);
+
         }
 
 
@@ -144,7 +157,7 @@ namespace Sando.IntegrationTests.Search
         private void CreateKey(string filesInThisDirectory)
         {
             Directory.CreateDirectory(_indexPath);
-            var key = new SolutionKey(Guid.NewGuid(), filesInThisDirectory);
+            var key = new Sando.Core.Tools.SolutionKey(Guid.NewGuid(), filesInThisDirectory);
             ServiceLocator.RegisterInstance(key);
         }
 
@@ -235,8 +248,14 @@ namespace Sando.IntegrationTests.Search
             SearchManager manager = new SearchManager(this);
             _results = null;
             manager.Search(keywords);
+            int i = 0;
             while (_results == null)
+            {
                 Thread.Sleep(50);
+                i++;
+                if (i < 100)
+                    break;
+            }
             return _results;
         }
 
@@ -245,7 +264,7 @@ namespace Sando.IntegrationTests.Search
             return _srcMLArchive.GetXElementForSourceFile(sourceFilePath);
         }
 
-        public SrcMLArchive GetSrcMLArchive()
+        public ISrcMLArchive GetSrcMLArchive()
         {
             throw new NotImplementedException();
         }
@@ -315,8 +334,7 @@ namespace Sando.IntegrationTests.Search
             throw new NotImplementedException();
         }
 
-        public ABB.SrcML.Data.DataRepository GetDataRepository()
-        {
+        public ABB.SrcML.Data.DataRepository GetDataRepository() {
             throw new NotImplementedException();
         }
 

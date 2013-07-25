@@ -14,7 +14,6 @@ using Sando.Indexer.Documents;
 using Sando.Indexer.Searching;
 using Sando.UnitTestHelpers;
 using UnitTestHelpers;
-using ABB.SrcML.VisualStudio.SolutionMonitor;
 
 namespace Sando.SearchEngine.UnitTests
 {
@@ -33,14 +32,7 @@ namespace Sando.SearchEngine.UnitTests
             Assert.DoesNotThrow(() => new CodeSearcher( null ));            
         }
 
-        [Test]     
-        public void PerformBasicSearch()
-        {
-			var indexerSearcher = new IndexerSearcher();
-        	CodeSearcher cs = new CodeSearcher(indexerSearcher);            
-            List<CodeSearchResult> result = cs.Search("SimpleName");
-            Assert.True(result.Count > 0);                                 
-        }
+
 
 		[TestFixtureSetUp]
     	public void CreateIndexer()
@@ -54,7 +46,7 @@ namespace Sando.SearchEngine.UnitTests
             ServiceLocator.RegisterInstance<Analyzer>(new SimpleAnalyzer());
             _indexer = new DocumentIndexer(TimeSpan.FromSeconds(1));
             ServiceLocator.RegisterInstance(_indexer);
-   
+
     		ClassElement classElement = SampleProgramElementFactory.GetSampleClassElement(
 				accessLevel: AccessLevel.Public,
 				definitionLineNumber: 11,
