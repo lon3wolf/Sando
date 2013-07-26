@@ -98,13 +98,13 @@ namespace Sando.IntegrationTests.Search
             string keywords = "reorder search results -test";            
             var expectedLowestRank = 20;
             try{
-                Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "ReorderSearchResults") && (el.ProgramElement.Name.Contains("Test"));
+                Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "ReorderSearchResults") && ((el.ProgramElement as MethodElement).ClassName.Contains("Test"));
                 EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);                
             }catch(Exception e){
                 //expected
                 return;
-            }
-            Assert.IsTrue(false, "Should fail to find this method");
+            } 
+            Assert.IsTrue(false, "XXXShould fail to find this method "+PrintFailInformation(false));
         }        
 
 		[Test]
