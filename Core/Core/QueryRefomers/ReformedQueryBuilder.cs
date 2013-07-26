@@ -146,8 +146,9 @@ namespace Sando.Core.QueryRefomers
             {
                 public bool Equals(ReformedWord x, ReformedWord y)
                 {
-                    return x.NewTerm.Equals(y.NewTerm) || x.NewTerm.GetStemmedQuery().
-                        Equals(y.NewTerm.GetStemmedQuery());
+                    return x.NewTerm.Equals(y.NewTerm, StringComparison.InvariantCultureIgnoreCase) || 
+                        x.NewTerm.GetStemmedQuery().Equals(y.NewTerm.GetStemmedQuery(), 
+                            StringComparison.InvariantCultureIgnoreCase);
                 }
 
                 public int GetHashCode(ReformedWord obj)
@@ -158,16 +159,9 @@ namespace Sando.Core.QueryRefomers
 
             public InternalReformedQuery RemoveShortTerms()
             {
-                var list = allTerms.ToList();
-                for (int i = 0; i < allTerms.Count; i++)
-                {
-                    if (allTerms.ElementAt(i).NewTerm.Length < 2)
-                    {
-                        list.RemoveAt(i);
-                    }
-                }
+                var terms = allTerms.Where(t => t.NewTerm.Length >= 2).ToArray();
                 allTerms.Clear();
-                allTerms.AddRange(list);
+                allTerms.AddRange(terms);
                 return this;
             }
         }
