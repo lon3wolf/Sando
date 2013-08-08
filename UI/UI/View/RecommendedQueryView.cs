@@ -229,7 +229,7 @@ namespace Sando.UI.View
                 tagCloudTitleTextBlock.Inlines.Add(new Run("Overall")
                     {
                       //  FontSize = 24, 
-                        Foreground = Brushes.Navy
+                        Foreground = Brushes.CadetBlue
                     });
             }
             else
@@ -238,7 +238,7 @@ namespace Sando.UI.View
                     {
                         FontSize = highlightedTerms.Contains(t) ? 28 : 24,
                         Foreground = highlightedTerms.Contains(t)
-                                        ? Brushes.Navy : Brushes.LightBlue
+                                        ? Brushes.CadetBlue : Brushes.CadetBlue
                     }).ToArray();
                 runs.Last().Text = runs.Last().Text.Trim();
                 tagCloudTitleTextBlock.Inlines.AddRange(runs);
@@ -281,6 +281,7 @@ namespace Sando.UI.View
                 FontSize = shapedWord.FontSize,
                 Foreground = shapedWord.Color,
                 IsEnabled = true,
+                TextDecorations = null,
             };
             link.Click += (sender, args) => LogEvents.AddWordFromTagCloud(searchBox.Text,
                 "TOFIXTHE", shapedWord.Word);

@@ -18,7 +18,7 @@
     <UserControl.Resources>
         <converters:BoolToOppositeBoolConverter x:Key="oppositeConverter" />
         <converters:IsSelectedAndFocusedConverter x:Key="FocusConverter" />
-      
+        
         <Style x:Key="ToggleButtonStyleBorderless" TargetType="{x:Type Button}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -39,6 +39,32 @@
             </Setter>
             
         </Style>
+
+        <Style x:Key="NoChromeButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="Chrome" Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#ADADAD"/>
+                                <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        
         <converters:ElementToIcon x:Key="ElementToIcon"/>
         <converters:ScoreToEndpoint x:Key="ScoreToEndpoint"/>
         <converters:FileTypeToIcon x:Key="FileTypeToIcon"/>
@@ -110,29 +136,26 @@
 
 
         <StackPanel Margin="0,5,5,0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Name="TagCloudButton"  Margin="0,0,0,0"
-                FontFamily="ExtraBold" IsEnabled="{Binding ElementName=TagCloudPopUpWindow, 
-                Mode=TwoWay, Path=IsOpen, Converter={StaticResource oppositeConverter}}" 
-        		KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
-                Click="TagCloudPopUp" FontWeight="ExtraBold" Height="15" VerticalAlignment="Top" ToolTip="Tag cloud">T
-            </Button>
-            <Button Name="ClearHistoryButton"  Margin="0,0,0,0"
-                FontFamily="ExtraBold" IsEnabled="True"
-        		KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
-                Click="ClearSearchHistory" FontWeight="ExtraBold" Height="15" VerticalAlignment="Top" 
-                ToolTip="Clear search history">C
-            </Button>
+      
+     
         </StackPanel>
 
-        <!-- Top Part: Query -->
-        <controls:AutoCompleteBox Loaded="searchBox_Loaded"  Grid.Row="0" 
-                                  Name="searchBox" Margin="5,5,20,0" FilterMode="None" 
-                                  Height="25" BorderBrush="DimGray" 
-                                  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                                  KeyUp="OnKeyUpHandler" Populating="searchBox_Populating" 
-                                  MinimumPrefixLength="0" MaxDropDownHeight="290" 
-                                  ValueMemberPath="Query" VerticalAlignment="Top" Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}">
-          
+        <Grid Margin="5,5,5,0" Grid.Column="0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="25" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Top Part: Query -->
+            <controls:AutoCompleteBox Loaded="searchBox_Loaded" HorizontalAlignment="Stretch" Grid.Column="0"
+                Name="searchBox" Margin="0,0,0,0" FilterMode="None"
+                Height="25" BorderBrush="DimGray" 
+                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                KeyUp="OnKeyUpHandler" Populating="searchBox_Populating" 
+                MinimumPrefixLength="0" MaxDropDownHeight="290" 
+                ValueMemberPath="Query" VerticalAlignment="Top" 
+                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}">
             <controls:AutoCompleteBox.ToolTip>
                 <StackPanel>                                        
                     <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
@@ -147,7 +170,13 @@
             </controls:AutoCompleteBox.ItemTemplate>
         </controls:AutoCompleteBox>
 
-        <Button Grid.Row="0" Grid.Column="1" Margin="0,5,5,0" Content="{Binding Path=SearchLabel}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="25" Name="searchButton" Click="SearchButtonClick" 
+            <Button Style="{DynamicResource NoChromeButton}" Background="#A9A9A9" Click="TagCloudPopUp" Grid.Column="1" 
+                    Height="25" Margin="0,0,0,0" ToolTip="Show tag cloud">
+                <Image Source="..\Resources\cloud.png"/>
+            </Button>
+       </Grid>
+        
+            <Button Grid.Row="0" Grid.Column="1" Margin="0,5,5,0" Content="{Binding Path=SearchLabel}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="25" Name="searchButton" Click="SearchButtonClick" 
                         />
 
         <ProgressBar Margin="5,5,5,0" Name="ProgBar" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
@@ -171,27 +200,32 @@
 
         <Popup Name="TagCloudPopUpWindow" Placement="Center" StaysOpen="False" IsOpen="False" Width="900" IsEnabled="True" 
                Grid.Row="3" Grid.Column="2">
-            <StackPanel Background="Azure">
-                <DockPanel Background="Azure" Margin="0, 0, 0,0" HorizontalAlignment="Center">
+            <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+                <DockPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" Margin="0,0,0,0" HorizontalAlignment="Center">
                     <Button Name="previousTagButton"  Margin="0,0,0,0" Width="20" HorizontalAlignment="Right"
                         FontFamily="ExtraBold" IsEnabled="True"
         		        KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
                         Click="ChangeSelectedTag" FontWeight="ExtraBold" Height="40" VerticalAlignment="Top" 
-                        ToolTip="Previous Word" Content="&lt;" FontSize="30">
+                        ToolTip="Previous Word" Content="&lt;" FontSize="30" Foreground="CadetBlue">
                     </Button>
                     <TextBlock Name="tagCloudTitleTextBlock" Margin="0,0,0,0" Visibility="Visible" IsEnabled="True" 
-                                HorizontalAlignment="Stretch" Background ="Azure" FontSize="28">
+                                HorizontalAlignment="Stretch" Foreground="CadetBlue"
+                               Background = "{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
+                               FontSize="28" FontFamily="Times">
                     </TextBlock>
 
                     <Button Name="nextTagButton"  Margin="0,0,0,0" Width="20" HorizontalAlignment="Left"
-                        FontFamily="ExtraBold" IsEnabled="True" FontSize="30" 
+                        FontFamily="ExtraBold" IsEnabled="True" FontSize="30" Foreground="CadetBlue"
         		        KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
                         Click="ChangeSelectedTag" FontWeight="ExtraBold" Height="40" VerticalAlignment="Top" 
+                        Background = "{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
                         ToolTip="Next word" Content="&gt;">
                     </Button>
                 </DockPanel>
-                <TextBlock Margin="0,0,0,0" Name="TagCloudTextBlock" IsEnabled="True" Background="Azure" HorizontalAlignment="Stretch" 
-                    TextWrapping="Wrap">
+                <TextBlock Margin="0,0,0,0" Name="TagCloudTextBlock" IsEnabled="True" 
+                           Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
+                           HorizontalAlignment="Stretch" 
+                    TextWrapping="Wrap" FontFamily="Times">
                 </TextBlock>
             </StackPanel>
         </Popup>
@@ -203,8 +237,6 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"  Text="Advanced Options" />
-
-
                     </StackPanel>
                 </DataTemplate>
             </Expander.HeaderTemplate>
@@ -277,15 +309,24 @@
             </StackPanel>
         </Expander>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" Margin="0,14,0,0" Grid.RowSpan="2">
+            
+            <Button Name="ClearHistoryButton"  Margin="30,0,0,0"
+                FontFamily="ExtraBold" IsEnabled="True"
+        		KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
+                Click="ClearSearchHistory" FontWeight="ExtraBold" Height="25" VerticalAlignment="Top" 
+                ToolTip="Clear search history">[C]
+            </Button>
 
-   
-
-            <Button Name="HelpButton"  ToolTip="Help" Margin="30,0,0,0" FontFamily="ExtraBold" VerticalAlignment="Top" Height="25" IsEnabled="{Binding ElementName=SelectionPopup, Mode=TwoWay, Path=IsOpen, Converter={StaticResource oppositeConverter}}" 
-        		KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" Click="Toggled_Popup" FontWeight="ExtraBold" >[?]
+            <Button Name="HelpButton"  ToolTip="Help" Margin="0,0,0,0" FontFamily="ExtraBold" VerticalAlignment="Top" 
+                    Height="25" IsEnabled="{Binding ElementName=SelectionPopup, Mode=TwoWay, Path=IsOpen, 
+                    Converter={StaticResource oppositeConverter}}" 
+        		    KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
+                    Click="Toggled_Popup" FontWeight="ExtraBold" >[?]
             </Button>
             
             <ToggleButton  ToolTip="Expand/Collapse"   Margin="0,0,0,0" VerticalAlignment="Top" Height="25"   x:Name="expandButton"
-        		KeyboardNavigation.IsTabStop="False"  Style="{StaticResource toggleButtonStyle}" Checked="Toggled" Unchecked="Toggled"/>
+        		KeyboardNavigation.IsTabStop="False"  Style="{StaticResource toggleButtonStyle}" Checked="Toggled" 
+                    Unchecked="Toggled" Visibility="Hidden"/>
 
             <Popup Name="SelectionPopup" Placement="Mouse" StaysOpen="False" IsOpen="False" Width="430.189">
                 <RichTextBox Margin="0,0,0,0" Name="richTB" HorizontalAlignment="Stretch" IsDocumentEnabled="False" IsEnabled="False">                    
@@ -317,7 +358,7 @@
                                             </Paragraph>
                                         </TableCell>
                                         <TableCell>
-                                            <Paragraph>Toggle through results following a query.</Paragraph>
+                                            <Paragraph>Navigate through results following a query.</Paragraph>
                                         </TableCell>
                                     </TableRow>
 
@@ -365,7 +406,7 @@
                                     </TableRow>
                                 <TableRow>
                                     <TableCell>
-                                        <Paragraph FontFamily="Arial">Escape '\' and '"' in quotes:
+                                        <Paragraph FontFamily="Arial">Escape \ and " in quotes:
                                         </Paragraph>
                                     </TableCell>
                                     <TableCell >
@@ -386,7 +427,7 @@
                                     </TableRow>
                                     <TableRow>
                                         <TableCell>
-                                            <Paragraph FontFamily="Arial">Limit by file extension:
+                                            <Paragraph FontFamily="Arial">Filter results by file extensions:
                                             </Paragraph>
                                         </TableCell>
                                         <TableCell >
@@ -409,8 +450,7 @@
                        Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Height="Auto"
                         VerticalAlignment="Stretch" MinWidth="270" MinHeight="100" HorizontalContentAlignment="Stretch"
                        SelectionChanged="searchResultListbox_SelectionChanged" MouseLeave="MouseLeaveEvent"                    
-                       Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"                       
-                       >  
+                       Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">  
     
                 <ListView.ContextMenu>
                     <ContextMenu Name="SearchResultMenu" StaysOpen="true">

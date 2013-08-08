@@ -7,8 +7,8 @@ using System.Windows.Data;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Sando.Core.Tools;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-
 
 namespace Sando.UI.View.Search.Converters {
     [ValueConversion(typeof(IHighlightRawInfo), typeof(object))]
@@ -21,9 +21,19 @@ namespace Sando.UI.View.Search.Converters {
              var offsets = infor.Offsets ?? lines.Select(n => i ++).ToArray();
              var offsetIndex = 0;
 
+             int num = 0, preNum = 0;
              foreach (var line in lines)
              {
-                var num = startLine + offsets.ElementAt(offsetIndex ++);
+                 if (offsets.Count() > offsetIndex)
+                 {
+                     num = startLine + offsets.ElementAt(offsetIndex++);
+                     preNum = num;
+                 }
+                 else
+                 {
+                     num = preNum + 1;
+                     preNum = num;
+                 }
                 line.AddBeginning(CreateRun("\t", FontWeights.Medium));
                 line.AddBeginning(CreateLineNumberHyperLink(num));
              }
@@ -55,6 +65,10 @@ namespace Sando.UI.View.Search.Converters {
             return list.ToArray();
         }
 
+  
+
+
+
         public Object Convert(Object inforValue, Type targetType, object parameter, CultureInfo culture)
         {
             var emptyLineOffsets = new List<int>();
@@ -69,7 +83,7 @@ namespace Sando.UI.View.Search.Converters {
                 }
 
                 string input = value as string;
-                string[] lines = input.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.None);
+                string[] lines = input.SplitToLines();
                 lines = RemoveHeadTailEmptyStrings(lines);
                 List<string> key_temp = new List<string>();
                 var offset = 0;
@@ -130,8 +144,7 @@ namespace Sando.UI.View.Search.Converters {
             }
             catch (Exception e)
             {
-                var run = CreateRun(((IHighlightRawInfo) inforValue).Text, FontWeights.Medium);
-                return new Span(run);
+                return span;
             }
         }
 
@@ -161,7 +174,9 @@ namespace Sando.UI.View.Search.Converters {
             IEnumerable<int> emptyLineOffsets)
         {
             var items = new List<Inline>();
-            var lines = BreakToRunLines(terms).Select(l => l.RemoveEmptyRun()).Where(l => !l.IsEmpty()).ToArray();
+
+            var lines = BreakToRunLines(terms).Select(l => l.RemoveEmptyRun()).ToArray();
+            lines = lines.Where(l => !l.IsEmpty()).ToArray();
             lines = AddEmptyLines(lines.ToList(), emptyLineOffsets).ToArray();
 
             if (inforValue.IndOption == IndentionOption.NoIndention)
@@ -299,10 +314,9 @@ namespace Sando.UI.View.Search.Converters {
             var currentLine = new InlineItemLine();
             foreach (var run in runs)
             {
-                if (Environment.NewLine.ToCharArray().Any(c => run.Text.Contains(c)))
+                if (run.Text.Contains(Environment.NewLine))
                 {
-                    var parts = run.Text.Split(Environment.NewLine.ToCharArray(), 
-                        StringSplitOptions.None);
+                    var parts = run.Text.SplitToLines();
                     foreach (var part in parts)
                     {
                         if(!string.IsNullOrEmpty(part))
@@ -331,6 +345,4 @@ namespace Sando.UI.View.Search.Converters {
             throw new NotImplementedException();
         }
     }
-
-   
 }
