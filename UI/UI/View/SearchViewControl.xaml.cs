@@ -360,7 +360,7 @@ namespace Sando.UI.View
                 foreach (string line in lines)
                 {
 
-                    containedKeys = IsContainSearchKey(searchKeys, line);
+                    containedKeys = GetContainedSearchKeys(searchKeys, line);
 
                     if (containedKeys.Length != 0)
                     {
@@ -408,7 +408,7 @@ namespace Sando.UI.View
                 var offesets = new List<int>();
                 for (int i = 0; i < lines.Count(); i ++)
                 {
-                    var containedKeys = IsContainSearchKey(keys, lines.ElementAt(i));
+                    var containedKeys = GetContainedSearchKeys(keys, lines.ElementAt(i));
                     if (containedKeys.Any())
                     {
                         sb.AppendLine(lines.ElementAt(i));
@@ -443,8 +443,10 @@ namespace Sando.UI.View
         }
 
         //Return the contained search key
-        private string[] IsContainSearchKey(string[] searchKeys, string line)
+        private string[] GetContainedSearchKeys(string[] searchKeys, string line)
         {
+            searchKeys = RemovePartialWords(searchKeys.Where(k => line.IndexOf(k, 
+                StringComparison.InvariantCultureIgnoreCase) >= 0).ToArray());       
             var containedKeys = new Dictionary<String, int>();
             foreach (string key in searchKeys){
                 var index = line.IndexOf(key, StringComparison.InvariantCultureIgnoreCase);
@@ -453,9 +455,32 @@ namespace Sando.UI.View
                     containedKeys.Add(key, index);
                 }
             }
-            return containedKeys.GroupBy(p => p.Value).Select(g => g.OrderBy(s => s.Key.Length).
-                Last()).Select(p => p.Key).ToArray();
+            return containedKeys.OrderBy(p => p.Value).Select(p => p.Key).ToArray();
         }
+
+        private string[] RemovePartialWords(string[] words)
+        {
+            var removedIndex = new List<int>();
+            var sortedWords = words.OrderByDescending(w => w.Length).ToList();
+            for (int i = sortedWords.Count() - 1; i > 0; i--)
+            {
+                for (int j = i - 1; j >= 0; j--)
+                {
+                    if (sortedWords[j].IndexOf(sortedWords[i], StringComparison.
+                        InvariantCultureIgnoreCase) >= 0)
+                    {
+                        removedIndex.Add(i);
+                        break;
+                    }
+                }
+            }
+            foreach (var index in removedIndex.Distinct().OrderByDescending(i => i))
+            {
+                sortedWords.RemoveAt(index);
+            }
+            return sortedWords.ToArray();
+        }
+
 
         public void UpdateMessage(string message)
         {
