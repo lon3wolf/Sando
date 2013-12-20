@@ -40,11 +40,12 @@ namespace Sando.SearchEngine
             var simple = searchCriteria as SimpleSearchCriteria;
             if (simple != null)
             {
-                foreach (var term in simple.SearchTerms)
-                    if (term.Contains("\""))
-                        return true;
+                return simple.SearchTerms.Any(t => t.Contains("\""));
             }
-            return false;    
+            else
+            {
+                return false;
+            }
         }
 
         private List<CodeSearchResult> RerunQueryWithWildcardAtTheEnd(SearchCriteria searchCriteria, List<CodeSearchResult> searchResults)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Sando.ExtensionContracts.ProgramElementContracts
 {
@@ -70,37 +72,36 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
 
 	    private bool ResolveClassId(string className, List<ProgramElement> includeElements, out Guid outGuid)
 		{
-			foreach(ProgramElement element in includeElements)
-			{
-				if(element is ClassElement && element.Name == className)
-				{
-					outGuid = ((ClassElement)element).Id;
-					return true;
-				}
-                else if (element is StructElement && element.Name == className)
-                {
-                    outGuid = ((StructElement)element).Id;
-                    return true;
-                }
-			}
-
-			outGuid = Guid.Empty;
-			return false;
+            var id = from element in includeElements
+                     where (element is ClassElement || element is StructElement) && element.Name == className
+                     select element.Id;
+            if (id.Any())
+            {
+                outGuid = id.First();
+                return true;
+            }
+            else
+            {
+                outGuid = Guid.Empty;
+                return false;
+            }
 		}
 
 		private bool ResolveAccessType(string funcName, List<ProgramElement> includeElements, out AccessLevel outAccessLevel)
 		{
-			foreach(ProgramElement element in includeElements)
-			{
-				if(element is MethodPrototypeElement && element.Name == funcName) 
-				{
-					outAccessLevel = ((MethodPrototypeElement)element).AccessLevel;
-					return true;
-				}
-			}
-
-			outAccessLevel = AccessLevel.Protected;
-			return false;
+            var level = from element in includeElements
+                        where element is MethodPrototypeElement && element.Name == funcName
+                        select ((MethodPrototypeElement)element).AccessLevel;
+            if (level.Any())
+            {
+                outAccessLevel = level.First();
+                return true;
+            }
+            else
+            {
+                outAccessLevel = AccessLevel.Protected;
+                return false;
+            }
 		}
 		
 		public virtual string[] IncludeFileNames { get; private set; }
