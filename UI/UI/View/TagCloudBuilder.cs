@@ -170,33 +170,8 @@ namespace Sando.UI.View
 
 
 
-        private Brush[] GenerateColorPool(int count)
-        {
-            var currentColor = Brushes.LightSkyBlue.Color;
-            var colors = new List<Color>();
-            for (int i = 0; i < count; i++)
-            {
-                currentColor = GetDarkerColor(currentColor);
-                colors.Add(currentColor);
-            }
-            return colors.Select
-                (c => new SolidColorBrush(c)).Cast<Brush>().ToArray();
-        }
 
-        private Color GetLighterColor(Color c)
-        {
-            var drawingcolor = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
-            System.Drawing.Color lightC = ControlPaint.Light(drawingcolor);
-            return Color.FromArgb(lightC.A, lightC.R, lightC.G, lightC.B);
-        }
-
-        private Color GetDarkerColor(Color c)
-        {
-            var drawingcolor = System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
-            System.Drawing.Color lightC = ControlPaint.Dark(drawingcolor);
-            return Color.FromArgb(lightC.A, lightC.R, lightC.G, lightC.B);
-        }
-
+        
         internal Color GetBackGroundColor()
         {
             var key = Microsoft.VisualStudio.Shell.VsBrushes.BackgroundKey;

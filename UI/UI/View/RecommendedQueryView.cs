@@ -315,12 +315,6 @@ namespace Sando.UI.View
             return brush;
         }
 
-        static internal Brush GetToolBackgroundHighlightColor()
-        {
-            var key = Microsoft.VisualStudio.Shell.VsBrushes.DropDownBackgroundKey;
-            var brush = (Brush)Application.Current.Resources[key];
-            return brush;
-        }
 
         internal static Brush GetHistoryTextColor()
         {

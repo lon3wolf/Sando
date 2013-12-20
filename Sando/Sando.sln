@@ -289,4 +289,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NDepend) = preSolution
+		Project = "..\..\sandoNDepend\Sando.ndproj"
+	EndGlobalSection
 EndGlobal

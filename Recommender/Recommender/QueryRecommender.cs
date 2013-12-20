@@ -68,12 +68,6 @@ namespace Sando.Recommender {
             return new SwumQueriesSorter().GetAllHistoryItems();
         }
 
-
-        private void AddRecommendation(string rec, Dictionary<string, int> recommendations)
-        {
-            AddRecommendation(rec, 1, recommendations);
-        }
-
         private void AddRecommendation(string rec, int score, Dictionary<string, int> recommendations)
         {
             int count;

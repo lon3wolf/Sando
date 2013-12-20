@@ -115,11 +115,6 @@ namespace Sando.Core.Tools
             return GetDefaultLetterWords(element.Name + " " + element.Namespace);
         }
 
-        private static IEnumerable<String> ExtractEnumWords(EnumElement element)
-        {
-            return GetDefaultLetterWords(element.Body);
-        }
-
         private static IEnumerable<string> ExtractFieldWords(FieldElement element)
         {
             return GetDefaultLetterWords(new [] {element.Name, element.FieldType});

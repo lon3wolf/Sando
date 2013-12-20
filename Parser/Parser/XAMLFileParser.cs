@@ -248,15 +248,6 @@ namespace Sando.Parser
                 return result;
             }
 
-            public String ConvertCountsToString(IEnumerable<int> counts)
-            {
-                var sb = new StringBuilder();
-                foreach (var count in counts)
-                {
-                    sb.Append(count);
-                }
-                return sb.ToString();
-            }
         }
     
         /// <summary>

@@ -844,14 +844,6 @@ namespace Sando.UI.View
         }
 
 
-
-
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            OpenFolderSelection();
-        }
-
         private void OpenFolderSelection()
         {
             try

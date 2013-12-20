@@ -195,11 +195,6 @@ namespace Sando.Core.QueryRefomers
             return RemoveDuplication(allQuries.Select(q => q.RemoveRedundantTerm().RemoveShortTerms()));
         }
 
-        private IEnumerable<IReformedQuery> FilterOutBadQueries(IEnumerable<InternalReformedQuery> allQuries)
-        {
-            return allQuries.Where(q => QueryFilters.All(f => f.Invoke(q))).ToList();
-        }
-
         private IEnumerable<IReformedQuery> RemoveDuplication(IEnumerable<IReformedQuery> queries)
         {
             queries = queries.ToArray();
