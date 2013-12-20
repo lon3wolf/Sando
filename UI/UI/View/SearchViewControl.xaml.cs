@@ -545,43 +545,6 @@ namespace Sando.UI.View
             }
         }
 
-        private void UpdateExpansionState(ListView view)
-        {
-            return;
-
-            if (view != null)
-            {
-                var selectedIndex = view.SelectedIndex;
-
-                if (IsExpandAllChecked())
-                {
-                    for (var currentIndex = 0; currentIndex < view.Items.Count; ++currentIndex)
-                    {
-                        var currentItem = view.ItemContainerGenerator.ContainerFromIndex(currentIndex) as ListViewItem;
-                        if (currentItem != null)
-                            currentItem.Height = 89;
-                    }
-                }
-                else
-                {
-                    for (var currentIndex = 0; currentIndex < view.Items.Count; ++currentIndex)
-                    {
-                        var currentItem = view.ItemContainerGenerator.ContainerFromIndex(currentIndex) as ListViewItem;                        
-                        if (currentItem != null)
-                            currentItem.Height = currentIndex == selectedIndex ? 89 : 24;
-                    }
-                }
-            }
-        } 
-
-        private bool IsExpandAllChecked()
-        {
-            if (expandButton == null)
-                return false;
-            var check = expandButton.IsChecked;
-            return check.HasValue && check == true;
-        }
-
         private void searchBox_Populating(object sender, PopulatingEventArgs e)
         {
             var recommendationWorker = new BackgroundWorker();
