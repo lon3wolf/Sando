@@ -222,32 +222,6 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
             return snippet;
         }
 
-        private int[] CalculateStartAndEndLine()
-        {
-            var resultLines = highlightRaw.Split('\n').Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
-            var allLines = File.ReadAllLines(ProgramElement.FullFilePath).ToList();
-            var lineCount = resultLines.Count();
-            int start;
-            for (start = 0; !AreAllLinesSame(resultLines, allLines.GetRange(start, lineCount)); start ++);
-            return new []{start, start + lineCount - 1};
-        }
-
-        private bool AreAllLinesSame(IEnumerable<string> lines1, IEnumerable<string> lines2)
-        {
-            lines1 = lines1.ToArray();
-            lines2 = lines2.ToArray();
-            if (lines1.Count() == lines2.Count())
-            {
-                for (int i = 0; i < lines1.Count(); i++)
-                {
-                    if (!lines1.ElementAt(i).Trim().Equals(lines2.ElementAt(i).Trim()))
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
         private static List<string> StandardizeLeadingWhitespace(List<string> lines, int numLines)
         {
             var newLines = new List<string>();
