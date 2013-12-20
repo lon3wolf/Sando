@@ -7,7 +7,7 @@
             _isInitialIndexingInProgress = true;
         }
 
-        public void InitialIndexingStarted()
+        public void SetInitialIndexingStarted()
         {
             _isInitialIndexingInProgress = true;
         }

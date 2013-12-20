@@ -505,147 +505,164 @@ namespace Sando.UI
         {
             try
             {
-                updatedForThisSolution = false;
-                //TODO if solution is reopen - the guid should be read from file - future change
-                var solutionId = Guid.NewGuid();
-                var openSolution = ServiceLocator.Resolve<DTE2>().Solution;
-                var solutionPath = openSolution.FileName;
-                var key = new SolutionKey(solutionId, solutionPath);              
-                ServiceLocator.RegisterInstance(key);
+                SolutionKey key = SetupSolutionKey();
 
-                var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();                
                 bool isIndexRecreationRequired = IndexStateManager.IsIndexRecreationRequired();
                 isIndexRecreationRequired = isIndexRecreationRequired || !PathManager.Instance.IndexPathExists(key);
                 
+                //Setup indexers
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
-
                 ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());
                 SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
                 ServiceLocator.RegisterInstance(currentIndexer);
-
                 ServiceLocator.RegisterInstance(new IndexUpdateManager());
 
                 if (isIndexRecreationRequired)
                 {
                     currentIndexer.ClearIndex();
                 }
-
-                ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingStarted();
-
-                // JZ: SrcMLService Integration
-                // Get the SrcML Service.
-                srcMLService = GetService(typeof(SSrcMLGlobalService)) as ISrcMLGlobalService;
-                if(null == srcMLService) {
-                    throw new Exception("Can not get the SrcML global service.");
-                }
-                else
-                {
-                    ServiceLocator.RegisterInstance(srcMLService);
-                }                                               
-                // Register all types of events from the SrcML Service.
-                
-                if (!SetupHandlers)
-                {
-                    SetupHandlers = true;
-                    srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
-                    srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
-                }
-
-                //This is done here because some extension points require data that isn't set until the solution is opened, e.g. the solution key or the srcml archive
-                //However, registration must happen before file monitoring begins below.
+                ServiceLocator.Resolve<InitialIndexingWatcher>().SetInitialIndexingStarted();
+                RegisterSrcMLService(srcMLArchiveEventsHandlers);                
                 RegisterExtensionPoints();
-
                 SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()), !isIndexRecreationRequired);
-                //SwumManager.Instance.Archive = _srcMLArchive;
-
-                ////XQ: for testing
-                //ISandoGlobalService sandoService = GetService(typeof(SSandoGlobalService)) as ISandoGlobalService;
-                //var res = sandoService.GetSearchResults("Monster");
-
-                // xige
-                var dictionary = new DictionaryBasedSplitter();
-                dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated += 
-                    dictionary.UpdateProgramElement;
-                ServiceLocator.RegisterInstance(dictionary);
-
-                var reformer = new QueryReformerManager(dictionary);
-                reformer.Initialize(null);
-                ServiceLocator.RegisterInstance(reformer);
-
-                var history = new SearchHistory();
-                history.Initialize(PathManager.Instance.GetIndexPath
-                    (ServiceLocator.Resolve<SolutionKey>()));
-                ServiceLocator.RegisterInstance(history);
-                                
-
-                // End of code changes
-
-                if (sandoOptions.AllowDataCollectionLogging)
-                {
-                    SandoLogManager.StartDataCollectionLogging(PathManager.Instance.GetExtensionRoot());
-                }
-                else
-                {
-                    SandoLogManager.StopDataCollectionLogging();
-                }
-				LogEvents.SolutionOpened(this, Path.GetFileName(solutionPath));
+                SetupRecommenderSystem();
+                SetupDataLogging();
+				LogEvents.SolutionOpened(this, Path.GetFileName(key.GetSolutionPath()));
 
                 if (isIndexRecreationRequired)
                 {
-                    //just recreate the whole index
-                    var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
-                        {
-                            Collection<string> files = null;
-                            while (files == null)
-                            {
-                                try
-                                {
-                                    files = srcMLService.GetSrcMLArchive().GetFiles();                                    
-                                }
-                                catch (NullReferenceException ne)
-                                {
-                                    System.Threading.Thread.Sleep(3000);
-                                }
-                            }                            
-                            foreach (var file in srcMLService.GetSrcMLArchive().FileUnits)
-                            {                                
-                                var fileName = ABB.SrcML.SrcMLElement.GetFileNameForUnit(file);
-                                srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
-                            }
-                            srcMLArchiveEventsHandlers.WaitForIndexing();
-                        });
+                    RecreateEntireIndex(srcMLArchiveEventsHandlers);
                 }
                 else
                 {
-                    //make sure you're not missing any files 
-                    var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
-                    {
-                        Collection<string> files = null;
-                        while (files == null)
-                        {
-                            try
-                            {
-                                files = srcMLService.GetSrcMLArchive().GetFiles();
-                            }
-                            catch (NullReferenceException ne)
-                            {
-                                System.Threading.Thread.Sleep(3000);
-                            }
-                        }
-                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
-                        {                            
-                            srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
-                        }
-                        srcMLArchiveEventsHandlers.WaitForIndexing();
-                    });                    
+                    CheckIndexForMissingFiles(srcMLArchiveEventsHandlers);
                 }                
             }
             catch (Exception e)
             {
                 LogEvents.UIRespondToSolutionOpeningError(this, e);
             }
+            UpdateFolderList();
+        }
+
+        private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        {
+            //make sure you're not missing any files 
+            var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                Collection<string> files = null;
+                while (files == null)
+                {
+                    try
+                    {
+                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                    }
+                    catch (NullReferenceException ne)
+                    {
+                        System.Threading.Thread.Sleep(3000);
+                    }
+                }
+                foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                {
+                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
+                }
+                srcMLArchiveEventsHandlers.WaitForIndexing();
+            });
+        }
+
+        private void RecreateEntireIndex(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        {
+            //just recreate the whole index
+            var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                Collection<string> files = null;
+                while (files == null)
+                {
+                    try
+                    {
+                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                    }
+                    catch (NullReferenceException ne)
+                    {
+                        System.Threading.Thread.Sleep(3000);
+                    }
+                }
+                foreach (var file in srcMLService.GetSrcMLArchive().FileUnits)
+                {
+                    var fileName = ABB.SrcML.SrcMLElement.GetFileNameForUnit(file);
+                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
+                }
+                srcMLArchiveEventsHandlers.WaitForIndexing();
+            });
+        }
+
+        private static void SetupDataLogging()
+        {
+            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+            if (sandoOptions.AllowDataCollectionLogging)
+            {
+                SandoLogManager.StartDataCollectionLogging(PathManager.Instance.GetExtensionRoot());
+            }
+            else
+            {
+                SandoLogManager.StopDataCollectionLogging();
+            }
+        }
+
+        private static void SetupRecommenderSystem()
+        {
+            // xige
+            var dictionary = new DictionaryBasedSplitter();
+            dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
+            ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated +=
+                dictionary.UpdateProgramElement;
+            ServiceLocator.RegisterInstance(dictionary);
+
+            var reformer = new QueryReformerManager(dictionary);
+            reformer.Initialize(null);
+            ServiceLocator.RegisterInstance(reformer);
+
+            var history = new SearchHistory();
+            history.Initialize(PathManager.Instance.GetIndexPath
+                (ServiceLocator.Resolve<SolutionKey>()));
+            ServiceLocator.RegisterInstance(history);
+        }
+
+        private void RegisterSrcMLService(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        {
+            srcMLService = GetService(typeof(SSrcMLGlobalService)) as ISrcMLGlobalService;
+            if (null == srcMLService)
+            {
+                throw new Exception("Can not get the SrcML global service.");
+            }
+            else
+            {
+                ServiceLocator.RegisterInstance(srcMLService);
+            }                         
+            if (!SetupHandlers)
+            {
+                SetupHandlers = true;
+                srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
+                srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
+            }
+        }
+
+        private SolutionKey SetupSolutionKey()
+        {
+            updatedForThisSolution = false;
+            //TODO if solution is reopen - the guid should be read from file - future change
+            var solutionId = Guid.NewGuid();
+            var openSolution = ServiceLocator.Resolve<DTE2>().Solution;
+            var solutionPath = openSolution.FileName;
+            var key = new SolutionKey(solutionId, solutionPath);
+            ServiceLocator.RegisterInstance(key);
+            return key;
+        }
+
+        //This should go away when we have the updated SrcML.NET API about folder updating
+        private void UpdateFolderList()
+        {
             var updateListedFoldersTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
                 bool done = false;

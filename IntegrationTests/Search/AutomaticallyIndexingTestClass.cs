@@ -144,7 +144,7 @@ namespace Sando.IntegrationTests.Search
             ServiceLocator.RegisterInstance(currentIndexer);
             ServiceLocator.RegisterInstance(new IndexUpdateManager());
             currentIndexer.ClearIndex();            
-            ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingStarted();
+            ServiceLocator.Resolve<InitialIndexingWatcher>().SetInitialIndexingStarted();
 
             var dictionary = new DictionaryBasedSplitter();
             dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
