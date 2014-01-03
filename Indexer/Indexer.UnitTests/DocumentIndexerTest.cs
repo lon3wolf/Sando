@@ -51,20 +51,7 @@ namespace Sando.Indexer.UnitTests
 			}
 		}
 
-		[Test]
-		public void DocumentIndexer_AddDocumentThrowsWhenProgramElementIsNull()
-		{
-			_documentIndexer = new DocumentIndexer();
-			try
-			{
-				_documentIndexer.AddDocument(null);
-			}
-			catch
-			{
-				//contract exception catched here
-			}
-			Assert.True(_contractFailed, "Contract should fail!");
-		}
+
 
         [Test]
         public void DocumentIndexer_DeleteDocuments()

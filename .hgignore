@@ -1,6 +1,7 @@
 syntax: regexp
 Sando/_ReSharper*
 Sando/.HistoryData/*
+Sando/packages/*
 syntax: glob
 */bin/*
 Indexer/Indexer.suo

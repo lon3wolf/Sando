@@ -278,19 +278,7 @@ namespace Sando.Core.UnitTests.Tools
             Assert.IsFalse(invalidCharactersFound);
         }
 
-        [Test]
-        public void ExtractSearchTerms_ContractFailsWhenSearchTermIsNull()
-        {
-            try
-            {
-                WordSplitter.ExtractSearchTerms(null);
-            }
-            catch
-            {
-                //contract exception catched here
-            }
-            Assert.True(contractFailed, "Contract should fail!");
-        }
+
 
         [Test]
         public void ExtractSearchTerms_FirstPartIsAlwaysOriginal()

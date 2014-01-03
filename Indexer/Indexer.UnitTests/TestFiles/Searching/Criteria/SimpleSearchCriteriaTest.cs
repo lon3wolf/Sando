@@ -78,75 +78,7 @@ namespace Sando.Indexer.UnitTests.Searching.Criteria
             string queryString = simpleSearchCriteria.ToQueryString();
             Assert.IsTrue(queryString.Contains("Source:*foreach\\(var?term?in?SearchTerms\\)*"), "Created query string is invalid!");
         }
-
-		[Test]
-		public void SimpleSearchCriteria_ToQueryStringThrowsWhenSearchingByAccessLevelWithNoAccessLevelCriteria()
-		{
-			SearchCriteria simpleSearchCriteria = new SimpleSearchCriteria()
-			{
-				SearchByAccessLevel = true
-			};
-			try
-			{
-				string queryString = simpleSearchCriteria.ToQueryString();
-			}
-			catch
-			{
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
-
-		[Test]
-		public void SimpleSearchCriteria_ToQueryStringThrowsWhenSearchingByLocationWithNoLocationCriteria()
-		{
-			SearchCriteria simpleSearchCriteria = new SimpleSearchCriteria()
-			{
-				SearchByLocation = true
-			};
-			try
-			{
-				string queryString = simpleSearchCriteria.ToQueryString();
-			}
-			catch
-			{
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
-
-		[Test]
-		public void SimpleSearchCriteria_ToQueryStringThrowsWhenSearchingByProgramElementTypeWithNoProgramElementTypeCriteria()
-		{
-			SearchCriteria simpleSearchCriteria = new SimpleSearchCriteria()
-			{
-				SearchByProgramElementType = true
-			};
-			try
-			{
-				string queryString = simpleSearchCriteria.ToQueryString();
-			}
-			catch
-			{
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
-
-		[Test]
-		public void SimpleSearchCriteria_ToQueryStringThrowsWhenSearchingByUsageTypeWithNoUsageTypeCriteria()
-		{
-			SearchCriteria simpleSearchCriteria = new SimpleSearchCriteria()
-			{
-				SearchByUsageType = true
-			};
-			try
-			{
-				string queryString = simpleSearchCriteria.ToQueryString();
-			}
-			catch
-			{
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
-
+		
 		[Test]
 		public void SimpleSearchCriteria_ToQueryStringCreatesValidAccessLevelsQueryString_SingleCondition()
 		{

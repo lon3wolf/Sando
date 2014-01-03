@@ -122,33 +122,9 @@ namespace Sando.Indexer.UnitTests
 			}
 		}
 
-		[Test]
-		public void DocumentFactory_CreateThrowsContractExceptionIfProgramElementIsNull()
-		{
-			try
-			{
-				SandoDocument sandoDocument = DocumentFactory.Create(null);
-			}
-			catch
-			{
-				//contract exception catched here
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
 
-		[Test]
-		public void DocumentFactory_CreateThrowsContractExceptionIfUnsportedProgramElementSubclassObjectPassed()
-		{
-			try
-			{
-				SandoDocument sandoDocument = DocumentFactory.Create(new TestElement("name", 12, -1000, "full path", "snippet"));
-			}
-			catch
-			{
-				//contract exception catched here
-			}
-			Assert.True(contractFailed, "Contract should fail!");
-		}
+
+
 
 		[SetUp]
 		public void ResetContract()

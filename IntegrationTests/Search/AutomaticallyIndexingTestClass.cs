@@ -43,7 +43,8 @@ namespace Sando.IntegrationTests.Search
 
         [TestFixtureSetUp]
         public void Setup()
-        {        
+        {
+            SrcMLArchiveEventsHandlers.MAX_PARALLELISM = 8;
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
 

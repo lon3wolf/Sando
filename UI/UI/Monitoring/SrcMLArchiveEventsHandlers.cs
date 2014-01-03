@@ -32,10 +32,12 @@ namespace Sando.UI.Monitoring
         public TaskFactory factory;
         public static SrcMLArchiveEventsHandlers Instance;
         System.Timers.Timer hideProgressBarTimer = new System.Timers.Timer(500);
+        public static int MAX_PARALLELISM = 2;
+
 
         public SrcMLArchiveEventsHandlers()
         {
-            scheduler = new LimitedConcurrencyLevelTaskScheduler(2,this);
+            scheduler = new LimitedConcurrencyLevelTaskScheduler(MAX_PARALLELISM, this);
             factory = new TaskFactory(scheduler);
             Instance = this;
             hideProgressBarTimer.Elapsed += waitToUpdateProgressBar_Elapsed;
