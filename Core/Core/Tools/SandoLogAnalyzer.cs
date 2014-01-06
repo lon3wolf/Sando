@@ -31,6 +31,7 @@ namespace Sando.Core.Tools
         {
             this.analyzer.AddAnalyzer(new NoSearchResultsAnalyzer());
             this.analyzer.AddAnalyzer(new NumberOfUsersAnalyzer());
+            this.analyzer.AddAnalyzer(new NumberOfRegularUsers());            
             this.analyzer.StartAnalysis();
         }
         
@@ -58,7 +59,12 @@ namespace Sando.Core.Tools
 
         private class NumberOfUsersAnalyzer : ILogFileAnalyzer
         {
-            private readonly Dictionary<string, int> IDs = new Dictionary<string, int>();  
+            private readonly Dictionary<string, int> IDs = new Dictionary<string, int>();
+            private int count5;
+            private int count7;
+            private int count15;
+            private int count10;
+            private int count20; 
 
             public void StartAnalyze(ILogFile file)
             {
@@ -75,10 +81,71 @@ namespace Sando.Core.Tools
 
             public void FinishAnalysis()
             {
-                int count = IDs.Keys.Count;
+                var allKeys = from key in IDs.Keys where IDs[key] > 5 select key;
+                count5 = allKeys.Count();
+                allKeys = from key in IDs.Keys where IDs[key] > 7 select key;
+                count7 = allKeys.Count();
+                allKeys = from key in IDs.Keys where IDs[key] > 10 select key;
+                count10 = allKeys.Count();
+                allKeys = from key in IDs.Keys where IDs[key] > 15 select key;
+                count15 = allKeys.Count();
+                allKeys = from key in IDs.Keys where IDs[key] > 20 select key;
+                count20 = allKeys.Count();
             }
         }
 
+
+        private class NumberOfRegularUsers : ILogFileAnalyzer
+        {
+            private readonly Dictionary<string, List<DateTime>> IDs = new Dictionary<string, List<DateTime>>();
+            private int count;
+
+            //SandoData_v1.1.2_1246082932_-194626707_2013-11-20-13.13.log
+            
+
+            public void StartAnalyze(ILogFile file)
+            {
+                var id = file.Name.Split('_')[2];
+                try
+                {
+                    var rest = file.Name.Split('_')[4];
+                    if (IDs.ContainsKey(id))
+                    {
+                        IDs[id].Add(DateTime.Parse(rest.Substring(0,10)));
+                    }
+                    else
+                    {
+                        var list = new List<DateTime>();
+                        list.Add(DateTime.Parse(rest.Substring(0,10)));
+                        IDs.Add(id, list);
+                    }
+                }
+                catch (IndexOutOfRangeException ioe)
+                {
+                    //we don't want to analyze files that don't have the normal naming convention
+                }
+            }
+
+            public void FinishAnalysis()
+            {
+                var allKeys = from key in IDs.Keys where IDs[key].Count() > 5 select key;
+                count = 0;
+                foreach (var key in allKeys)
+                {
+                    var dateList = IDs[key];
+                    bool add = false;
+                    foreach(var date in dateList)
+                        foreach (var date1 in dateList)                        
+                            if ((date1 - date).TotalDays > 10 || (date - date1).TotalDays > 10)
+                            {
+                                add = true;
+                                break;
+                            }                        
+                    if (add)
+                        count++;
+                }
+            }
+        }
 
 
         public class SandoLogAnalyzer
