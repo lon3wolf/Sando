@@ -93,12 +93,13 @@ namespace Sando.Core.Tools
                 count20 = allKeys.Count();
             }
         }
-
+         
 
         private class NumberOfRegularUsers : ILogFileAnalyzer
         {
             private readonly Dictionary<string, List<DateTime>> IDs = new Dictionary<string, List<DateTime>>();
             private int count;
+            private int countErrors;
 
             //SandoData_v1.1.2_1246082932_-194626707_2013-11-20-13.13.log
             
@@ -123,6 +124,7 @@ namespace Sando.Core.Tools
                 catch (IndexOutOfRangeException ioe)
                 {
                     //we don't want to analyze files that don't have the normal naming convention
+                    countErrors++;
                 }
             }
 
@@ -134,14 +136,20 @@ namespace Sando.Core.Tools
                 {
                     var dateList = IDs[key];
                     bool add = false;
-                    foreach(var date in dateList)
-                        foreach (var date1 in dateList)                        
+                    bool recentDate = false;
+                    DateTime now = DateTime.Now;
+                    foreach (var date in dateList)
+                    {
+                        if ((now - date).TotalDays < 90)
+                            recentDate = true;
+                        foreach (var date1 in dateList)
                             if ((date1 - date).TotalDays > 10 || (date - date1).TotalDays > 10)
                             {
                                 add = true;
                                 break;
-                            }                        
-                    if (add)
+                            }                            
+                    }                        
+                    if (add && recentDate)
                         count++;
                 }
             }
