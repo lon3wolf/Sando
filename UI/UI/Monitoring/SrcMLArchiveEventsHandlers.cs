@@ -105,14 +105,13 @@ namespace Sando.UI.Monitoring
             StartNew(action, cancelTokenSource);
         }
 
-        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args, bool commitImmediately, DocumentIndexer documentIndexer) {
+        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args, bool commitImmediately, DocumentIndexer documentIndexer) {                        
             string sourceFilePath = args.FilePath;
             var fileExtension = Path.GetExtension(sourceFilePath);
             if(ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null) {
-                // Get SrcMLService and use its API to get the XElement
-
+                if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath))
+                    return;
                 var xelement = srcMLService.GetXElementForSourceFile(args.FilePath);
-
                 var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
                 switch(args.EventType) {
                     case FileEventType.FileAdded:
@@ -140,6 +139,7 @@ namespace Sando.UI.Monitoring
                         // if we get here, a new event was probably added. for now, no-op
                         break;
                 }
+                ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
             }
         }
 

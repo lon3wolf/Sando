@@ -251,6 +251,7 @@
     <Compile Include="Actions\FileOpener.cs" />
     <Compile Include="Actions\FileRemover.cs" />
     <Compile Include="Model\SearchResultUIItem.cs" />
+    <Compile Include="Monitoring\ConcurrentIndexingMonitor.cs" />
     <Compile Include="Monitoring\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Monitoring\IndexUpdateManager.cs" />
     <Compile Include="Monitoring\InitialIndexingWatcher.cs" />
