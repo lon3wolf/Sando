@@ -92,12 +92,17 @@ namespace Sando.IntegrationTests.Search
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx")
                     )
-                        _handler.SourceFileChanged(this, new FileEventRaisedArgs(FileEventType.FileAdded, file));  
+                    HandleFileUpdated(file);
             }
             done = true;
         }
 
-        private List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
+        protected virtual void HandleFileUpdated(string file)
+        {
+            _handler.SourceFileChanged(this, new FileEventRaisedArgs(FileEventType.FileAdded, file));
+        }
+
+        protected List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
         {
             if (filesInThisDirectory.EndsWith("LIBS") || filesInThisDirectory.EndsWith("bin") || filesInThisDirectory.EndsWith("Debug"))
                 return incoming;
@@ -208,7 +213,7 @@ namespace Sando.IntegrationTests.Search
 
         private string _indexPath;
         private SrcMLArchive _srcMLArchive;
-        private SrcMLArchiveEventsHandlers _handler;
+        protected SrcMLArchiveEventsHandlers _handler;
 
         protected List<CodeSearchResult> EnsureRankingPrettyGood(string keywords, Predicate<CodeSearchResult> predicate, int expectedLowestRank)
         {
@@ -216,7 +221,7 @@ namespace Sando.IntegrationTests.Search
             if (expectedLowestRank > 0)
             {
                 var methodSearchResult = CheckExistance(keywords, predicate);
-                CheckRanking(keywords, expectedLowestRank, methodSearchResult);
+                CheckRanking(keywords, expectedLowestRank, methodSearchResult.FirstOrDefault());
             }
             return _results;
         }
@@ -229,9 +234,9 @@ namespace Sando.IntegrationTests.Search
                           rank);
         }
 
-        private CodeSearchResult CheckExistance(string keywords, Predicate<CodeSearchResult> predicate)
+        protected List<CodeSearchResult> CheckExistance(string keywords, Predicate<CodeSearchResult> predicate)
         {
-            var methodSearchResult = _results.Find(predicate);
+            var methodSearchResult = _results.FindAll(predicate);
             if (methodSearchResult == null)
             {
                 string info = PrintFailInformation();
@@ -255,7 +260,7 @@ namespace Sando.IntegrationTests.Search
             return info.ToString();
         }
 
-        private List<CodeSearchResult> GetResults(string keywords)
+        protected List<CodeSearchResult> GetResults(string keywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
             manager.AddListener(this);
@@ -289,7 +294,7 @@ namespace Sando.IntegrationTests.Search
 
 
         public event EventHandler<EventArgs> StartupCompleted;
-        private List<CodeSearchResult> _results;
+        protected List<CodeSearchResult> _results;
         protected string _myMessage;
         private bool done = false;
 
