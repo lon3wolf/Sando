@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="Extensions\ExtensionPointsRepositoryTest.cs" />
     <Compile Include="Extensions\Configuration\ExtensionPointsConfigurationAnalyzerTest.cs" />
     <Compile Include="Logging\AmazonS3LogUploaderTest.cs" />

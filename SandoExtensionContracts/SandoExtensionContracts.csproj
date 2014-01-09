@@ -51,6 +51,9 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="IndexerContracts\IndexFilterSettings.cs" />
     <Compile Include="IndexerContracts\IIndexFilterManager.cs" />
     <Compile Include="ProgramElementContracts\AccessLevel.cs" />

@@ -87,6 +87,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="OptionsPages\ISandoOptionsProvider.cs" />
     <Compile Include="OptionsPages\SandoOptions.cs" />

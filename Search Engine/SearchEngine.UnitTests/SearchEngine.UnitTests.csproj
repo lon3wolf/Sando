@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="CodeSearcherFixture.cs" />
     <Compile Include="CodeSearchResultTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

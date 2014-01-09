@@ -251,6 +251,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="Actions\FileOpener.cs" />
     <Compile Include="Actions\FileRemover.cs" />
     <Compile Include="Model\SearchResultUIItem.cs" />

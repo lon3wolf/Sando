@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (c) 2014 ABB Group
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ * Vinay Augustine (ABB Group) - initial API, implementation, & documentation
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Clean;Build">
+  <PropertyGroup>
+    <MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory)\..\LIBS\BuildScripts\MSBuildTasks</MSBuildCommunityTasksPath>
+    <SolutionToBuild Condition="'$(SolutionToBuild)'==''">Sando.sln</SolutionToBuild>
+    <SolutionFullPath Condition="'$(SolutionToBuild)'!=''">$([System.IO.Path]::GetFullPath($(SolutionToBuild)))</SolutionFullPath>
+    <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))\..</RootDirectory>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <DeployExtension Condition="'$(DeployExtension)'==''">False</DeployExtension>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <AssemblyInfoFiles Include="$(RootDirectory)\Sando\SolutionInfo.cs" />
+    <SourceManifests Include="$(RootDirectory)\**\source.extension.vsixmanifest" />
+    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin\Debug" />
+    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin\Release" />
+    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin" />
+  </ItemGroup>
+  
+  <Import Project="$(MSBuildThisFileDirectory)\..\LIBS\BuildScripts\Version.targets" />
+  
+  <Target Name="Clean">
+    <RemoveDir Directories="@(OutDirs)" />
+  </Target> 
+  
+  <Target Name="Build" DependsOnTargets="CreateAssemblyInfo;SetVsixVersion">
+    <MSBuild Projects="$(SolutionFullPath)" Properties="Configuration=$(Configuration);Platform=Any CPU;DeployExtension=$(DeployExtension)" />
+  </Target>
+  
+</Project>

@@ -103,6 +103,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Sando\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="Exceptions\SandoException.cs" />
     <Compile Include="Extensions\Configuration\BaseExtensionPointConfiguration.cs" />
     <Compile Include="Extensions\Configuration\ExtensionPointsConfigurationFileReader.cs" />
