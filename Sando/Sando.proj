@@ -12,7 +12,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Clean;Build">
   <PropertyGroup>
     <MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory)\..\LIBS\BuildScripts\MSBuildTasks</MSBuildCommunityTasksPath>
-    <SolutionToBuild Condition="'$(SolutionToBuild)'==''">Sando.sln</SolutionToBuild>
+    <SolutionToBuild Condition="'$(SolutionToBuild)'==''">$(MSBuildThisFileDirectory)\Sando.sln</SolutionToBuild>
     <SolutionFullPath Condition="'$(SolutionToBuild)'!=''">$([System.IO.Path]::GetFullPath($(SolutionToBuild)))</SolutionFullPath>
     <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))\..</RootDirectory>
     <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
