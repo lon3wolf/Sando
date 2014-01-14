@@ -17,17 +17,18 @@
     <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))\..</RootDirectory>
     <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
     <DeployExtension Condition="'$(DeployExtension)'==''">False</DeployExtension>
+    <VersionOutputFile>$(RootDirectory)\Version.txt</VersionOutputFile>
   </PropertyGroup>
   
   <ItemGroup>
     <AssemblyInfoFiles Include="$(RootDirectory)\Sando\SolutionInfo.cs" />
     <SourceManifests Include="$(RootDirectory)\**\source.extension.vsixmanifest" />
-    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin\Debug" />
-    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin\Release" />
-    <OutDirs Include="$(MSBuildThisFileDirectory)\..\bin" />
+    <OutDirs Include="$(RootDirectory)\bin\Debug" />
+    <OutDirs Include="$(RootDirectory)\bin\Release" />
+    <OutDirs Include="$(RootDirectory)\bin" />
   </ItemGroup>
   
-  <Import Project="$(MSBuildThisFileDirectory)\..\LIBS\BuildScripts\Version.targets" />
+  <Import Project="$(RootDirectory)\LIBS\BuildScripts\Version.targets" />
   
   <Target Name="Clean">
     <RemoveDir Directories="@(OutDirs)" />
