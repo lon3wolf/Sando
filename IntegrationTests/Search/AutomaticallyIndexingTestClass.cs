@@ -74,8 +74,7 @@ namespace Sando.IntegrationTests.Search
             CreateIndexer();
             CreateArchive(filesInThisDirectory);            
             CreateSwum();            
-            AddFilesToIndex(filesInThisDirectory);            
-            _handler.WaitForIndexing();
+            AddFilesToIndex(filesInThisDirectory);                        
             ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
             Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*4);
             ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();

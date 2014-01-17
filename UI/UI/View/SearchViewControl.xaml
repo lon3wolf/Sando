@@ -366,18 +366,37 @@
                     -->
                 </Grid>
 
+                <!-- Reset -->                
+                <Grid>                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="212*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Button Name="Reset"  Margin="5,0,0,3"
+                FontFamily="ExtraBold" IsEnabled="True" 
+                    Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+        		KeyboardNavigation.IsTabStop="False" 
+                Click="Reset_Click" Height="19" Width="120"  VerticalAlignment="Top" 
+                ToolTip="Reset Sando Index">Reset Sando Index
+</Button>
+
+                </Grid>
+
             </StackPanel>
         </Expander>
-        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="1"  Margin="0,0,0,0" Grid.RowSpan="2">
-
-
-            <Button Name="Reset"  Margin="0,3,0,0"
+        <StackPanel Orientation="Horizontal"  Grid.Row="5" Grid.Column="1"  Margin="0,0,0,0" Grid.RowSpan="2">            
+            <!--<Button Name="Reset"  Margin="0,3,0,0"
                 FontFamily="ExtraBold" IsEnabled="True" 
                     Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
         		KeyboardNavigation.IsTabStop="False" 
                 Click="Reset_Click" FontWeight="ExtraBold" Height="19" Width="19" VerticalAlignment="Top" 
                 ToolTip="Reset Sando Index">☢
-            </Button>
+            </Button>-->
 
             <Button Name="Options"  Margin="1,3,0,0"
                 FontFamily="ExtraBold" IsEnabled="True" 
