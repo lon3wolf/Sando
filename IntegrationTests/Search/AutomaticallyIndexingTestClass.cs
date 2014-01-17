@@ -250,7 +250,7 @@ namespace Sando.IntegrationTests.Search
         protected List<CodeSearchResult> CheckExistance(string keywords, Predicate<CodeSearchResult> predicate)
         {
             var methodSearchResult = _results.FindAll(predicate);
-            if (methodSearchResult == null)
+            if (methodSearchResult == null||methodSearchResult.Count==0)
             {
                 string info = PrintFailInformation();
                 Assert.Fail("Failed to find relevant search result for search: " + keywords+"\n"+info);                
