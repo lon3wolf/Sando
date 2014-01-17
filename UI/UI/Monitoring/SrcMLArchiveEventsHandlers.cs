@@ -35,9 +35,14 @@ namespace Sando.UI.Monitoring
         public static int MAX_PARALLELISM = 2;
 
 
-        public SrcMLArchiveEventsHandlers()
+        private SrcMLArchiveEventsHandlers()
         {
-            scheduler = new LimitedConcurrencyLevelTaskScheduler(MAX_PARALLELISM, this);
+            throw new NotImplementedException();
+        }
+
+        public SrcMLArchiveEventsHandlers(TaskScheduler aScheduler)
+        {
+            scheduler = aScheduler;
             factory = new TaskFactory(scheduler);
             Instance = this;
             hideProgressBarTimer.Elapsed += waitToUpdateProgressBar_Elapsed;
@@ -54,16 +59,9 @@ namespace Sando.UI.Monitoring
                 return tasks.Count;
         }
 
-        public void WaitForIndexing()
-        {
-            while ((scheduler as LimitedConcurrencyLevelTaskScheduler).GetTasks()>0)
-            {
-                Thread.Sleep(500);
-            }
-        }
 
         public Task StartNew(Action a, CancellationTokenSource c)
-        {
+        {            
             var task = factory.StartNew(a, c.Token);
             lock (tasksTrackerLock)
             {

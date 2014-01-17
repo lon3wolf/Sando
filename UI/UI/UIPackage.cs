@@ -42,6 +42,8 @@ using Microsoft.VisualStudio;
 using System.Linq;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
+using ABB.VisualStudio.Interfaces;
+using System.Threading;
 
 
 
@@ -513,6 +515,8 @@ namespace Sando.UI
                 //Setup indexers
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
                 ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());
+                var taskScheduler = GetTaskSchedulerService();
+                ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
                 SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
                 ServiceLocator.RegisterInstance(currentIndexer);
@@ -546,6 +550,20 @@ namespace Sando.UI
             UpdateFolderList();
         }
 
+        private TaskScheduler GetTaskSchedulerService()
+        {
+            taskSchedulerService = GetService(typeof(STaskManagerService)) as ITaskManagerService;
+            if (null == taskSchedulerService)
+            {
+                throw new Exception("Can not get the task scheduler global service.");
+            }
+            else
+            {
+                ServiceLocator.RegisterInstance(taskSchedulerService);
+            }
+            return taskSchedulerService.GlobalScheduler;          
+        }
+
         private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
         {
             //make sure you're not missing any files 
@@ -567,8 +585,8 @@ namespace Sando.UI
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
                 }
-                srcMLArchiveEventsHandlers.WaitForIndexing();
-            });
+                //srcMLArchiveEventsHandlers.WaitForIndexing();
+            }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
         private void RecreateEntireIndex(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
@@ -593,8 +611,8 @@ namespace Sando.UI
                     var fileName = ABB.SrcML.SrcMLElement.GetFileNameForUnit(file);
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
                 }
-                srcMLArchiveEventsHandlers.WaitForIndexing();
-            });
+                //srcMLArchiveEventsHandlers.WaitForIndexing();
+            }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
         private static void SetupDataLogging()
@@ -683,6 +701,7 @@ namespace Sando.UI
 
         Action progressAction;
         private bool updatedForThisSolution = false;
+        private ITaskManagerService taskSchedulerService;
  
         private Analyzer GetAnalyzer()
         {
@@ -703,8 +722,7 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(GetService(typeof (DTE)) as DTE2);
             ServiceLocator.RegisterInstance(this);
             ServiceLocator.RegisterInstance(new ViewManager(this));
-            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());
-            ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers());
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());            
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
             ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
         }

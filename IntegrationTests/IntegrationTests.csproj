@@ -81,6 +81,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\LIBS\srcML.NET\ABB.SrcML.Data.dll</HintPath>
     </Reference>
+    <Reference Include="ABB.SrcML.Data.Core">
+      <HintPath>..\LIBS\srcML.NET\ABB.SrcML.Data.Core.dll</HintPath>
+    </Reference>
     <Reference Include="ABB.SrcML.VisualStudio.Interfaces">
       <HintPath>..\LIBS\srcML.NET\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
     </Reference>

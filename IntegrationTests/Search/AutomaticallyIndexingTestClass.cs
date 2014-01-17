@@ -29,6 +29,9 @@ using Sando.Indexer.Documents;
 using Lucene.Net.Analysis.Standard;
 using Sando.Core.QueryRefomers;
 using Sando.UI;
+using System.Threading.Tasks;
+using ABB.SrcML.Utilities;
+using ABB.VisualStudio;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -79,10 +82,21 @@ namespace Sando.IntegrationTests.Search
         }
 
  
+        public static TaskScheduler GetATestingScheduler(){
+            return new TaskManagerService(null, new InfiniteCoreStrategy()).GlobalScheduler;
+        }
+
+        public class InfiniteCoreStrategy : IConcurrencyStrategy
+        {
+            public int ComputeAvailableCores()
+            {
+                return 100;
+            }
+        }
 
         private void AddFilesToIndex(string filesInThisDirectory)
         {
-            _handler = new SrcMLArchiveEventsHandlers();
+            _handler = new SrcMLArchiveEventsHandlers(GetATestingScheduler());
             var files = GetFileList(filesInThisDirectory);
             foreach (var file in files)
             {
@@ -180,7 +194,7 @@ namespace Sando.IntegrationTests.Search
             _indexPath = Path.Combine(Path.GetTempPath(), indexDirName);
             TestUtils.InitializeDefaultExtensionPoints();
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(_indexPath,40,false));
-            ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers());
+            ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(GetATestingScheduler()));
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
         }
 
@@ -378,6 +392,24 @@ namespace Sando.IntegrationTests.Search
             get
             {
                 return 60;
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        ABB.SrcML.Data.IDataRepository ISrcMLGlobalService.GetDataRepository()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double SaveInterval
+        {
+            get
+            {
+                throw new NotImplementedException();
             }
             set
             {
