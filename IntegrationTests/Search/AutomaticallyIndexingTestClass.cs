@@ -32,6 +32,7 @@ using Sando.UI;
 using System.Threading.Tasks;
 using ABB.SrcML.Utilities;
 using ABB.VisualStudio;
+using System.Reflection;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -74,15 +75,26 @@ namespace Sando.IntegrationTests.Search
             CreateIndexer();
             CreateArchive(filesInThisDirectory);            
             CreateSwum();            
-            AddFilesToIndex(filesInThisDirectory);                        
+            AddFilesToIndex(filesInThisDirectory);
+            WaitForIndexing();
             ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
-            Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*4);
+            Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*2);
             ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
+        }
+
+        private static void WaitForIndexing()
+        {
+            while (((IEnumerable<Task>)GetATestingScheduler().GetType().InvokeMember("GetScheduledTasks",
+                   BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.NonPublic,
+                   null, GetATestingScheduler(), null)).Count() != 0)
+                Thread.Sleep(1000);
         }
 
  
         public static TaskScheduler GetATestingScheduler(){
-            return new TaskManagerService(null, new InfiniteCoreStrategy()).GlobalScheduler;
+            if(scheduler == null)
+                scheduler = new TaskManagerService(null, new InfiniteCoreStrategy()).GlobalScheduler;
+            return scheduler;
         }
 
         public class InfiniteCoreStrategy : IConcurrencyStrategy
@@ -310,6 +322,7 @@ namespace Sando.IntegrationTests.Search
         protected List<CodeSearchResult> _results;
         protected string _myMessage;
         private bool done = false;
+        private static TaskScheduler scheduler;
 
 
         public void StopMonitoring()
