@@ -429,8 +429,8 @@ namespace Sando.UI
 
         public void UpdateIndexingFilesList(String directory, bool emptyDirectorySpecified=false)
         {
-            if(WindowActivated)
-            {
+            var window = FindToolWindow(typeof(SearchToolWindow), 0, false);
+            if(null != window && null != window.Frame) {
                 var path = directory;
                 try {
                     var control = ServiceLocator.Resolve<SearchViewControl>();
