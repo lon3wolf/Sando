@@ -428,5 +428,10 @@ namespace Sando.IntegrationTests.Search
                 throw new NotImplementedException();
             }
         }
+
+
+        public event EventHandler<DirectoryScanningMonitorEventArgs> DirectoryAdded;
+
+        public event EventHandler<DirectoryScanningMonitorEventArgs> DirectoryRemoved;
     }
 }

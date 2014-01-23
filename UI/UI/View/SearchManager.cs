@@ -132,10 +132,7 @@ namespace Sando.UI.View
                 {
                     returnString.Append(results.Count() + " results returned. ");
                 }
-                if (ServiceLocator.Resolve<InitialIndexingWatcher>().IsInitialIndexingInProgress())
-                {
-                    returnString.Append("Sando is still performing its initial index of this project, results may be incomplete.");
-                }
+
                 _searchResultListener.Update(searchString, results);
                 _searchResultListener.UpdateMessage(returnString.ToString());
                 _searchResultListener.UpdateRecommendedQueries(criteria.GetRecommendedQueries());

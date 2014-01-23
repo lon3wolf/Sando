@@ -947,28 +947,10 @@ namespace Sando.UI.View
 
         private void CloseFolderPopup()
         {
-            CurrentlyIndexingFoldersPopup.IsOpen = false;
-            UpdateMethodIndexingList();
+            CurrentlyIndexingFoldersPopup.IsOpen = false;            
         }
 
-        private void UpdateMethodIndexingList()
-        {
-            try
-            {
-                var srcMlService = ServiceLocator.Resolve<ISrcMLGlobalService>();
-                if (srcMlService != null)
-                {
-                    if (srcMlService.MonitoredDirectories != null && srcMlService.MonitoredDirectories.Count > 0)
-                        OpenSolutionPaths = UIPackage.GetDisplayPathMonitoredFiles(srcMlService, this);
-                    else if (srcMlService.MonitoredDirectories != null && srcMlService.MonitoredDirectories.Count == 0)
-                        OpenSolutionPaths = PleaseAddDirectoriesMessage;
-                }
-            }
-            catch (ResolutionFailedException resFailed)
-            {
-                //ignore
-            }
-        }
+    
 
         private void IndexingList_KeyDown(object sender, KeyEventArgs e)
         {

@@ -211,6 +211,11 @@ namespace Sando.UI
                 _viewManager = ServiceLocator.Resolve<ViewManager>();
                 AddCommand();                
                 SetUpLifeCycleEvents();
+
+                //load srml package first?
+                var taskScheduler = GetTaskSchedulerService();
+                ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
+                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());                
             }
             catch(Exception e)
             {
@@ -420,31 +425,17 @@ namespace Sando.UI
 		}
 
 
-        public void HandleIndexingStateChange(bool ready)
-        {            
-            CallShowProgressBar(!ready);
-            if (ready)
-                ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingCompleted();
-            UpdateIndexingFilesList();
-        }
+    
 
-        public void UpdateIndexingFilesListIfEmpty()
-        {   
-            if (!updatedForThisSolution)
-            {
-                UpdateIndexingFilesList();
-            }             
-        }
-
-        public void UpdateIndexingFilesList()
+        public void UpdateIndexingFilesList(String directory, bool emptyDirectorySpecified=false)
         {
-            if(srcMLService != null && srcMLService.MonitoredDirectories != null && WindowActivated)
+            if(WindowActivated)
             {
-                var path = GetDisplayPathMonitoredFiles(srcMLService, this);
+                var path = directory;
                 try {
                     var control = ServiceLocator.Resolve<SearchViewControl>();
                     control.Dispatcher.Invoke((Action) (() => UpdateDirectory(path, control)));
-                    if(srcMLService.MonitoredDirectories.Count > 0)
+                    if(!emptyDirectorySpecified)
                         updatedForThisSolution = true;
                 } catch(InvalidOperationException notInited) {
                     //OK, window not inited so can't update it
@@ -452,28 +443,7 @@ namespace Sando.UI
             }
         }
 
-        public static string GetDisplayPathMonitoredFiles(ISrcMLGlobalService service, object callingObject )
-        {
-            if (service.MonitoredDirectories.Count > 0)
-            {
-                var fullpath = service.MonitoredDirectories.First();
-                var path = Path.GetFileName(fullpath);
-                try
-                {
-                    var parent = Path.GetFileName(Path.GetDirectoryName(fullpath));
-                    path += " in folder " + parent;
-                }
-                catch (Exception e)
-                {
-                    LogEvents.UIIndexUpdateError(callingObject, e);
-                }
-                return path;
-            }
-            else
-            {
-                return SearchViewControl.PleaseAddDirectoriesMessage;
-            }
-        }
+
 
         private void UpdateDirectory(string path, SearchViewControl control)
         {
@@ -483,15 +453,21 @@ namespace Sando.UI
             }
         }
 
+        private bool lastShowValue = false;
 
-        private void CallShowProgressBar(bool show)
+        public void ShowProgressBar(bool show)
         {
             if(WindowActivated)
             {
                 try {
-                    var control = ServiceLocator.Resolve<SearchViewControl>();
-                    if(null != control) {
-                        control.Dispatcher.BeginInvoke((Action) (() => control.ShowProgressBar(show)));
+                    if (lastShowValue != show)
+                    {
+                        var control = ServiceLocator.Resolve<SearchViewControl>();
+                        if (null != control)
+                        {
+                            control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
+                        }
+                        lastShowValue = show;
                     }
                 } catch(TargetInvocationException e) {
                     FileLogger.DefaultLogger.Error(e);
@@ -514,9 +490,7 @@ namespace Sando.UI
                 
                 //Setup indexers
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
-                ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());
-                var taskScheduler = GetTaskSchedulerService();
-                ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
+                ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());                
                 SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
                 ServiceLocator.RegisterInstance(currentIndexer);
@@ -525,9 +499,7 @@ namespace Sando.UI
                 if (isIndexRecreationRequired)
                 {
                     currentIndexer.ClearIndex();
-                }
-                ServiceLocator.Resolve<InitialIndexingWatcher>().SetInitialIndexingStarted();
-                RegisterSrcMLService(srcMLArchiveEventsHandlers);                
+                }                
                 RegisterExtensionPoints();
                 SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()), !isIndexRecreationRequired);
                 SetupRecommenderSystem();
@@ -547,21 +519,31 @@ namespace Sando.UI
             {
                 LogEvents.UIRespondToSolutionOpeningError(this, e);
             }
-            UpdateFolderList();
+            UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage,true);
         }
+        
 
         private TaskScheduler GetTaskSchedulerService()
         {
-            taskSchedulerService = GetService(typeof(STaskManagerService)) as ITaskManagerService;
-            if (null == taskSchedulerService)
+            if (taskSchedulerService == null)                
             {
-                throw new Exception("Can not get the task scheduler global service.");
-            }
-            else
-            {
-                ServiceLocator.RegisterInstance(taskSchedulerService);
+                taskSchedulerService = GetService(typeof(STaskManagerService)) as ITaskManagerService;
+                if (null == taskSchedulerService)
+                {
+                    throw new Exception("Can not get the task scheduler global service.");
+                }
+                else
+                {
+                    ServiceLocator.RegisterInstance(taskSchedulerService);
+                    taskSchedulerService.SchedulerIdled += taskSchedulerService_SchedulerIdled;
+                }
             }
             return taskSchedulerService.GlobalScheduler;          
+        }
+
+        void taskSchedulerService_SchedulerIdled(object sender, EventArgs e)
+        {
+            ShowProgressBar(false);            
         }
 
         private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
@@ -663,7 +645,13 @@ namespace Sando.UI
                 SetupHandlers = true;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
                 srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
+                srcMLService.DirectoryAdded += srcMLService_DirectoryAdded;
             }
+        }
+
+        void srcMLService_DirectoryAdded(object sender, DirectoryScanningMonitorEventArgs e)
+        {
+            UpdateIndexingFilesList(e.Directory);
         }
 
         private SolutionKey SetupSolutionKey()
@@ -678,26 +666,26 @@ namespace Sando.UI
             return key;
         }
 
-        //This should go away when we have the updated SrcML.NET API about folder updating
-        private void UpdateFolderList()
-        {
-            var updateListedFoldersTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                bool done = false;
-                while (!done)
-                {
-                    System.Threading.Thread.Sleep(2000);
-                    if (srcMLService != null)
-                    {
-                        if (srcMLService.MonitoredDirectories != null)
-                        {
-                            UpdateIndexingFilesList();
-                            done = true;
-                        }
-                    }
-                }
-            });
-        }
+        ////This should go away when we have the updated SrcML.NET API about folder updating
+        //private void UpdateFolderList()
+        //{
+        //    var updateListedFoldersTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+        //    {
+        //        bool done = false;
+        //        while (!done)
+        //        {
+        //            System.Threading.Thread.Sleep(2000);
+        //            if (srcMLService != null)
+        //            {
+        //                if (srcMLService.MonitoredDirectories != null)
+        //                {
+        //                    UpdateIndexingFilesListIfEmpty();
+        //                    done = true;
+        //                }
+        //            }
+        //        }
+        //    });
+        //}
 
         Action progressAction;
         private bool updatedForThisSolution = false;
@@ -725,6 +713,15 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());            
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
             ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
+        }
+
+
+        public void UpdateIndexingFilesList()
+        {
+            if (srcMLService != null && srcMLService.MonitoredDirectories != null && srcMLService.MonitoredDirectories.Count > 0)
+            {
+                UpdateIndexingFilesList(srcMLService.MonitoredDirectories.First());
+            }
         }
     }
 }

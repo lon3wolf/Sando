@@ -44,13 +44,22 @@ namespace Sando.UI.Monitoring
         {
             scheduler = aScheduler;
             factory = new TaskFactory(scheduler);
-            Instance = this;
-            hideProgressBarTimer.Elapsed += waitToUpdateProgressBar_Elapsed;
+            Instance = this;            
         }
 
         public void SourceFileChanged(object sender, FileEventRaisedArgs args)
         {
+            GetPackage().ShowProgressBar(true);
             SourceFileChanged(sender, args, false);
+        }
+
+        private UIPackage GetPackage()
+        {
+            if (package == null)
+            {
+                package = ServiceLocator.Resolve<UIPackage>();
+            }
+            return package;
         }
 
         public int TaskCount()
@@ -175,19 +184,10 @@ namespace Sando.UI.Monitoring
         private string lastFile = "";
         private DateTime lastTime = DateTime.Now;
         private int counter=0;
+        private UIPackage package;
         
 
-        public void StartupCompleted(object sender, IsReadyChangedEventArgs args)
-        {
-            if (args.ReadyState)
-            {
-                if (ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>().TaskCount() == 0)
-                {
-                    ServiceLocator.Resolve<InitialIndexingWatcher>().InitialIndexingCompleted();
-                    SwumManager.Instance.PrintSwumCache();
-                }
-            }
-        }
+   
 
         public void MonitoringStopped(object sender, EventArgs args)
         {
@@ -209,36 +209,6 @@ namespace Sando.UI.Monitoring
             }
         }
 
-        internal void StartingToIndex()
-        {            
-            hideProgressBarTimer.Stop();            
-            try
-            {
-                ServiceLocator.Resolve<UIPackage>().UpdateIndexingFilesListIfEmpty();
-                ServiceLocator.Resolve<UIPackage>().HandleIndexingStateChange(false);
-            }
-            catch (Exception ee)
-            {
-                //ignore
-            }                                        
-        }
-
-        internal void FinishedIndexing()
-        {
-            hideProgressBarTimer.Stop();
-            hideProgressBarTimer.Start();
-        }
-       
-        void waitToUpdateProgressBar_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                ServiceLocator.Resolve<UIPackage>().HandleIndexingStateChange(true);
-            }
-            catch (Exception errorToIgnore)
-            {
-                //ignore
-            }
-        }
+      
     }
 }
