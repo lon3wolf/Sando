@@ -12,6 +12,10 @@ using ABB.SrcML;
 using Sando.Core.Logging;
 using Sando.Core.Logging.Persistence;
 using Sando.Core.Logging.Events;
+using System.Timers;
+using Sando.DependencyInjection;
+using ABB.VisualStudio.Interfaces;
+using System.Threading.Tasks;
 
 
 namespace Sando.Recommender {
@@ -32,6 +36,34 @@ namespace Sando.Recommender {
             builder = new UnigramSwumBuilder { Splitter = new CamelIdSplitter() };
             signaturesToSwum = new Dictionary<string, SwumDataRecord>();
             CacheLoaded = false;
+            Timer printer = new Timer();
+            printer.Interval = 1000 * 60 * 10;
+            printer.Elapsed += printer_Elapsed;
+            printer.Start();
+        }
+
+        void printer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                var scheduler = ServiceLocator.Resolve<ITaskManagerService>().GlobalScheduler;
+                 Action action =  () =>
+                {
+                    try
+                    {
+                        PrintSwumCache();
+                    }
+                    catch (InvalidOperationException ee)
+                    {
+                        //ignore when someone else is using the file
+                    }
+                };                 
+                 Task.Factory.StartNew(action, new System.Threading.CancellationToken(), TaskCreationOptions.None, scheduler);
+            }
+            catch (Exception eee)
+            {
+                //ignore, as periodic update is not a feature we want to crash on.
+            }
         }
 
         /// <summary>

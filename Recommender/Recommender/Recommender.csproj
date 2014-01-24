@@ -75,6 +75,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\LIBS\srcML.NET\ABB.SrcML.Core.dll</HintPath>
     </Reference>
+    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=99.99.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\LIBS\srcML.NET\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="ABB.Swum, Version=0.1.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\LIBS\Swum.NET\ABB.Swum.dll</HintPath>
