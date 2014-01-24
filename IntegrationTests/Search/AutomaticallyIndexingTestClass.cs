@@ -93,7 +93,7 @@ namespace Sando.IntegrationTests.Search
  
         public static TaskScheduler GetATestingScheduler(){
             if(scheduler == null)
-                scheduler = new TaskManagerService(null, new InfiniteCoreStrategy()).GlobalScheduler;
+                scheduler = new LimitedConcurrencyLevelTaskScheduler(100, true);
             return scheduler;
         }
 
