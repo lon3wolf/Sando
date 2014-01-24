@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Threading;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -21,11 +20,16 @@ using Sando.Core.Tools;
 using Sando.Core.Logging.Events;
 using Sando.ExtensionContracts.TaskFactoryContracts;
 using System.Threading.Tasks;
+using System.Timers;
+using System.Threading;
 
 namespace Sando.Indexer
 {
     public class DocumentIndexer : IDisposable
 	{
+
+        System.Timers.Timer refreshIndexSearcher;
+        System.Timers.Timer commitChanges;
         public DocumentIndexer(ITaskScheduler scheduler, TimeSpan? refreshIndexSearcherThreadInterval = null, TimeSpan? commitChangesThreadInterval = null)
 		{
 			try
@@ -40,26 +44,16 @@ namespace Sando.Indexer
 				_indexSearcher = new IndexSearcher(Reader);
                 QueryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Configuration.Configuration.GetValue("DefaultSearchFieldName"), Analyzer);
 
-			    if (!refreshIndexSearcherThreadInterval.HasValue) 
-                    refreshIndexSearcherThreadInterval = TimeSpan.FromSeconds(10);
-			    var refreshIndexSearcherBackgroundWorker = new BackgroundWorker {WorkerReportsProgress = false, WorkerSupportsCancellation = false};
-                refreshIndexSearcherBackgroundWorker.DoWork += PeriodicallyRefreshIndexSearcherIfNeeded;
-                refreshIndexSearcherBackgroundWorker.RunWorkerAsync(refreshIndexSearcherThreadInterval);
+			    refreshIndexSearcher = new System.Timers.Timer();
+                refreshIndexSearcher.Elapsed += PeriodicallyRefreshIndexSearcherIfNeeded;
+                refreshIndexSearcher.Interval = refreshIndexSearcherThreadInterval.HasValue ? refreshIndexSearcherThreadInterval.Value.Seconds*1000 : TimeSpan.FromSeconds(10).Milliseconds;
+                refreshIndexSearcher.Start();
 
-                if (commitChangesThreadInterval.HasValue)
-			    {
-			        var commitChangesBackgroundWorker = new BackgroundWorker
-			            {
-			                WorkerReportsProgress = false,
-			                WorkerSupportsCancellation = false
-			            };
-			        commitChangesBackgroundWorker.DoWork += PeriodicallyCommitChangesIfNeeded;
-			        commitChangesBackgroundWorker.RunWorkerAsync(commitChangesThreadInterval);
-			    }
-                else
-                {
-                    _synchronousCommits = true;
-                }
+                commitChanges = new System.Timers.Timer();
+                commitChanges.Elapsed += PeriodicallyCommitChangesIfNeeded;
+                commitChanges.Interval = commitChangesThreadInterval.HasValue ? commitChangesThreadInterval.Value.Seconds*1000 : TimeSpan.FromSeconds(10).Milliseconds;
+                commitChanges.Start();
+
 			}
 			catch(CorruptIndexException corruptIndexEx)
 			{
@@ -77,6 +71,34 @@ namespace Sando.Indexer
 				throw new IndexerException(TranslationCode.Exception_General_IOException, ioEx, ioEx.Message);
 			}
 		}
+
+        private void PeriodicallyCommitChangesIfNeeded(object sender, ElapsedEventArgs e)
+        {
+            _scheduler.StartNew(() =>
+            {
+                lock (_lock)
+                {
+                    if (_hasIndexChanged)
+                        CommitChanges();
+                }
+            }, new CancellationTokenSource());
+        }
+
+        private void PeriodicallyRefreshIndexSearcherIfNeeded(object sender, ElapsedEventArgs e)
+        {     
+            _scheduler.StartNew(() =>
+            {
+                lock (_lock)
+                {
+                    if (!IsUsable())
+                    {
+                        UpdateSearcher();
+                    }
+                }
+            }, new CancellationTokenSource());
+        }
+
+
 
         public DocumentIndexer(TimeSpan timeSpan) : this (new SimpleScheduler(), timeSpan)
         {            
@@ -212,49 +234,9 @@ namespace Sando.Indexer
 		    }
 		}
 
-        private void PeriodicallyCommitChangesIfNeeded(object sender, DoWorkEventArgs args)
-        {
-            var backgroundThreadInterval = args.Argument;
-            Task task = null;
-            while (!_disposed)
-            {
-                if (task == null || task.IsCompleted)
-                {
-                    task = _scheduler.StartNew(() =>
-                    {
-                        lock (_lock)
-                        {
-                            if (_hasIndexChanged)
-                                CommitChanges();
-                        }
-                    }, new CancellationTokenSource());
-                }
-                Thread.Sleep(Convert.ToInt32(((TimeSpan)backgroundThreadInterval).TotalMilliseconds));
-            }
-        }
+      
 
-	    private void PeriodicallyRefreshIndexSearcherIfNeeded(object sender, DoWorkEventArgs args)
-	    {
-            var backgroundThreadInterval = args.Argument;
-            Task task = null;
-	        while (!_disposed)
-	        {
-                if (task == null || task.IsCompleted)
-                {
-                    task = _scheduler.StartNew(() =>
-                    {
-                        lock (_lock)
-                        {
-                            if (!IsUsable())
-                            {
-                                UpdateSearcher();
-                            }
-                        }
-                    }, new CancellationTokenSource());
-                }
-                Thread.Sleep(Convert.ToInt32(((TimeSpan)backgroundThreadInterval).TotalMilliseconds));
-	        }
-	    }
+	
 
 	    private bool IsUsable()
         {
@@ -306,6 +288,10 @@ namespace Sando.Indexer
             {
                 if(disposing)
                 {
+                    if (refreshIndexSearcher != null)
+                        refreshIndexSearcher.Stop();
+                    if (commitChanges != null)
+                        commitChanges.Stop();
                     IndexWriter.Close();
 					IndexReader indexReader = _indexSearcher.GetIndexReader();
                     if(indexReader != null)

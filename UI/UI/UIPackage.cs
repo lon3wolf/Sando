@@ -448,7 +448,7 @@ namespace Sando.UI
         private void UpdateDirectory(string path, SearchViewControl control)
         {
             if (control != null)
-            {
+            { 
                 control.OpenSolutionPaths = path;
             }
         }
@@ -483,6 +483,8 @@ namespace Sando.UI
         {
             try
             {
+                UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage, true);
+
                 SolutionKey key = SetupSolutionKey();
 
                 bool isIndexRecreationRequired = IndexStateManager.IsIndexRecreationRequired();
@@ -518,8 +520,7 @@ namespace Sando.UI
             catch (Exception e)
             {
                 LogEvents.UIRespondToSolutionOpeningError(this, e);
-            }
-            UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage,true);
+            }            
         }
         
 
