@@ -32,6 +32,7 @@ using System.Windows.Controls.Primitives;
 using System.Collections;
 using System.Windows.Media;
 using ABB.SrcML;
+using Sando.Indexer;
 
 namespace Sando.UI.View
 {
@@ -961,6 +962,7 @@ namespace Sando.UI.View
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             var srcMlService = ServiceLocator.Resolve<ISrcMLGlobalService>();
+            var indexer = ServiceLocator.Resolve<DocumentIndexer>();
             if (srcMlService == null)
             {
                 MessageBox.Show("Could not reset the index.", "Failed to Reset", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -968,6 +970,7 @@ namespace Sando.UI.View
             else
             {
                 srcMlService.Reset();
+                indexer.AddDeletionFile();
                 MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.", "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }

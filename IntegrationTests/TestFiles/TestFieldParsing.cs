@@ -14,6 +14,7 @@ using Sando.UnitTestHelpers;
 using UnitTestHelpers;
 using ABB.SrcML.VisualStudio.SolutionMonitor;
 using Sando.Core.Tools;
+using System.Threading;
 
 namespace Sando.SearchEngine.UnitTests
 {
@@ -36,7 +37,7 @@ namespace Sando.SearchEngine.UnitTests
         {
             var indexerSearcher = new IndexerSearcher();
             CodeSearcher cs = new CodeSearcher(indexerSearcher);
-            List<CodeSearchResult> result = cs.Search("SimpleName");
+            List<CodeSearchResult> result = cs.Search("SimpleName");            
             Assert.True(result.Count > 0);
         }
 
@@ -50,7 +51,7 @@ namespace Sando.SearchEngine.UnitTests
             _solutionKey = new SolutionKey(Guid.NewGuid(), "C:/SolutionPath");
             ServiceLocator.RegisterInstance(_solutionKey);
             ServiceLocator.RegisterInstance<Analyzer>(new SimpleAnalyzer());
-            _indexer = new DocumentIndexer(TimeSpan.FromSeconds(1));
+            _indexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
             ServiceLocator.RegisterInstance(_indexer);
 
             ClassElement classElement = SampleProgramElementFactory.GetSampleClassElement(
@@ -72,6 +73,7 @@ namespace Sando.SearchEngine.UnitTests
             );
             sandoDocument = DocumentFactory.Create(methodElement);
             _indexer.AddDocument(sandoDocument);
+            Thread.Sleep(2000);
         }
 
         [TestFixtureTearDown]

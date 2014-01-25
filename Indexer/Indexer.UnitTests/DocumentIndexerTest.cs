@@ -14,6 +14,7 @@ using UnitTestHelpers;
 using Sando.Core.Tools;
 using Sando.Indexer.Searching.Criteria;
 using Sando.Indexer.Searching;
+using ABB.SrcML.Utilities;
 
 namespace Sando.Indexer.UnitTests
 {
@@ -25,7 +26,7 @@ namespace Sando.Indexer.UnitTests
 		{
 			try
 			{
-				_documentIndexer = new DocumentIndexer();
+                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
 			}
 			catch(Exception ex)
 			{
@@ -38,7 +39,7 @@ namespace Sando.Indexer.UnitTests
 		{
 			try
 			{
-                _documentIndexer = new DocumentIndexer();
+                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
 				ClassElement classElement = SampleProgramElementFactory.GetSampleClassElement();
 				SandoDocument sandoDocument = DocumentFactory.Create(classElement);
 				Assert.NotNull(sandoDocument);
@@ -59,12 +60,14 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TimeSpan.FromSeconds(1));
+                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
                 MethodElement sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
+                Thread.Sleep(2000);
                 int numDocs = _documentIndexer.GetNumberOfIndexedDocuments();
                 Assert.IsTrue(numDocs == 1);
                 _documentIndexer.DeleteDocuments(sampleMethodElement.FullFilePath);
+                Thread.Sleep(2000);
                 int docs = _documentIndexer.GetNumberOfIndexedDocuments();
                 Assert.IsTrue(docs == 0);
             }
@@ -80,7 +83,7 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TimeSpan.FromMilliseconds(500));
+                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
                 var sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
                 const string searchQueryString = "body: sth";
@@ -102,7 +105,7 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TimeSpan.FromMilliseconds(100));
+                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
                 var sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
                 const string searchQueryString = "body: sth";

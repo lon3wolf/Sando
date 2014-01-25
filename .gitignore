@@ -2,3 +2,10 @@ Sando/packages/
 bin/
 obj/
 Sando/Sando.v2.ncrunchsolution
+Sando/.HistoryData/
+Sando/_NCrunch_Sando/
+Sando/Sando.ncrunchsolution.user
+Sando/Sando.v12.suo
+Sando/TestResults/Sando.TE.Tests.mdf
+Sando/TestResults/Sando.TE.Tests_log.ldf
+UI/UI/UI.csproj.user

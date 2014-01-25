@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnitTestHelpers;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -17,7 +18,7 @@ namespace Sando.IntegrationTests.Search
         {
             var indexer = ServiceLocator.Resolve<DocumentIndexer>();
             indexer.Dispose();
-            var currentIndexer = new DocumentIndexer(TimeSpan.FromSeconds(10), GetTimeToCommit());
+            var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
             ServiceLocator.RegisterInstance(currentIndexer);
             Assert.IsTrue(currentIndexer.GetNumberOfIndexedDocuments() > 5, "The index is being destroyed when it is closed and reopened");
         }

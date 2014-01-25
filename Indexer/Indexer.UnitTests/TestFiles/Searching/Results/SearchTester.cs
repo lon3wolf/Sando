@@ -15,6 +15,7 @@ using Sando.Indexer.Searching;
 using Sando.Indexer.Searching.Criteria;
 using Sando.Parser;
 using UnitTestHelpers;
+using System.Threading;
 
 namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
 {
@@ -43,12 +44,13 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
         public void CheckFolderForExpectedResults(string searchString, string methodNameToFind, string solutionPath)
         {
             ServiceLocator.RegisterInstance<Analyzer>(new SnowballAnalyzer("English"));
-            _indexer = new DocumentIndexer(TimeSpan.FromSeconds(1));
+            _indexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
             ServiceLocator.RegisterInstance(_indexer);
 
             try
             {
                 IndexFilesInDirectory(solutionPath);
+                Thread.Sleep(2000);
                 var results = GetResults(searchString);
                 Assert.IsTrue(HasResults(methodNameToFind, results), "Can't find expected results");
             }

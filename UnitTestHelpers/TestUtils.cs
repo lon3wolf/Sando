@@ -11,11 +11,27 @@ using Sando.Parser;
 using Sando.SearchEngine;
 using Sando.Core.Logging;
 using Sando.Core.Logging.Persistence;
+using Sando.ExtensionContracts.TaskFactoryContracts;
+using ABB.SrcML.Utilities;
+using System.Threading.Tasks;
 
 namespace UnitTestHelpers
 {
     public class TestUtils
     {
+        private static Sando.ExtensionContracts.TaskFactoryContracts.ITaskScheduler testingScheduler = new TestingScheduler();
+
+        private class TestingScheduler : ITaskScheduler
+        {
+
+            TaskScheduler scheduler = new LimitedConcurrencyLevelTaskScheduler(100, true);
+
+            System.Threading.Tasks.Task ITaskScheduler.StartNew(Action a, System.Threading.CancellationTokenSource c)
+            {
+                return Task.Factory.StartNew(a, c.Token, TaskCreationOptions.None, scheduler);
+            }
+        }
+
         static TestUtils() {
             SolutionDirectory = GetSolutionDirectory();
             SrcMLDirectory = Path.Combine(SolutionDirectory, "LIBS", "SrcML");
@@ -66,6 +82,11 @@ namespace UnitTestHelpers
                 currentDirectory = currentDirectory.Parent;
             }
             return currentDirectory.FullName;
+        }
+
+        public static Sando.ExtensionContracts.TaskFactoryContracts.ITaskScheduler GetATestingScheduler()
+        {
+            return testingScheduler;
         }
     }
 }

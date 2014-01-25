@@ -22,6 +22,7 @@ using Sando.ExtensionContracts.TaskFactoryContracts;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Threading;
+using System.IO;
 
 namespace Sando.Indexer
 {
@@ -30,30 +31,22 @@ namespace Sando.Indexer
 
         System.Timers.Timer refreshIndexSearcher;
         System.Timers.Timer commitChanges;
+        DirectoryInfo directoryInfo;
         public DocumentIndexer(ITaskScheduler scheduler, TimeSpan? refreshIndexSearcherThreadInterval = null, TimeSpan? commitChangesThreadInterval = null)
 		{
 			try
 			{
                 _scheduler = scheduler;
                 var solutionKey = ServiceLocator.Resolve<SolutionKey>();			
-                var directoryInfo = new System.IO.DirectoryInfo(PathManager.Instance.GetIndexPath(solutionKey));
+                directoryInfo = new System.IO.DirectoryInfo(PathManager.Instance.GetIndexPath(solutionKey));
+                DeleteOldFolderIfIndicated(solutionKey);
 				LuceneIndexesDirectory = FSDirectory.Open(directoryInfo);
 				Analyzer = ServiceLocator.Resolve<Analyzer>();
-                IndexWriter = new IndexWriter(LuceneIndexesDirectory, Analyzer, IndexWriter.MaxFieldLength.LIMITED);
-			    Reader = IndexWriter.GetReader();
+                IndexWriter = new IndexWriter(LuceneIndexesDirectory, Analyzer, IndexWriter.MaxFieldLength.LIMITED);			    
+                Reader = IndexWriter.GetReader();
 				_indexSearcher = new IndexSearcher(Reader);
                 QueryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Configuration.Configuration.GetValue("DefaultSearchFieldName"), Analyzer);
-
-			    refreshIndexSearcher = new System.Timers.Timer();
-                refreshIndexSearcher.Elapsed += PeriodicallyRefreshIndexSearcherIfNeeded;
-                refreshIndexSearcher.Interval = refreshIndexSearcherThreadInterval.HasValue ? refreshIndexSearcherThreadInterval.Value.Seconds*1000 : TimeSpan.FromSeconds(10).Milliseconds;
-                refreshIndexSearcher.Start();
-
-                commitChanges = new System.Timers.Timer();
-                commitChanges.Elapsed += PeriodicallyCommitChangesIfNeeded;
-                commitChanges.Interval = commitChangesThreadInterval.HasValue ? commitChangesThreadInterval.Value.Seconds*1000 : TimeSpan.FromSeconds(10).Milliseconds;
-                commitChanges.Start();
-
+                SetupTimedUpdates(refreshIndexSearcherThreadInterval, commitChangesThreadInterval);
 			}
 			catch(CorruptIndexException corruptIndexEx)
 			{
@@ -71,6 +64,34 @@ namespace Sando.Indexer
 				throw new IndexerException(TranslationCode.Exception_General_IOException, ioEx, ioEx.Message);
 			}
 		}
+
+        public DocumentIndexer(ITaskScheduler scheduler)
+            : this(scheduler, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
+        {
+
+        }
+
+        private void SetupTimedUpdates(TimeSpan? refreshIndexSearcherThreadInterval, TimeSpan? commitChangesThreadInterval)
+        {
+            refreshIndexSearcher = new System.Timers.Timer();
+            refreshIndexSearcher.Elapsed += PeriodicallyRefreshIndexSearcherIfNeeded;
+            refreshIndexSearcher.Interval = refreshIndexSearcherThreadInterval.HasValue ? refreshIndexSearcherThreadInterval.Value.Seconds * 1000 : TimeSpan.FromSeconds(10).Milliseconds;
+            refreshIndexSearcher.Start();
+
+            commitChanges = new System.Timers.Timer();
+            commitChanges.Elapsed += PeriodicallyCommitChangesIfNeeded;
+            commitChanges.Interval = commitChangesThreadInterval.HasValue ? commitChangesThreadInterval.Value.Seconds * 1000 : TimeSpan.FromSeconds(10).Milliseconds;
+            commitChanges.Start();
+        }
+
+        private void DeleteOldFolderIfIndicated(SolutionKey solutionKey)
+        {
+            if (File.Exists(directoryInfo.FullName + "\\" + DELETE_INIDACTOR))
+            {
+                System.IO.Directory.Delete(directoryInfo.FullName, true);
+                PathManager.Instance.GetIndexPath(solutionKey);
+            }
+        }
 
         private void PeriodicallyCommitChangesIfNeeded(object sender, ElapsedEventArgs e)
         {
@@ -100,31 +121,9 @@ namespace Sando.Indexer
 
 
 
-        public DocumentIndexer(TimeSpan timeSpan) : this (new SimpleScheduler(), timeSpan)
-        {            
-            
-        }
-
-        public DocumentIndexer(TimeSpan timeSpan, TimeSpan? nullable)
-            : this(new SimpleScheduler(), timeSpan, nullable)
-        {
       
-        }
 
-        public DocumentIndexer() : this(new SimpleScheduler())
-        {
-            
-        }
-       
 
-        class SimpleScheduler : ITaskScheduler
-        {
-
-            Task ITaskScheduler.StartNew(Action a, CancellationTokenSource c)
-            {
-                return Task.Factory.StartNew(() => a, c.Token);
-            }
-        }
 
         public virtual void AddDocument(SandoDocument sandoDocument)
 		{
@@ -134,11 +133,8 @@ namespace Sando.Indexer
             IndexWriter.AddDocument(tempDoc);
             lock (_lock)
             {
-                if (_synchronousCommits)
-                    CommitChanges();
-                else
-                    if (!_hasIndexChanged) //if _hasIndexChanged is false, then turn it into true
-                        _hasIndexChanged = true;
+                if (!_hasIndexChanged) //if _hasIndexChanged is false, then turn it into true
+                    _hasIndexChanged = true;
             }
 		}
 
@@ -150,7 +146,7 @@ namespace Sando.Indexer
             IndexWriter.DeleteDocuments(new TermQuery(term));
             lock (_lock)
             {
-                if (_synchronousCommits || commitImmediately)
+                if (commitImmediately)
                     CommitChanges();
                 else
                     if (!_hasIndexChanged) //if _hasIndexChanged is false, then turn it into true
@@ -312,7 +308,7 @@ namespace Sando.Indexer
             }
         }
 
-	    public Directory LuceneIndexesDirectory { get; set; }
+	    public Lucene.Net.Store.Directory LuceneIndexesDirectory { get; set; }
 		public QueryParser QueryParser { get; protected set; }
 		public IndexReader Reader { get; private set; }
 		protected Analyzer Analyzer { get; set; }
@@ -321,16 +317,24 @@ namespace Sando.Indexer
         private bool _hasIndexChanged;
         private bool _disposed;
 	    private IndexSearcher _indexSearcher;
-        private readonly bool _synchronousCommits;
 	    private readonly object _lock = new object();
         private bool _disposingInProcess = false;
         private ITaskScheduler _scheduler;
         private TimeSpan timeSpan;
         private TimeSpan? nullable;
+        private string DELETE_INIDACTOR = "DELETE_ME";
 
         public bool IsDisposingOrDisposed()
         {
             return _disposingInProcess || _disposed;
+        }
+
+        public void AddDeletionFile()
+        {
+            if (directoryInfo != null)
+            {
+                File.Create(directoryInfo.FullName + "\\" + DELETE_INIDACTOR);
+            }
         }
     }
 }
