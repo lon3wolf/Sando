@@ -38,4 +38,34 @@
     <MSBuild Projects="$(SolutionFullPath)" Properties="Configuration=$(Configuration);Platform=Any CPU;DeployExtension=$(DeployExtension)" />
   </Target>
   
+  <PropertyGroup>
+    <BuildFolder>$(RootDirectory)\bin\$(Configuration)</BuildFolder>
+    <SandoVsixName>UI.vsix</SandoVsixName>
+    <SrcMLVsixName>ABB.SrcML.VisualStudio.SrcMLService.vsix</SrcMLVsixName>
+    <SandoTemp>$(BuildFolder)\_sandoTemp</SandoTemp>
+    <SrcMLTemp>$(BuildFolder)\_srcmlTemp</SrcMLTemp>
+  </PropertyGroup>
+  
+  <!-- Removes the GENDATA file from the SrcMLService VSIX -->
+  <Target Name="BuildWithoutData" DependsOnTargets="Build">
+    <Unzip ZipFileName="$(BuildFolder)\$(SandoVsixName)" TargetDirectory="$(SandoTemp)" />
+    <Unzip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)" TargetDirectory="$(SrcMLTemp)" />
+    
+    <ItemGroup>
+      <SrcMLContent Include="$(SrcMLTemp)\**\*.*" Exclude="$(SrcMLTemp)\GENDATA" />
+      <SandoContent Include="$(SandoTemp)\**\*.*" />
+    </ItemGroup>
+    
+    <Zip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)"
+         WorkingDirectory="$(SrcMLTemp)"
+         Files="@(SrcMLContent)" />
+    <Zip ZipFileName="$(BuildFolder)\$(SandoVsixName)"
+         WorkingDirectory="$(SandoTemp)"
+         Files="@(SandoContent)" />
+         
+    <RemoveDir Directories="$(SrcMLTemp);$(SandoTemp)" />
+  </Target>
+  
 </Project>
+
+
