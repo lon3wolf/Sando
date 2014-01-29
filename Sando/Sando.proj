@@ -38,6 +38,8 @@
     <MSBuild Projects="$(SolutionFullPath)" Properties="Configuration=$(Configuration);Platform=Any CPU;DeployExtension=$(DeployExtension)" />
   </Target>
   
+  <Target Name="BuildWithoutData" DependsOnTargets="Build;RemoveGenDataFile" />
+  
   <PropertyGroup>
     <BuildFolder>$(RootDirectory)\bin\$(Configuration)</BuildFolder>
     <SandoVsixName>UI.vsix</SandoVsixName>
@@ -47,23 +49,35 @@
   </PropertyGroup>
   
   <!-- Removes the GENDATA file from the SrcMLService VSIX -->
-  <Target Name="BuildWithoutData" DependsOnTargets="Build">
+  <Target Name="RemoveGenDataFile" DependsOnTargets="CleanTempFolders">
     <Unzip ZipFileName="$(BuildFolder)\$(SandoVsixName)" TargetDirectory="$(SandoTemp)" />
     <Unzip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)" TargetDirectory="$(SrcMLTemp)" />
+    <Delete Files="$(BuildFolder)\$(SandoVsixName)" />
+    <Delete Files="$(SandoTemp)\$(SrcMLVsixName)" />
     
     <ItemGroup>
-      <SrcMLContent Include="$(SrcMLTemp)\**\*.*" Exclude="$(SrcMLTemp)\GENDATA" />
-      <SandoContent Include="$(SandoTemp)\**\*.*" />
+      <SrcMLContent Include="$(SrcMLTemp)\**\*" Exclude="$(SrcMLTemp)\GENDATA" />
     </ItemGroup>
-    
     <Zip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)"
          WorkingDirectory="$(SrcMLTemp)"
-         Files="@(SrcMLContent)" />
+         Files="@(SrcMLContent)" 
+         ZipLevel="9" 
+         ParallelCompression="false" />
+         
+    <ItemGroup>
+      <SandoContent Include="$(SandoTemp)\**\*" />
+    </ItemGroup>
     <Zip ZipFileName="$(BuildFolder)\$(SandoVsixName)"
          WorkingDirectory="$(SandoTemp)"
-         Files="@(SandoContent)" />
+         Files="@(SandoContent)" 
+         ZipLevel="9" 
+         ParallelCompression="false" />
          
     <RemoveDir Directories="$(SrcMLTemp);$(SandoTemp)" />
+  </Target>
+  
+  <Target Name="CleanTempFolders" >
+    <RemoveDir Directories="$(SandoTemp);$(SrcMLTemp)" />
   </Target>
   
 </Project>
