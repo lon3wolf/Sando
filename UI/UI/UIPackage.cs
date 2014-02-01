@@ -483,7 +483,7 @@ namespace Sando.UI
         {
             try
             {
-                if(srcMLService==null || srcMLService.MonitoredDirectories==null&&srcMLService.MonitoredDirectories.Count()==0)
+                if(srcMLService==null || srcMLService.MonitoredDirectories==null || srcMLService.MonitoredDirectories.Count()==0)
                     UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage, true);
 
                 SolutionKey key = SetupSolutionKey();
