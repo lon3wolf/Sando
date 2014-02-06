@@ -35,9 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML, Version=2.0.48.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\LIBS\srcML.NET\ABB.SrcML.dll</HintPath>
+    <Reference Include="ABB.SrcML">
+      <HintPath>..\..\packages\ABB.SrcML.2.8.3.11\lib\net40\ABB.SrcML.dll</HintPath>
     </Reference>
     <Reference Include="ABB.SrcML.Core, Version=2.8.3.11, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
