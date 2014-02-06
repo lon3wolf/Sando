@@ -54,9 +54,8 @@
     <Reference Include="Contrib.Regex">
       <HintPath>..\Lucene.Net-2.9.4\bin\Contrib\Contrib.Regex.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\LIBS\log4net.dll</HintPath>
+    <Reference Include="log4net">
+      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Lucene.Net">
       <HintPath>..\Lucene.Net-2.9.4\bin\Lucene.Net.dll</HintPath>
@@ -102,6 +101,7 @@
     <Compile Include="TestFiles\Searching\Results\SearchTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestFiles\Searching\Criteria\SearchCriteriaTest.cs" />
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="TestFiles\CS_1\ImageCapture.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
