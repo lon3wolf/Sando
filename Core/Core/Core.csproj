@@ -74,8 +74,7 @@
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.4.15.1, Culture=neutral, PublicKeyToken=cd2d24cd2bace800, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\LIBS\AWSSDK.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\AWSSDK.1.4.15.1\lib\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="BlackHen.Threading">
       <HintPath>..\..\LIBS\BlackHen.Threading.dll</HintPath>
