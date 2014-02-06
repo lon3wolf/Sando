@@ -11,17 +11,17 @@
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Clean;Build">
   <PropertyGroup>
-    <MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory)\..\LIBS\BuildScripts\MSBuildTasks</MSBuildCommunityTasksPath>
+    <MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory)\LIBS\BuildScripts\MSBuildTasks</MSBuildCommunityTasksPath>
     <SolutionToBuild Condition="'$(SolutionToBuild)'==''">$(MSBuildThisFileDirectory)\Sando.sln</SolutionToBuild>
     <SolutionFullPath Condition="'$(SolutionToBuild)'!=''">$([System.IO.Path]::GetFullPath($(SolutionToBuild)))</SolutionFullPath>
-    <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))\..</RootDirectory>
+    <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))</RootDirectory>
     <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
     <DeployExtension Condition="'$(DeployExtension)'==''">False</DeployExtension>
     <VersionOutputFile>$(RootDirectory)\Version.txt</VersionOutputFile>
   </PropertyGroup>
   
   <ItemGroup>
-    <AssemblyInfoFiles Include="$(RootDirectory)\Sando\SolutionInfo.cs" />
+    <AssemblyInfoFiles Include="$(RootDirectory)\SolutionInfo.cs" />
     <SourceManifests Include="$(RootDirectory)\**\source.extension.vsixmanifest" />
     <OutDirs Include="$(RootDirectory)\bin\Debug" />
     <OutDirs Include="$(RootDirectory)\bin\Release" />
