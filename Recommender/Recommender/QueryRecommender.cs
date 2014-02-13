@@ -49,7 +49,7 @@ namespace Sando.Recommender {
                         return nextPair.Value.CompareTo(firstPair.Value);
                     }
                 );
-                return SortRecommendations(query, listForSorting.Select(kvp => kvp.Key).ToArray());
+                return SortRecommendations(query, listForSorting.Select(kvp => kvp.Key).Take(50).ToArray());
             }
             catch (Exception e)
             {
