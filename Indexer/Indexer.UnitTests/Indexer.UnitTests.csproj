@@ -47,6 +47,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\ABB.SrcML.Data.Core.2.8.4.13\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
     </Reference>
+    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=2.8.4.13, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.2.8.4.13\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
