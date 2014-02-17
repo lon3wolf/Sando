@@ -35,20 +35,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML">
-      <HintPath>..\..\packages\ABB.SrcML.2.8.3.11\lib\net40\ABB.SrcML.dll</HintPath>
-    </Reference>
-    <Reference Include="ABB.SrcML.Core, Version=2.8.3.11, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML, Version=2.8.4.13, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Core.2.8.3.11\lib\net40\ABB.SrcML.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.2.8.4.13\lib\net40\ABB.SrcML.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Data.Core, Version=2.8.3.11, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Core, Version=2.8.4.13, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Data.Core.2.8.3.11\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Core.2.8.4.13\lib\net40\ABB.SrcML.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=2.8.3.11, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data.Core, Version=2.8.4.13, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.2.8.3.11\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Data.Core.2.8.4.13\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
