@@ -17,7 +17,6 @@ using Sando.Recommender;
 using Sando.Indexer.IndexFiltering;
 using Sando.UI.Options;
 using Configuration.OptionsPages;
-using ABB.SrcML.VisualStudio.SolutionMonitor;
 using ABB.SrcML;
 using System.Threading;
 using Sando.Core.Tools;
@@ -312,13 +311,14 @@ namespace Sando.IntegrationTests.Search
             throw new NotImplementedException();
         }
 
-
-        public event EventHandler<EventArgs> MonitoringStopped;
+        public bool IsUpdating { get { return !done; } }
+        public event EventHandler MonitoringStarted;
+        public event EventHandler MonitoringStopped;
+        public event EventHandler UpdateArchivesStarted;
+        public event EventHandler UpdateArchivesCompleted;
 
         public event EventHandler<FileEventRaisedArgs> SourceFileChanged;
 
-
-        public event EventHandler<EventArgs> StartupCompleted;
         protected List<CodeSearchResult> _results;
         protected string _myMessage;
         private bool done = false;
@@ -375,15 +375,6 @@ namespace Sando.IntegrationTests.Search
             throw new NotImplementedException();
         }
 
-        public ABB.SrcML.Data.DataRepository GetDataRepository() {
-            throw new NotImplementedException();
-        }
-
-        public bool IsReady
-        {
-            get { return done; }
-        }
-
         public void AddDirectoryToMonitor(string pathToDirectory)
         {
             throw new NotImplementedException();
@@ -409,12 +400,6 @@ namespace Sando.IntegrationTests.Search
             {
                 throw new NotImplementedException();
             }
-        }
-
-
-        ABB.SrcML.Data.IDataRepository ISrcMLGlobalService.GetDataRepository()
-        {
-            throw new NotImplementedException();
         }
 
         public double SaveInterval
