@@ -49,7 +49,6 @@ namespace Sando.UI.Monitoring
 
         public void SourceFileChanged(object sender, FileEventRaisedArgs args)
         {
-            GetPackage().ShowProgressBar(true);
             SourceFileChanged(sender, args, false);
         }
 
@@ -209,6 +208,14 @@ namespace Sando.UI.Monitoring
             }
         }
 
-      
+
+
+        public void UpdateStarted(object sender, EventArgs e) {
+            GetPackage().ShowProgressBar(true);
+        }
+
+        public void UpdateCompleted(object sender, EventArgs e) {
+            GetPackage().ShowProgressBar(false);
+        }
     }
 }

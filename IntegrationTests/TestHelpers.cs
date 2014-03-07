@@ -70,16 +70,16 @@ namespace Sando.IntegrationTests
         internal static bool WaitForServiceToFinish(ISrcMLGlobalService service, int millisecondsTimeout)
         {
             System.Threading.Thread.Sleep(2000);
-            if (!service.IsReady)
+            if (service.IsUpdating)
             {
                 ManualResetEvent mre = new ManualResetEvent(false);
-                EventHandler<IsReadyChangedEventArgs> action = (o, e) => { mre.Set(); };
-                service.IsReadyChanged += action;
+                EventHandler action = (o, e) => { mre.Set(); };
+                service.UpdateArchivesCompleted += action;
                 mre.WaitOne(millisecondsTimeout);
-                service.IsReadyChanged -= action;
+                service.UpdateArchivesCompleted -= action;
             }
             System.Threading.Thread.Sleep(10000);
-            return service.IsReady;
+            return !service.IsUpdating;
         }
 
         internal static IEnumerable<Project> GetProjects(Solution solution)

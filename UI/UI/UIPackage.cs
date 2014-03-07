@@ -537,15 +537,9 @@ namespace Sando.UI
                 else
                 {
                     ServiceLocator.RegisterInstance(taskSchedulerService);
-                    taskSchedulerService.SchedulerIdled += taskSchedulerService_SchedulerIdled;
                 }
             }
             return taskSchedulerService.GlobalScheduler;          
-        }
-
-        void taskSchedulerService_SchedulerIdled(object sender, EventArgs e)
-        {
-            ShowProgressBar(false);            
         }
 
         private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
@@ -645,6 +639,11 @@ namespace Sando.UI
             if (!SetupHandlers)
             {
                 SetupHandlers = true;
+                if(srcMLService.IsUpdating) {
+                    ShowProgressBar(true);
+                }
+                srcMLService.UpdateArchivesStarted += srcMLArchiveEventsHandlers.UpdateStarted;
+                srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
                 srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
                 srcMLService.DirectoryAdded += srcMLService_DirectoryAdded;

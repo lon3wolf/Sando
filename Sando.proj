@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (c) 2014 ABB Group
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ * Vinay Augustine (ABB Group) - initial API, implementation, & documentation
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Clean;Build">
+  <PropertyGroup>
+    <MSBuildCommunityTasksPath>$(MSBuildThisFileDirectory)\LIBS\BuildScripts\MSBuildTasks</MSBuildCommunityTasksPath>
+    <SolutionToBuild Condition="'$(SolutionToBuild)'==''">$(MSBuildThisFileDirectory)\Sando.sln</SolutionToBuild>
+    <SolutionFullPath Condition="'$(SolutionToBuild)'!=''">$([System.IO.Path]::GetFullPath($(SolutionToBuild)))</SolutionFullPath>
+    <RootDirectory Condition="'$(SolutionFullPath)'!=''">$([System.IO.Path]::GetDirectoryName($(SolutionFullPath)))</RootDirectory>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <DeployExtension Condition="'$(DeployExtension)'==''">False</DeployExtension>
+    <VersionOutputFile>$(RootDirectory)\Version.txt</VersionOutputFile>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <AssemblyInfoFiles Include="$(RootDirectory)\SolutionInfo.cs" />
+    <SourceManifests Include="$(RootDirectory)\**\source.extension.vsixmanifest" />
+    <OutDirs Include="$(RootDirectory)\bin\Debug" />
+    <OutDirs Include="$(RootDirectory)\bin\Release" />
+    <OutDirs Include="$(RootDirectory)\bin" />
+  </ItemGroup>
+  
+  <Import Project="$(RootDirectory)\LIBS\BuildScripts\Version.targets" />
+  
+  <Target Name="Clean">
+    <RemoveDir Directories="@(OutDirs)" />
+  </Target> 
+  
+  <Target Name="Build" DependsOnTargets="CreateAssemblyInfo;SetVsixVersion">
+    <MSBuild Projects="$(SolutionFullPath)" Properties="Configuration=$(Configuration);Platform=Any CPU;DeployExtension=$(DeployExtension)" />
+  </Target>
+  
+  <Target Name="BuildWithoutData" DependsOnTargets="Build;RemoveGenDataFile" />
+  
+  <PropertyGroup>
+    <BuildFolder>$(RootDirectory)\bin\$(Configuration)</BuildFolder>
+    <SandoVsixName>UI.vsix</SandoVsixName>
+    <SrcMLVsixName>ABB.SrcML.VisualStudio.SrcMLService.vsix</SrcMLVsixName>
+    <SandoTemp>$(BuildFolder)\_sandoTemp</SandoTemp>
+    <SrcMLTemp>$(BuildFolder)\_srcmlTemp</SrcMLTemp>
+  </PropertyGroup>
+  
+  <!-- Removes the GENDATA file from the SrcMLService VSIX -->
+  <Target Name="RemoveGenDataFile" DependsOnTargets="CleanTempFolders">
+    <Unzip ZipFileName="$(BuildFolder)\$(SandoVsixName)" TargetDirectory="$(SandoTemp)" />
+    <Unzip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)" TargetDirectory="$(SrcMLTemp)" />
+    <Delete Files="$(BuildFolder)\$(SandoVsixName)" />
+    <Delete Files="$(SandoTemp)\$(SrcMLVsixName)" />
+    
+    <ItemGroup>
+      <SrcMLContent Include="$(SrcMLTemp)\**\*" Exclude="$(SrcMLTemp)\GENDATA" />
+    </ItemGroup>
+    <Zip ZipFileName="$(SandoTemp)\$(SrcMLVsixName)"
+         WorkingDirectory="$(SrcMLTemp)"
+         Files="@(SrcMLContent)" 
+         ZipLevel="9" 
+         ParallelCompression="false" />
+         
+    <ItemGroup>
+      <SandoContent Include="$(SandoTemp)\**\*" />
+    </ItemGroup>
+    <Zip ZipFileName="$(BuildFolder)\$(SandoVsixName)"
+         WorkingDirectory="$(SandoTemp)"
+         Files="@(SandoContent)" 
+         ZipLevel="9" 
+         ParallelCompression="false" />
+         
+    <RemoveDir Directories="$(SrcMLTemp);$(SandoTemp)" />
+  </Target>
+  
+  <Target Name="CleanTempFolders" >
+    <RemoveDir Directories="$(SandoTemp);$(SrcMLTemp)" />
+  </Target>
+  
+</Project>
+

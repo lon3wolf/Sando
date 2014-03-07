@@ -78,7 +78,7 @@ namespace UnitTestHelpers
 
         internal static string GetSolutionDirectory() {
             var currentDirectory = new DirectoryInfo(Environment.CurrentDirectory);
-            while(currentDirectory != null && !File.Exists(Path.Combine(currentDirectory.FullName, "Sando", "Sando.sln"))) {
+            while(currentDirectory != null && !File.Exists(Path.Combine(currentDirectory.FullName, "Sando.sln"))) {
                 currentDirectory = currentDirectory.Parent;
             }
             return currentDirectory.FullName;
