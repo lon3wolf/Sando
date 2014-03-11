@@ -73,17 +73,17 @@
     <AssemblyOriginatorKeyFile>sandoKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML.Core, Version=3.0.1.15, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Core, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Core.3.0.1.15\lib\net40\ABB.SrcML.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Core.3.0.20.18\lib\net40\ABB.SrcML.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Data.Core, Version=3.0.1.15, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data.Core, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Data.Core.3.0.1.15\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Data.Core.3.0.20.18\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.0.1.15, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.3.0.1.15\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.3.0.20.18\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ABB.Swum, Version=0.1.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
