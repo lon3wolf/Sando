@@ -37,8 +37,6 @@ namespace Sando.IntegrationTests.Search
 {
     public class AutomaticallyIndexingTestClass : ISrcMLGlobalService, ISearchResultListener
     { 
-        public event EventHandler<IsReadyChangedEventArgs> IsReadyChanged;
-
         public void Reset()
         {
 
@@ -311,6 +309,7 @@ namespace Sando.IntegrationTests.Search
             throw new NotImplementedException();
         }
 
+        public bool IsMonitoring { get { return true; } }
         public bool IsUpdating { get { return !done; } }
         public event EventHandler MonitoringStarted;
         public event EventHandler MonitoringStopped;
