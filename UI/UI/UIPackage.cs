@@ -249,8 +249,10 @@ namespace Sando.UI
                     var stw = window as SearchToolWindow;
                     if (stw != null)
                     {
-                        stw.GetSearchViewControl().FocusOnText();
-                        WindowActivated = true;
+                        WindowActivated = true;    
+                        stw.GetSearchViewControl().FocusOnText();                        
+                        ShowProgressBar(lastShowValue);
+                        UpdateIndexingFilesList();                    
                     }
                 }
             }
@@ -460,19 +462,16 @@ namespace Sando.UI
             if(WindowActivated)
             {
                 try {
-                    if (lastShowValue != show)
+                    var control = ServiceLocator.Resolve<SearchViewControl>();
+                    if (null != control)
                     {
-                        var control = ServiceLocator.Resolve<SearchViewControl>();
-                        if (null != control)
-                        {
-                            control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
-                        }
-                        lastShowValue = show;
-                    }
+                        control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
+                    }                                            
                 } catch(TargetInvocationException e) {
                     FileLogger.DefaultLogger.Error(e);
                 }
             }
+            lastShowValue = show;
         }
 
         /// <summary>

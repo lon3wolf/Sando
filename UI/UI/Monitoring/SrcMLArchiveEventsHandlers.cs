@@ -19,6 +19,7 @@ using Sando.UI.View;
 using Sando.ExtensionContracts.TaskFactoryContracts;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Xml;
 
 
 namespace Sando.UI.Monitoring
@@ -138,7 +139,9 @@ namespace Sando.UI.Monitoring
             if(ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null) {
                 if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath))
                     return;
-                var xelement = srcMLService.GetXElementForSourceFile(args.FilePath);
+                var xelement = GetXElement(args, srcMLService);
+                if (xelement == null)
+                    return;
                 var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
                 switch(args.EventType) {
                     case FileEventType.FileAdded:
@@ -169,6 +172,20 @@ namespace Sando.UI.Monitoring
                 ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
             }
         }
+
+        private static XElement GetXElement(FileEventRaisedArgs args, ISrcMLGlobalService srcMLService)
+        {
+            try
+            {
+                return srcMLService.GetXElementForSourceFile(args.FilePath);
+            }
+            catch (ArgumentException e)
+            {                
+                return XElement.Load(args.FilePath);
+            }
+        }
+
+  
 
         private void RemoveTask(Task task, CancellationTokenSource cancelToken)
         {
