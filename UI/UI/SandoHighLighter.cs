@@ -29,8 +29,8 @@ namespace Sando.UI
 
         private readonly Timer timer;
 
-        // After five seconds, this highlight should be gone.
-        private const int TIMEOUT = 10000 * 5;
+        // After six seconds, this highlight should be gone.
+        private const int TIMEOUT = 1000 * 6;
 
         public HighlightedEntity(String Path, int StartLineNumber, string Rawsource, string[] keywords,
             TimerCallback Callback)
