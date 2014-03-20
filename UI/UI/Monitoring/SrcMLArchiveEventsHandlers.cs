@@ -19,6 +19,9 @@ using Sando.UI.View;
 using Sando.ExtensionContracts.TaskFactoryContracts;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Xml;
+using System.Reflection;
+using Sando.Core.Logging.Persistence;
 
 
 namespace Sando.UI.Monitoring
@@ -31,7 +34,8 @@ namespace Sando.UI.Monitoring
         private TaskScheduler scheduler;
         public TaskFactory factory;
         public static SrcMLArchiveEventsHandlers Instance;
-        System.Timers.Timer hideProgressBarTimer = new System.Timers.Timer(500);
+        private Action whenDoneWithTasks = null;
+        
         public static int MAX_PARALLELISM = 2;
 
 
@@ -138,7 +142,9 @@ namespace Sando.UI.Monitoring
             if(ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null) {
                 if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath))
                     return;
-                var xelement = srcMLService.GetXElementForSourceFile(args.FilePath);
+                var xelement = GetXElement(args, srcMLService);
+                if (xelement == null)
+                    return;
                 var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
                 switch(args.EventType) {
                     case FileEventType.FileAdded:
@@ -170,18 +176,38 @@ namespace Sando.UI.Monitoring
             }
         }
 
+        private static XElement GetXElement(FileEventRaisedArgs args, ISrcMLGlobalService srcMLService)
+        {
+            try
+            {
+                return srcMLService.GetXElementForSourceFile(args.FilePath);
+            }
+            catch (ArgumentException e)
+            {                
+                return XElement.Load(args.FilePath);
+            }
+        }
+
+  
+
         private void RemoveTask(Task task, CancellationTokenSource cancelToken)
         {
             lock (tasksTrackerLock)
             {
                 tasks.TryTake(out task);
                 cancellers.TryTake(out cancelToken);
+                if (tasks.Count() == 0)
+                {
+                    if (whenDoneWithTasks != null)
+                    {
+                        factory.StartNew(whenDoneWithTasks);
+                        whenDoneWithTasks = null;
+                    }
+                }
             }
         }
 
-        private object tasksTrackerLock = new object();
-        private string lastFile = "";
-        private DateTime lastTime = DateTime.Now;
+        private object tasksTrackerLock = new object();        
         private int counter=0;
         private UIPackage package;
         
@@ -214,8 +240,18 @@ namespace Sando.UI.Monitoring
             GetPackage().ShowProgressBar(true);
         }
 
-        public void UpdateCompleted(object sender, EventArgs e) {
-            GetPackage().ShowProgressBar(false);
+        public void UpdateCompleted(object sender, EventArgs e) {            
+            //hide progress bar when all *current* tasks are complete
+            whenDoneWithTasks = () =>
+            {
+                GetPackage().ShowProgressBar(false);
+            };
+            if (TaskCount() == 0)
+            {
+                factory.StartNew(whenDoneWithTasks);
+                whenDoneWithTasks = null;
+            }
         }
+
     }
 }
