@@ -198,7 +198,7 @@
                                 <TableRow>
                                     <TableCell >
                                         <Paragraph FontFamily="Arial">
-                                            Alt + Shift + S
+                                            Ctrl + Shift + F
                                         </Paragraph>
                                     </TableCell>
                                     <TableCell>
@@ -372,7 +372,7 @@
                     <controls:AutoCompleteBox.ToolTip>
                         <StackPanel>
                             <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
-                            <TextBlock>Keyboard shortcut: Alt+Shift+S</TextBlock>
+                            <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
                         </StackPanel>
                     </controls:AutoCompleteBox.ToolTip>
 

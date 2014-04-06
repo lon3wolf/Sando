@@ -280,20 +280,25 @@ namespace Sando.UI
         private void HijackFindInFilesKeyBinding()
         {
             var dte = ServiceLocator.Resolve<DTE2>();
-            foreach (var command in dte.Commands)
-                if (((Command)command).Name.Contains("Edit.FindinFiles"))
-                {
-                    SetKeyBindings((Command)command, new List<string>());
-                    break;
-                }
-            foreach (var command in dte.Commands)
-                if (((Command)command).Name.Contains("View.Sando"))
-                {                    
-                    List<string> bindings = new List<string>();
-                    bindings.Add("Global::Ctrl+Shift+F");
-                    SetKeyBindings((Command)command, bindings);
-                    break;
-                }
+            string[] toChange = { "Edit.FindinFiles", "View.Sando" };
+            foreach(var commandString in toChange)
+                foreach (var command in dte.Commands)
+                    if (((Command)command).Name.Contains(commandString))
+                    {
+                        SetKeyBindings((Command)command, new List<string>());
+                        break;
+                    }
+            string[] toChangeCommand = { "Global::Alt+Shift+S", "Global::Ctrl+Shift+F" };
+            int index = 0;
+            foreach (var commandString in toChange)
+                foreach (var command in dte.Commands)
+                    if (((Command)command).Name.Contains(commandString))
+                    {                    
+                        List<string> bindings = new List<string>();
+                        bindings.Add(toChangeCommand[index++]);
+                        SetKeyBindings((Command)command, bindings);
+                        break;
+                    }
         }
 
         private void SetKeyBindings(Command command, IEnumerable<string> commandBindings)
