@@ -215,7 +215,7 @@ namespace Sando.UI
                 //load srml package first?
                 var taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
-                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());                
+                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
             }
             catch(Exception e)
             {
@@ -271,8 +271,41 @@ namespace Sando.UI
             {
                 // Create the command for the tool window
                 var toolwndCommandID = new CommandID(GuidList.guidUICmdSet, (int) PkgCmdIDList.sandoSearch);
-                var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);
+                var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);                
                 mcs.AddCommand(menuToolWin);
+            }
+            HijackFindInFilesKeyBinding();
+        }
+
+        private void HijackFindInFilesKeyBinding()
+        {
+            var dte = ServiceLocator.Resolve<DTE2>();
+            foreach (var command in dte.Commands)
+                if (((Command)command).Name.Contains("Edit.FindinFiles"))
+                {
+                    SetKeyBindings((Command)command, new List<string>());
+                    break;
+                }
+            foreach (var command in dte.Commands)
+                if (((Command)command).Name.Contains("View.Sando"))
+                {                    
+                    List<string> bindings = new List<string>();
+                    bindings.Add("Global::Ctrl+Shift+F");
+                    SetKeyBindings((Command)command, bindings);
+                    break;
+                }
+        }
+
+        private void SetKeyBindings(Command command, IEnumerable<string> commandBindings)
+        {
+            try
+            {
+                var bindings = commandBindings.Cast<object>().ToArray();
+                command.Bindings = bindings;
+            }
+            catch (COMException)
+            {
+                //don't care if this fails, as it is not crucial bro
             }
         }
         
