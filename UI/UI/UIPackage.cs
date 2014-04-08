@@ -274,45 +274,10 @@ namespace Sando.UI
                 var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);                
                 mcs.AddCommand(menuToolWin);
             }
-            HijackFindInFilesKeyBinding();
+            KeyBindingsManager.RebindOnceOnly();
         }
 
-        private void HijackFindInFilesKeyBinding()
-        {
-            var dte = ServiceLocator.Resolve<DTE2>();
-            string[] toChange = { "Edit.FindinFiles", "View.Sando" };
-            foreach(var commandString in toChange)
-                foreach (var command in dte.Commands)
-                    if (((Command)command).Name.Contains(commandString))
-                    {
-                        SetKeyBindings((Command)command, new List<string>());
-                        break;
-                    }
-            string[] toChangeCommand = { "Global::Alt+Shift+S", "Global::Ctrl+Shift+F" };
-            int index = 0;
-            foreach (var commandString in toChange)
-                foreach (var command in dte.Commands)
-                    if (((Command)command).Name.Contains(commandString))
-                    {                    
-                        List<string> bindings = new List<string>();
-                        bindings.Add(toChangeCommand[index++]);
-                        SetKeyBindings((Command)command, bindings);
-                        break;
-                    }
-        }
-
-        private void SetKeyBindings(Command command, IEnumerable<string> commandBindings)
-        {
-            try
-            {
-                var bindings = commandBindings.Cast<object>().ToArray();
-                command.Bindings = bindings;
-            }
-            catch (COMException)
-            {
-                //don't care if this fails, as it is not crucial bro
-            }
-        }
+        
         
         public void StartupCompleted()
         {
