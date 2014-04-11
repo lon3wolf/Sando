@@ -177,7 +177,7 @@
     <Compile Include="Tools\SeSpecificThesaurus.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Tools\SparseCoOccurrenceMatrix.cs" />
+    <Compile Include="Tools\SparseMatrixForWordPairs.cs" />
     <Compile Include="Tools\SpecialWords.cs" />
     <Compile Include="Tools\TimedProcessor.cs" />
     <Compile Include="Tools\SolutionKey.cs" />

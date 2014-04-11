@@ -176,6 +176,7 @@ namespace Sando.IntegrationTests.Search
 
             var dictionary = new DictionaryBasedSplitter();
             dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
+            ServiceLocator.RegisterInstance(dictionary);
 
             var reformer = new QueryReformerManager(dictionary);
             reformer.Initialize(null);

@@ -213,7 +213,7 @@ namespace Sando.UI
                 SetUpLifeCycleEvents();
 
                 //load srml package first?
-                var taskScheduler = GetTaskSchedulerService();
+                taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
                 RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
             }
@@ -608,10 +608,11 @@ namespace Sando.UI
             }
         }
 
-        private static void SetupRecommenderSystem()
+        private void SetupRecommenderSystem()
         {
             // xige
-            var dictionary = new DictionaryBasedSplitter();
+            var dictionary = new DictionaryBasedSplitter(taskScheduler);
+            ServiceLocator.RegisterInstance(dictionary);
             dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
             ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated +=
                 dictionary.UpdateProgramElement;
@@ -693,6 +694,7 @@ namespace Sando.UI
         Action progressAction;
         private bool updatedForThisSolution = false;
         private ITaskManagerService taskSchedulerService;
+        private TaskScheduler taskScheduler;
  
         private Analyzer GetAnalyzer()
         {

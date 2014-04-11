@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Sando.Core.Tools;
+using System.Diagnostics;
 
 namespace Sando.Core.UnitTests.Tools
 {
@@ -15,7 +16,7 @@ namespace Sando.Core.UnitTests.Tools
 
         public BigMatrixTest()
         {
-            this.matrix = new SparseCoOccurrenceMatrix();
+            this.matrix = new SparseMatrixForWordPairs();
         }
 
         [SetUp]
@@ -23,6 +24,7 @@ namespace Sando.Core.UnitTests.Tools
         {
             matrix.Initialize(@"TestFiles\");
         }
+
 
         private void AssertWordPairExist(string word1, string word2)
         {
@@ -35,40 +37,38 @@ namespace Sando.Core.UnitTests.Tools
         }
 
         [Test]
-        public void SameLocalDictionaryWordPairAlwaysExist()
+        public void DifferentWordPairsThatExist()
         {
-            AssertWordPairExist("sando", "sando");
-            AssertWordPairExist("abb", "abb");
-            AssertWordPairExist("test", "test");
+            AssertWordPairExist("dog", "enkiixinzfompqv");
+            AssertWordPairExist("cat", "kdwehypeuoiadtg");
+            AssertWordPairExist("czwagzxqgxittuy", "bird");
         }
 
         [Test]
         public void SameNonLocalDictionaryWordNeverExist()
         {
-            AssertWordPairNonExist("animal", "animal");
-            AssertWordPairNonExist("bush", "bush");
-            AssertWordPairNonExist("pinkcolor", "pinkcolor");
+            AssertWordPairNonExist("fast", "fast");
+            AssertWordPairNonExist("jamming", "jamming");
+            AssertWordPairNonExist("red", "red");
         }
 
         [Test]
-        public void DifferentWordPairsThatExist()
+        public void SameNonLocalDictionaryWordsExist()
         {
-            AssertWordPairExist("method", "name");
-            AssertWordPairExist("assert", "true");
-            AssertWordPairExist("search", "result");
-            AssertWordPairExist("assert", "null");
-            AssertWordPairExist("sando", "search");
-            AssertWordPairExist("directory", "update");
-            AssertWordPairExist("configuration", "results");
+            AssertWordPairExist("dog", "dog");
+            AssertWordPairExist("bird", "bird");
+            AssertWordPairExist("cat", "cat");
         }
+
+
 
         [Test]
         public void DifferentWordPairsThatDoesNotExist()
         {
-            AssertWordPairNonExist("confidence", "apple");
+            AssertWordPairNonExist("sando", "apple");
             AssertWordPairNonExist("confidence", "lackof");
-            AssertWordPairNonExist("confidence", "configuration");
-            AssertWordPairNonExist("configuration", "nomad");   
+            AssertWordPairNonExist("test", "configuration");
+            AssertWordPairNonExist("yo", "nomad");   
         }
 
         [Test]

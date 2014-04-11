@@ -16,19 +16,19 @@ namespace Sando.Core.UnitTests.Tools
 
         public InFileCoOccurrenceMatrixTests()
         {
-            this.matrix = new SparseCoOccurrenceMatrix();
+            this.matrix = new SparseMatrixForWordPairs();
         }
 
 
         [Test]
         public void TestPerformanceOfMatrix()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new Stopwatch();            
+            matrix.Initialize(@"TestFiles\SandoMatrix");
             stopwatch.Start();
-            matrix.Initialize(@"TestFiles\LargeMatrix");
             matrix.Dispose();
             stopwatch.Stop();
-            Assert.IsTrue(stopwatch.ElapsedMilliseconds < 500 );
+            Assert.IsTrue(stopwatch.ElapsedMilliseconds < 4000 );
         }
         
     }

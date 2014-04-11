@@ -22,7 +22,7 @@ namespace Sando.Core.UnitTests.Tools
         [SetUp]
         public void Intialize()
         {
-            dictionary.Initialize(@"TestFiles\");
+            dictionary.Initialize(@"TestFiles\SandoMatrix");
         }
 
         private IEnumerable<string> GetReformedWord(String target, IEnumerable<String> context)

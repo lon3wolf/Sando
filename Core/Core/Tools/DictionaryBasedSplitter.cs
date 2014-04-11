@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using Sando.ExtensionContracts.SplitterContracts;
+using System.Threading.Tasks;
 
 namespace Sando.Core.Tools
 {
@@ -25,12 +26,25 @@ namespace Sando.Core.Tools
     public partial class DictionaryBasedSplitter : IWordSplitter, IWordCoOccurrenceMatrix
     {
         private readonly FileDictionary dictionary;
-        private readonly SparseCoOccurrenceMatrix matrix;
-        
+        private readonly SparseMatrixForWordPairs matrix;
+
+        public void AddWordPair(string one, string two, int count = 1)
+        {
+            throw new NotImplementedException();
+        }
+
         public DictionaryBasedSplitter()
         {
             this.dictionary = new FileDictionary();
-            this.matrix = new SparseCoOccurrenceMatrix();
+            this.matrix = new SparseMatrixForWordPairs();
+            this.dictionary.rawWordsEvent += matrix.HandleCoOcurrentWordsAsync;
+        }
+
+
+        public DictionaryBasedSplitter(TaskScheduler scheduler)
+        {
+            this.dictionary = new FileDictionary();
+            this.matrix = new SparseMatrixForWordPairs(scheduler);
             this.dictionary.rawWordsEvent += matrix.HandleCoOcurrentWordsAsync;
         }
 
