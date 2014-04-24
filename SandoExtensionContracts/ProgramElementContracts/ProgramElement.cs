@@ -72,7 +72,13 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
 
         public string FileExtension
         {
-            get { return Path.GetExtension(FullFilePath); }
+            get { 
+                    var pathWithDot = Path.GetExtension(FullFilePath);
+                    if (pathWithDot.IndexOf('.') != -1)
+                        return pathWithDot.Substring(1);
+                    else
+                        return pathWithDot;
+                }
         }
 
 

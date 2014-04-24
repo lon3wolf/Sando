@@ -2,6 +2,10 @@
 using NUnit.Framework;
 using Sando.Indexer.Documents;
 using UnitTestHelpers;
+using Lucene.Net.Analysis;
+using System.IO;
+using Portal.LuceneInterface;
+using System.Collections.Generic;
 
 namespace Sando.Indexer.UnitTests.Documents
 {
@@ -10,29 +14,28 @@ namespace Sando.Indexer.UnitTests.Documents
 	{
 		[Test]
 		public void SandoDocumentStringExtension_ToSandoSearchableReturnsValidString()
-		{
-			string testString = "SetFileExtension";
-			Assert.AreEqual(testString.ToSandoSearchable(), "SetFileExtension"+SandoDocumentStringExtension.Delimiter+"Set File Extension");
-
-			testString = "donothing";
-			Assert.AreEqual(testString.ToSandoSearchable(), "donothing");
-
-			testString = String.Empty;
-			Assert.AreEqual(testString.ToSandoSearchable(), String.Empty);
+		{            
+            CheckSplits("SetFileExtension", "SetFileExtension Set File Extension");
+            CheckSplits("donothing", "donothing");            
 		}
 
-		[Test]
-		public void SandoDocumentStringExtension_ToSandoDisplayableReturnsValidString()
-		{
-            string testString = "SetFileExtension" + SandoDocumentStringExtension.Delimiter + "Set File Extension";
-			Assert.AreEqual(testString.ToSandoDisplayable(), "SetFileExtension");
+        private static void CheckSplits(string testString, string expectedSplits)
+        {
+            StringReader r = new StringReader(testString);
+            TokenStream ts = new WhitespaceTokenizer(r);
+            WordDelimiterFilter filter = new WordDelimiterFilter(ts, 1, 1, 1, 1, 1);            
+            var toFind = new HashSet<string>();
+            foreach (var term in expectedSplits.Split())
+                toFind.Add(term);
+            Token token = filter.Next();
+            while (token!=null && !String.IsNullOrEmpty(token.ToString()))
+            {                
+                toFind.Remove(token.Term());
+                token = filter.Next();
+            }
+            Assert.AreEqual(0, toFind.Count);
+        }
 
-			testString = "donothing";
-			Assert.AreEqual(testString.ToSandoDisplayable(), "donothing");
-
-			testString = String.Empty;
-			Assert.AreEqual(testString.ToSandoDisplayable(), String.Empty);
-		}
 
 		[TestFixtureSetUp]
 		public void SetUp()

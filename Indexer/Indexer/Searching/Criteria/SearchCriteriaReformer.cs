@@ -14,7 +14,8 @@ namespace Sando.Indexer.Searching.Criteria
         private const int TERM_MINIMUM_LENGTH = 2;
 
         public static void ReformSearchCriteria(SimpleSearchCriteria criteria)
-        {
+        {            
+
             var specialTerms = GetSpecialTerms(criteria.SearchTerms);
             var terms = criteria.SearchTerms.Where(t => !t.StartsWith("\"")||!t.EndsWith("\"")).
                 Select(t => t.NormalizeText()).Where(t => !String.IsNullOrWhiteSpace(t)).
@@ -28,7 +29,7 @@ namespace Sando.Indexer.Searching.Criteria
             var queries = GetReformedQuery(terms.Distinct()).ToList();
             if (queries.Count > 0)
             {
-                LogEvents.AddSearchTermsToOriginal(queries.First());
+                //LogEvents.AddSearchTermsToOriginal(queries.First());
                 var query = queries.First();
                 terms.AddRange(query.WordsAfterReform.Except(terms));
                 criteria.Explanation = GetExplanation(query, originalTerms);
@@ -49,7 +50,8 @@ namespace Sando.Indexer.Searching.Criteria
             }
             terms.AddRange(specialTerms);
             criteria.SearchTerms = ConvertToSortedSet(terms);
-        }
+        }                           
+
 
         private static String[] GetSpecialTerms(IEnumerable<string> searchTerms)
         {

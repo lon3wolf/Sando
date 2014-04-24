@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using ABB.SrcML.Utilities;
 using ABB.VisualStudio;
 using System.Reflection;
+using Sando.Indexer.Splitter;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -162,10 +163,7 @@ namespace Sando.IntegrationTests.Search
 
             ServiceLocator.RegisterInstance(new IndexFilterManager());
 
-            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new SnowballAnalyzer("English"));            
-            analyzer.AddAnalyzer(SandoField.Source.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.AccessLevel.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.ProgramElementType.ToString(), new KeywordAnalyzer());
+            Analyzer analyzer = SnowballAndWordSplittingAnalyzer.GetAnalyzer();
             ServiceLocator.RegisterInstance<Analyzer>(analyzer);
 
             var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());

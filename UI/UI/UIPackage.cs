@@ -44,6 +44,7 @@ using System.Windows.Threading;
 using System.Collections.ObjectModel;
 using ABB.VisualStudio.Interfaces;
 using System.Threading;
+using Sando.Indexer.Splitter;
 
 
 
@@ -495,7 +496,7 @@ namespace Sando.UI
                 
                 //Setup indexers
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
-                ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());                
+                ServiceLocator.RegisterInstance<Analyzer>(SnowballAndWordSplittingAnalyzer.GetAnalyzer());                
                 SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
                 ServiceLocator.RegisterInstance(currentIndexer);
@@ -696,14 +697,7 @@ namespace Sando.UI
         private ITaskManagerService taskSchedulerService;
         private TaskScheduler taskScheduler;
  
-        private Analyzer GetAnalyzer()
-        {
-            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new SnowballAnalyzer("English"));
-            analyzer.AddAnalyzer(SandoField.Source.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.AccessLevel.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.ProgramElementType.ToString(), new KeywordAnalyzer());
-            return analyzer;
-        }  
+ 
 
         #endregion
 

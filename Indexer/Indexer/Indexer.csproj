@@ -81,7 +81,6 @@
     <Compile Include="Documents\MethodDocument.cs" />
     <Compile Include="DocumentIndexer.cs" />
     <Compile Include="Documents\SandoDocument.cs" />
-    <Compile Include="Documents\SandoDocumentStringExtension.cs" />
     <Compile Include="Documents\SandoField.cs" />
     <Compile Include="Documents\StructDocument.cs" />
     <Compile Include="Exceptions\IndexerException.cs" />
@@ -105,6 +104,8 @@
     <Compile Include="Searching\QueryWeightsSupplier.cs" />
     <Compile Include="Searching\UsageType.cs" />
     <Compile Include="Documents\XmlXElementDocument.cs" />
+    <Compile Include="Splitter\SnowballAndWordSplitterAnalyzer.cs" />
+    <Compile Include="Splitter\WordDelimiterFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

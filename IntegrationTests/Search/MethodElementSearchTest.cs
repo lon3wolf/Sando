@@ -93,7 +93,7 @@ namespace Sando.IntegrationTests.Search
                 {
                     SearchTerms = new SortedSet<string>(keywords.Split(' ')),
                     SearchByFileExtension = true,
-                    FileExtensions = new SortedSet<string> {".cpp"}
+                    FileExtensions = new SortedSet<string> {"cpp"}
                 };
             var codeSearchResults = codeSearcher.Search(searchCriteria);
             Assert.AreEqual(1, codeSearchResults.Count, "Invalid results number");
