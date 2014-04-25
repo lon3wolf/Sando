@@ -215,6 +215,24 @@ namespace Portal.LuceneInterface
         }
 
 
+        private Token NewSpecialTok(Token orig, int start, int end)
+        {
+            // end appears to be erroneously named
+            return new AbbreviationToken(orig.TermText().Substring(start, end - start),
+                    orig.StartOffset() + start,
+                    orig.StartOffset() + end,
+                    orig.Type());
+        }
+
+        private class AbbreviationToken : Token
+        {
+
+            public AbbreviationToken(string p1, int p2, int p3, string p4) :base(p1,p2,p3,p4)
+            {
+            }
+
+        }
+
         public override Token Next()
         {
 
@@ -275,7 +293,6 @@ namespace Portal.LuceneInterface
                     int firstType = type;
                     int lastType = type;  // type of the previously read char
 
-
                     while (pos < end)
                     {
 
@@ -322,10 +339,17 @@ namespace Portal.LuceneInterface
                             // case of a word starting with a capital (won't split).
                             // It will also handle pluralization of
                             // an uppercase word such as FOOs (won't split).
-
                             if ((lastType & UPPER) != 0 && (type & LOWER) != 0)
                             {
                                 // UPPER->LOWER: Don't split
+                                //In the case "XMLElement", trying to get "XML" & "Element", get the last cap letter as a token too
+                                //from "XMLElement" -> "XMLElement XML Element lement"
+                                if (pos - start > 1)
+                                {
+                                    queue.Add(NewSpecialTok(t, start, pos));
+                                    if ((firstType & ALPHA) != 0) numWords++;
+                                    break;
+                                }
                             }
                             else
                             {
@@ -339,7 +363,7 @@ namespace Portal.LuceneInterface
                                 // NUMERIC->ALPHA
                                 // *->DELIMITER
                                 queue.Add(NewTok(t, start, pos));
-                                if ((firstType & ALPHA) != 0) numWords++;
+                                if ((firstType & ALPHA) != 0) numWords++; 
                                 break;
                             }
                         }
@@ -367,7 +391,6 @@ namespace Portal.LuceneInterface
                             if ((firstType & ALPHA) != 0) numWords++;
                             break;
                         }
-
                         lastType = type;
                         ch = s[pos];
                         type = CharType(ch);
@@ -419,20 +442,20 @@ namespace Portal.LuceneInterface
                 if (numWords == 0)
                 {
                     // all numbers
-                    AddCombos(tlist, 0, numtok, generateNumberParts != 0, catenateNumbers != 0 || catenateAll != 0, 1);
+                    AddCombos(s, tlist, 0, numtok, generateNumberParts != 0, catenateNumbers != 0 || catenateAll != 0, 1);
                     if (queue.Count > 0) break; else continue;
                 }
                 else if (numNumbers == 0)
                 {
                     // all words
-                    AddCombos(tlist, 0, numtok, generateWordParts != 0, catenateWords != 0 || catenateAll != 0, 1);
+                    AddCombos(s, tlist, 0, numtok, generateWordParts != 0, catenateWords != 0 || catenateAll != 0, 1);
                     if (queue.Count > 0) break; else continue;
                 }
                 else if (generateNumberParts == 0 && generateWordParts == 0 && catenateNumbers == 0 && catenateWords == 0)
                 {
                     // catenate all *only*
                     // OPT:could be optimized to add to current queue...
-                    AddCombos(tlist, 0, numtok, false, catenateAll != 0, 1);
+                    AddCombos(s, tlist, 0, numtok, false, catenateAll != 0, 1);
                     if (queue.Count > 0) break; else continue;
                 }
 
@@ -455,11 +478,11 @@ namespace Portal.LuceneInterface
                     }
                     if (wasWord)
                     {
-                        AddCombos(tlist, i, j, generateWordParts != 0, catenateWords != 0, 1);
+                        AddCombos(s, tlist, i, j, generateWordParts != 0, catenateWords != 0, 1);
                     }
                     else
                     {
-                        AddCombos(tlist, i, j, generateNumberParts != 0, catenateNumbers != 0, 1);
+                        AddCombos(s, tlist, i, j, generateNumberParts != 0, catenateNumbers != 0, 1);
                     }
                     i = j;
                 }
@@ -467,7 +490,7 @@ namespace Portal.LuceneInterface
                 // take care catenating all subwords
                 if (catenateAll != 0)
                 {
-                    AddCombos(tlist, 0, numtok, false, true, 0);
+                    AddCombos(s, tlist, 0, numtok, false, true, 0);
                 }
 
                 // NOTE: in certain cases, queue may be empty (for instance, if catenate
@@ -486,7 +509,7 @@ namespace Portal.LuceneInterface
 
 
         // index "a","b","c" as  pos0="a", pos1="b", pos2="c", pos2="abc"
-        private void AddCombos(List<Token> lst, int start, int end, bool generateSubwords, bool catenateSubwords, int posOffset)
+        private void AddCombos(string s, List<Token> lst, int start, int end, bool generateSubwords, bool catenateSubwords, int posOffset)
         {
             if (end - start == 1)
             {
@@ -497,9 +520,18 @@ namespace Portal.LuceneInterface
             }
 
             StringBuilder sb = null;
+            StringBuilder sbWithUnderscores = null;
             if (catenateSubwords) sb = new StringBuilder();
+            bool catenateSubwordsWithUnderScores = false;
+            bool startWithUnderscore = false;
+            var both = ShouldCatenateSubwords(s, lst, start, end);
+            catenateSubwordsWithUnderScores = both.Item1;
+            startWithUnderscore = both.Item2;
+            if (catenateSubwordsWithUnderScores) sbWithUnderscores = new StringBuilder();
             Token firstTok = null;
+            Token lastToken = null;
             Token tok = null;
+            lastToken = null;
             for (int i = start; i < end; i++)
             {
                 tok = lst[i];
@@ -507,11 +539,24 @@ namespace Portal.LuceneInterface
                 {
                     if (i == start) firstTok = tok;
                     sb.Append(tok.TermText());
+                    if (catenateSubwordsWithUnderScores)
+                    {                        
+                        if (lastToken != null)
+                            if (lastToken.EndOffset() + 1 == tok.StartOffset())
+                                sbWithUnderscores.Append('_');
+                        if (startWithUnderscore)
+                            {
+                                sbWithUnderscores.Append("_");
+                                startWithUnderscore = false;
+                            }
+                        sbWithUnderscores.Append(tok.TermText());
+                    }
                 }
                 if (generateSubwords)
                 {
                     queue.Add(tok);
                 }
+                lastToken = tok;
             }
 
             if (catenateSubwords)
@@ -524,7 +569,70 @@ namespace Portal.LuceneInterface
                 // Otherwise, use the value passed in as the position offset.
                 concatTok.SetPositionIncrement(generateSubwords == true ? 0 : posOffset);
                 queue.Add(concatTok);
+                if (catenateSubwordsWithUnderScores)
+                {
+                    Token underscoresToken = new Token(sbWithUnderscores.ToString(),
+                        firstTok.StartOffset(),
+                        tok.EndOffset(),
+                        firstTok.Type());
+                    queue.Add(underscoresToken);
+                }
             }
+            AbbreviationToken lastOne = null;
+            for (int i = start; i < end; i++)
+            {
+                tok = lst[i];
+                if (lastOne != null)
+                {
+                    Token concatTok = new Token(lastOne.Term().Substring(lastOne.Term().Length -1)+tok.Term(),
+                        tok.StartOffset()-1,
+                        tok.EndOffset(),
+                        tok.Type());
+                    queue.Add(concatTok);
+                    if (lastOne.Term().Length >= 3)
+                    {
+                        Token abbreviation = new Token(lastOne.Term().Substring(0,lastOne.Term().Length - 1),
+                            lastOne.StartOffset(),
+                            lastOne.EndOffset() - 1,
+                            lastOne.Type());
+                        queue.Add(abbreviation);
+                    }
+                }
+                if (tok as AbbreviationToken!=null)
+                {
+                    lastOne = tok as AbbreviationToken;
+                }
+                else
+                {
+                    lastOne = null;
+                }
+            }
+        }
+
+        private static Tuple<bool,bool> ShouldCatenateSubwords(string s, List<Token> lst, int start, int end)
+        {
+            bool catenateSubwordsWithUnderScores = false;
+            bool startWithUnderscore = false;
+            Token token = null;
+            Token lastToken = null;
+            if (s.StartsWith("_"))
+            {
+                catenateSubwordsWithUnderScores = true;
+                startWithUnderscore = true;
+            }
+            if (!catenateSubwordsWithUnderScores)
+                for (int i = start; i < end; i++)
+                {
+                    token = lst[i];
+                    if (lastToken != null)
+                        if (lastToken.EndOffset() + 1 == token.StartOffset())
+                        {
+                            catenateSubwordsWithUnderScores = true;
+                            break;
+                        }
+                    lastToken = token;
+                }
+            return new Tuple<bool, bool>(catenateSubwordsWithUnderScores, startWithUnderscore);
         }
 
 
