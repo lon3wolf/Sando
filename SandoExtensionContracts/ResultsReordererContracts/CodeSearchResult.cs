@@ -16,6 +16,8 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
 
     public interface IHighlightRawInfo
     {
+        string FullFilePath { get; }
+
         string Text { get; }
         int StartLineNumber { get; }
         int[] Offsets { get; }
@@ -135,7 +137,7 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
         {
             get
             {
-                return new InternalHighlightRawInfo(highlight, ProgramElement.
+                return new InternalHighlightRawInfo(ProgramElement.FullFilePath, highlight, ProgramElement.
                     DefinitionLineNumber, IndentionOption.NoIndention, HighlightOffsets);
             }
         }
@@ -144,7 +146,7 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
         {
             get
             {
-                return new InternalHighlightRawInfo(highlightRaw, ProgramElement.
+                return new InternalHighlightRawInfo(ProgramElement.FullFilePath, highlightRaw, ProgramElement.
                     DefinitionLineNumber, IndentionOption.KeepIndention);
             }
         }
@@ -156,13 +158,20 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
             public int[] Offsets { get; private set; }
             public IndentionOption IndOption { get; private set; }
 
-            internal InternalHighlightRawInfo(String Text, int StartLineNumber, 
+            internal InternalHighlightRawInfo(String fullFilePath, String Text, int StartLineNumber, 
                 IndentionOption IndOption, int[] Offsets = null)
             {
+                this.FullFilePath = fullFilePath;
                 this.Text = Text;
                 this.StartLineNumber = StartLineNumber;
                 this.Offsets = Offsets;
                 this.IndOption = IndOption;
+            }
+
+            public string FullFilePath
+            {
+                get;
+                private set;
             }
         }
 

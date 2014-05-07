@@ -10,6 +10,8 @@ using System.Windows.Media;
 using Sando.Core.Tools;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.Core.Logging.Events;
+using System.Windows.Input;
+using Sando.UI.Actions;
 
 namespace Sando.UI.View.Search.Converters {
     [ValueConversion(typeof(IHighlightRawInfo), typeof(object))]
@@ -36,14 +38,27 @@ namespace Sando.UI.View.Search.Converters {
                      preNum = num;
                  }
                 line.AddBeginning(CreateRun("\t", regularWeight));
-                line.AddBeginning(CreateLineNumberHyperLink(num));
+                line.AddBeginning(CreateLineNumberHyperLink(num, infor));
              }
              return lines;
          }
 
-        private Inline CreateLineNumberHyperLink(int number)
+        private Inline CreateLineNumberHyperLink(int number, IHighlightRawInfo infor)
         {
             var run = CreateRun(number.ToString(), regularWeight);
+            run.MouseUp += delegate(object sender, MouseButtonEventArgs e)
+            {
+
+                if (e.ClickCount == 1 && e.LeftButton == MouseButtonState.Released)
+                {
+
+                    FileOpener.OpenFile(infor.FullFilePath, number);
+
+                }
+
+            };
+            
+            
             run.Foreground = Brushes.CadetBlue;
             return run;
         }

@@ -60,6 +60,12 @@ namespace Sando.UI.View
             ServiceLocator.RegisterInstance<QueryRecommender>(_recommender);
             ServiceLocator.RegisterInstance<SearchViewControl>(this);
             OpenSolutionPaths = DefaultOpenSolutionMessage;
+
+            FileOpener.FileOpened += (sender, e) =>
+            { 
+                foreach (var item in this.searchResultListbox.Items)
+                    ShowPopupOneItem(this.searchResultListbox, false, item);
+            };
         }
 
      
@@ -590,8 +596,8 @@ namespace Sando.UI.View
             {
                 if (this.searchResultListbox.Items.Count > 0)
                 {
-                    foreach (var item in this.searchResultListbox.Items)
-                        ShowPopupOneItem(this.searchResultListbox, false, item);
+                    //foreach (var item in this.searchResultListbox.Items)
+                    //    ShowPopupOneItem(this.searchResultListbox, false, item);
                 }
             }
             catch (Exception ee)
@@ -817,6 +823,8 @@ namespace Sando.UI.View
         //    }
         //}
 
+       
+
 
         private void ListViewItem_LostFocus(object sender, RoutedEventArgs e) {
             //searchResultListbox.SelectedItem = null;
@@ -973,6 +981,11 @@ namespace Sando.UI.View
                 indexer.AddDeletionFile();
                 MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.", "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void MyToolWindow_MouseLeave(object sender, MouseEventArgs e)
+        {
+
         }
 
   

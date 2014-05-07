@@ -14,7 +14,7 @@
              Name="MyToolWindow"
              Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" KeyboardNavigation.IsTabStop="False" xmlns:my="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
              xmlns:search="clr-namespace:Sando.UI.View.Search"
-             LostFocus="MyToolWindow_LostFocus">
+             LostFocus="MyToolWindow_LostFocus" MouseLeave="MouseLeaveEvent">
 
     <UserControl.Resources>
         <converters:BoolToOppositeBoolConverter x:Key="oppositeConverter" />
@@ -568,7 +568,7 @@
                 <ListView  Name="searchResultListbox"  ItemsSource="{Binding Path=SearchResults}" ScrollViewer.VerticalScrollBarVisibility="Auto"
                        Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Height="Auto"
                         VerticalAlignment="Stretch" MinWidth="270" MinHeight="100" HorizontalContentAlignment="Stretch"
-                       SelectionChanged="searchResultListbox_SelectionChanged" MouseLeave="MouseLeaveEvent"                    
+                       SelectionChanged="searchResultListbox_SelectionChanged"                     
                        Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
 
                     <ListView.ContextMenu>

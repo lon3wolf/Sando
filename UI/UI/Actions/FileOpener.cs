@@ -31,6 +31,8 @@ namespace Sando.UI.Actions
                 Window window = _dte.ItemOperations.OpenFile(filePath, Constants.vsViewKindTextView);
                 var selection = (TextSelection)_dte.ActiveDocument.Selection;
                 selection.GotoLine(lineNumber);
+
+                FileOpened(null, new EventArgs());
             }
             catch (Exception e)
             {
@@ -55,7 +57,11 @@ namespace Sando.UI.Actions
                 _dte = ServiceLocator.Resolve<DTE2>();
             }
         }
+
+        public static event FileOpenedEventHandler FileOpened;
         
     }
+
+    public delegate void FileOpenedEventHandler(object sender, EventArgs e);
 
 }
