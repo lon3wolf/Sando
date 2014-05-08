@@ -38,29 +38,31 @@ namespace Sando.UI.View.Search.Converters {
                      preNum = num;
                  }
                 line.AddBeginning(CreateRun("\t", regularWeight));
-                line.AddBeginning(CreateLineNumberHyperLink(num, infor));
+                line.AddBeginning(CreateRun(num.ToString(), regularWeight));
+                AddLineNumberHyperlinks(infor, num, line);
              }
              return lines;
          }
 
-        private Inline CreateLineNumberHyperLink(int number, IHighlightRawInfo infor)
-        {
-            var run = CreateRun(number.ToString(), regularWeight);
+         private void AddLineNumberHyperlinks(IHighlightRawInfo infor, int num, InlineItemLine line)
+         {
+             foreach (var item in line.GetItems())
+             {
+                 var run = item as Run;
+                 if (run != null)
+                     AddLineNumberHyperlink(run, num, infor);
+             }
+         }
+
+        private void AddLineNumberHyperlink(Run run, int number, IHighlightRawInfo infor)
+        {            
             run.MouseUp += delegate(object sender, MouseButtonEventArgs e)
             {
-
                 if (e.ClickCount == 1 && e.LeftButton == MouseButtonState.Released)
                 {
-
                     FileOpener.OpenFile(infor.FullFilePath, number);
-
                 }
-
-            };
-            
-            
-            run.Foreground = Brushes.CadetBlue;
-            return run;
+            };                        
         }
 
         private string[] RemoveHeadTailEmptyStrings(IEnumerable<string> lines)

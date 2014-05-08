@@ -26,6 +26,11 @@ namespace Sando.UI.UnitTests
                 this.StartLineNumber = StartLineNumber;
                 this.Offsets = Offsets;
             }
+
+            public string FullFilePath
+            {
+                get { throw new NotImplementedException(); }
+            }
         }
         
         [Test]
