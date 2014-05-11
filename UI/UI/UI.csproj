@@ -273,6 +273,7 @@
     </Compile>
     <Compile Include="Actions\FileOpener.cs" />
     <Compile Include="Actions\FileRemover.cs" />
+    <Compile Include="Base\BaseViewModel.cs" />
     <Compile Include="Model\SearchResultUIItem.cs" />
     <Compile Include="Monitoring\ConcurrentIndexingMonitor.cs" />
     <Compile Include="Monitoring\IndexUpdateManager.cs" />
@@ -287,6 +288,16 @@
     <Compile Include="Service\SandoGlobalService.cs" />
     <Compile Include="Service\SandoLocalService.cs" />
     <Compile Include="TextBlockEx.cs" />
+    <Compile Include="ViewModel\MenuViewModel.cs" />
+    <Compile Include="ViewModel\SandoMainViewModel.cs" />
+    <Compile Include="ViewModel\SearchResultViewModel.cs" />
+    <Compile Include="ViewModel\SearchViewModel.cs" />
+    <Compile Include="View\MenuView.xaml.cs">
+      <DependentUpon>MenuView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SandoMainView.xaml.cs">
+      <DependentUpon>SandoMainView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Search\Converters\BackgroundConverter.cs" />
     <Compile Include="View\RecommendedQueryView.cs" />
     <Compile Include="View\Search\Converters\HighlightSearchKey.cs" />
@@ -556,6 +567,14 @@
     <Resource Include="Resources\VS2010Icons\VSObject_ValueType.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Base\DataTemplateDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Base\StyleDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -569,6 +588,14 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\MenuView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\SandoMainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\SearchViewControl.xaml">
       <SubType>Designer</SubType>
