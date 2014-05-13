@@ -80,7 +80,7 @@ namespace Sando.IntegrationTests.Search
             ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
         }
 
-        private static void WaitForIndexing()
+        public void WaitForIndexing()
         {
             while (((IEnumerable<Task>)GetATestingScheduler().GetType().InvokeMember("GetScheduledTasks",
                    BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.NonPublic,
@@ -103,7 +103,7 @@ namespace Sando.IntegrationTests.Search
             }
         }
 
-        private void AddFilesToIndex(string filesInThisDirectory)
+        public void AddFilesToIndex(string filesInThisDirectory)
         {
             _handler = new SrcMLArchiveEventsHandlers(GetATestingScheduler());
             var files = GetFileList(filesInThisDirectory);
@@ -139,14 +139,14 @@ namespace Sando.IntegrationTests.Search
             return incoming;
         }
 
-        private void CreateSwum()
+        public void CreateSwum()
         {
             SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<Sando.Core.Tools.SolutionKey>()), false);
             SwumManager.Instance.Archive = _srcMLArchive;
         }
 
 
-        private void CreateArchive(string filesInThisDirectory)
+        public void CreateArchive(string filesInThisDirectory)
         {
             var srcMlArchiveFolder = Path.Combine(_indexPath, "archive");
             var srcMLFolder = Path.Combine(".", "SrcML", "CSharp");
@@ -157,7 +157,7 @@ namespace Sando.IntegrationTests.Search
 
 
 
-        private void CreateIndexer()
+        public void CreateIndexer()
         {
             ServiceLocator.Resolve<UIPackage>();
 
@@ -189,14 +189,14 @@ namespace Sando.IntegrationTests.Search
 
 
 
-        private void CreateKey(string filesInThisDirectory)
+        public void CreateKey(string filesInThisDirectory)
         {
             Directory.CreateDirectory(_indexPath);
             var key = new Sando.Core.Tools.SolutionKey(Guid.NewGuid(), filesInThisDirectory);
             ServiceLocator.RegisterInstance(key);
         }
 
-        private void CreateSystemWideDefaults(string indexDirName)
+        public void CreateSystemWideDefaults(string indexDirName)
         {
             _indexPath = Path.Combine(Path.GetTempPath(), indexDirName);
             TestUtils.InitializeDefaultExtensionPoints();
@@ -223,6 +223,10 @@ namespace Sando.IntegrationTests.Search
                 try
                 {
                     Directory.Delete(_indexPath, true);
+                    deleted = true;
+                }
+                catch (DirectoryNotFoundException e)
+                {
                     deleted = true;
                 }
                 catch (Exception e)
