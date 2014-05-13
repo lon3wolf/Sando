@@ -29,7 +29,7 @@ namespace Sando.IntegrationTests.Search.Performance
         }
 
         [Test]
-        //[Ignore]
+        [Ignore]
         public void SelfIndexingPerformanceTest()
         {
             var fileStream = new StreamWriter(TestUtils.SolutionDirectory + "\\SandoPerformanceData.txt");
