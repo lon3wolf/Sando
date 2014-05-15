@@ -16,9 +16,9 @@ namespace Sando.IntegrationTests.Search.Performance
     [TestFixture]
     public class IndexingPerformanceTest
     {
-
         private const int NumberOfExperimentsToAverage = 5;
-        private int[] CorpusMultipliers = { 1, 2, 5, 10 };
+        private string PerformanceOutputFile = TestUtils.SolutionDirectory + "\\SandoPerformanceData.txt";
+        private string ExternalProjectsDirectory = TestUtils.SolutionDirectory + "\\ScalabilityTestProjects";
 
         private AutomaticallyIndexingTestClass automaticallyIndexingTestClass;
 
@@ -30,62 +30,99 @@ namespace Sando.IntegrationTests.Search.Performance
 
         [Test]
         [Ignore]
-        public void SelfIndexingPerformanceTest()
+        public void ExternalIndexingPerformanceTest()
         {
-            var fileStream = new StreamWriter(TestUtils.SolutionDirectory + "\\SandoPerformanceData.txt");
+            var fileStream = File.AppendText(PerformanceOutputFile);
 
-            fileStream.WriteLine("Sando Git Hash = 7d47a1ec749383adb153efd3874f4fd13c8022f5");
+            fileStream.WriteLine("*** ExternalIndexingPerformanceTest ***");
             fileStream.WriteLine("Date = " + DateTime.UtcNow);
 
-            for (int n = 0; n < CorpusMultipliers.Length; n++)
+            var sandoDirectory = Path.Combine(ExternalProjectsDirectory, "sando");
+            if (! System.IO.Directory.Exists(sandoDirectory))
             {
-                Stopwatch timer = new Stopwatch();
-                double sumExpTimes = 0.0;
-                for (int j = 0; j < NumberOfExperimentsToAverage; j++)
-                {
-                    MeasurePerformanceOfSelfIndexing(CorpusMultipliers[n], timer);
-                    sumExpTimes += timer.Elapsed.TotalSeconds;
-                }
-                var avgExpTime = sumExpTimes / NumberOfExperimentsToAverage;
-                fileStream.WriteLine("Time for " + CorpusMultipliers[n] + " self indexing ops = " + avgExpTime + "secs");
-                timer.Reset();
+                GitDownloadProjectSource("https://git01.codeplex.com/sando");
             }
+            PerformAndWritePerfromanceExperiments(fileStream, sandoDirectory);
+
+            var nugetDirectory = Path.Combine(ExternalProjectsDirectory, "nuget");
+            if (!System.IO.Directory.Exists(nugetDirectory))
+            {
+                GitDownloadProjectSource("https://git01.codeplex.com/nuget");
+            }
+            PerformAndWritePerfromanceExperiments(fileStream, nugetDirectory);
 
             fileStream.Close();
         }
 
-        private void MeasurePerformanceOfSelfIndexing(int corpusMultiplier, Stopwatch timer)
+        private void PerformAndWritePerfromanceExperiments(StreamWriter fileStream, string projectDir)
         {
-            var indexDirName = GetIndexDirName() + "_" + corpusMultiplier;
-            var filesInThisDirectory = TestUtils.SolutionDirectory;
+            Stopwatch timer = new Stopwatch();
+            double sumExpTimes = 0.0;
+            for (int j = 0; j < NumberOfExperimentsToAverage; j++)
+            {
+                MeasureIndexingTime(projectDir, timer);
+                sumExpTimes += timer.Elapsed.TotalSeconds;
+            }
+            var avgExpTime = sumExpTimes / NumberOfExperimentsToAverage;
+            fileStream.WriteLine("Time for " + Path.GetFileName(projectDir) + " indexing = " + avgExpTime + "secs");
+        }
 
-            automaticallyIndexingTestClass.CreateSystemWideDefaults(indexDirName);
-            automaticallyIndexingTestClass.CreateKey(filesInThisDirectory);
+        private void GitDownloadProjectSource(string url)
+        {
+            CreateExternalProjectsDirectory();
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = true;
+            startInfo.RedirectStandardOutput = false;
+            startInfo.RedirectStandardInput = false;
+            startInfo.WorkingDirectory = ExternalProjectsDirectory;
+            startInfo.FileName = "git.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.Arguments = "clone " + url;
+
+            try
+            {
+                using (Process exeProcess = Process.Start(startInfo))
+                {
+                    exeProcess.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Problem running git - " + ex.ToString());
+            }
+        }
+
+        private void MeasureIndexingTime(string projectDirName, Stopwatch timer)
+        {
+            automaticallyIndexingTestClass.CreateSystemWideDefaults(Path.GetFileName(projectDirName) + "_IndexDir");
+            automaticallyIndexingTestClass.CreateKey(projectDirName);
             automaticallyIndexingTestClass.CreateIndexer();
-            automaticallyIndexingTestClass.CreateArchive(filesInThisDirectory);
+            automaticallyIndexingTestClass.CreateArchive(projectDirName);
             automaticallyIndexingTestClass.CreateSwum(); 
 
-            for (int i = 0; i < corpusMultiplier; i++)            
-            {
-                timer.Start();
+            timer.Start();
 
-                automaticallyIndexingTestClass.AddFilesToIndex(filesInThisDirectory);
-                automaticallyIndexingTestClass.WaitForIndexing();
-                ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
+            automaticallyIndexingTestClass.AddFilesToIndex(projectDirName);
+            automaticallyIndexingTestClass.WaitForIndexing();
+            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
 
-                timer.Stop();
+            timer.Stop();
 
-                Thread.Sleep(TimeSpan.FromSeconds(10));
-                ServiceLocator.Resolve<DocumentIndexer>().ClearIndex();
-                Thread.Sleep(TimeSpan.FromSeconds(10));
-            }
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+            ServiceLocator.Resolve<DocumentIndexer>().ClearIndex();
+            Thread.Sleep(TimeSpan.FromSeconds(10));
             
             automaticallyIndexingTestClass.TearDown();
         }
 
-        private string GetIndexDirName()
+        private void CreateExternalProjectsDirectory()
         {
-            return "IndexingPerformanceTest";
+            if (! System.IO.Directory.Exists(ExternalProjectsDirectory))
+            {
+                System.IO.Directory.CreateDirectory(ExternalProjectsDirectory);
+            }
         }
 
     }
