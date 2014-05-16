@@ -125,7 +125,7 @@ namespace Sando.IntegrationTests.Search
             _handler.SourceFileChanged(this, new FileEventRaisedArgs(FileEventType.FileAdded, file));
         }
 
-        protected List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
+        public List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
         {
             if (filesInThisDirectory.EndsWith("LIBS") || filesInThisDirectory.EndsWith("bin") || filesInThisDirectory.EndsWith("Debug"))
                 return incoming;

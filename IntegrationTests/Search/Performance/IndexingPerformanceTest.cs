@@ -5,11 +5,13 @@ using Sando.IntegrationTests.Search;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Management;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using UnitTestHelpers;
+using Sando.Recommender;
 
 namespace Sando.IntegrationTests.Search.Performance
 {
@@ -21,11 +23,13 @@ namespace Sando.IntegrationTests.Search.Performance
         private string ExternalProjectsDirectory = TestUtils.SolutionDirectory + "\\ScalabilityTestProjects";
 
         private AutomaticallyIndexingTestClass automaticallyIndexingTestClass;
+        private bool _indexedAProject;
 
         [TestFixtureSetUp]
         public void Setup()
         {
             automaticallyIndexingTestClass = new AutomaticallyIndexingTestClass();
+            _indexedAProject = false;
         }
 
         [Test]
@@ -40,34 +44,64 @@ namespace Sando.IntegrationTests.Search.Performance
             var sandoDirectory = Path.Combine(ExternalProjectsDirectory, "sando");
             if (! System.IO.Directory.Exists(sandoDirectory))
             {
-                GitDownloadProjectSource("https://git01.codeplex.com/sando");
+                GitDownloadProjectSource("https://git01.codeplex.com/sando", fileStream);
             }
-            PerformAndWritePerfromanceExperiments(fileStream, sandoDirectory);
+            PerformAndWritePerformanceExperiments(fileStream, sandoDirectory);
 
             var nugetDirectory = Path.Combine(ExternalProjectsDirectory, "nuget");
             if (!System.IO.Directory.Exists(nugetDirectory))
             {
-                GitDownloadProjectSource("https://git01.codeplex.com/nuget");
+                GitDownloadProjectSource("https://git01.codeplex.com/nuget", fileStream);
             }
-            PerformAndWritePerfromanceExperiments(fileStream, nugetDirectory);
+            PerformAndWritePerformanceExperiments(fileStream, nugetDirectory);
+
+            var linuxDirectory = Path.Combine(ExternalProjectsDirectory, "linux");
+            if (!System.IO.Directory.Exists(linuxDirectory))
+            {
+                GitDownloadProjectSource("https://github.com/torvalds/linux.git", fileStream);
+            }
+            PerformAndWritePerformanceExperiments(fileStream, linuxDirectory);
 
             fileStream.Close();
         }
 
-        private void PerformAndWritePerfromanceExperiments(StreamWriter fileStream, string projectDir)
+        private void PerformAndWritePerformanceExperiments(StreamWriter fileStream, string projectDir)
         {
-            Stopwatch timer = new Stopwatch();
-            double sumExpTimes = 0.0;
+            var projectName = Path.GetFileName(projectDir);
+
+            Stopwatch indexingTimer = new Stopwatch();
+            double sumIndexingTimes = 0.0;
+            int indexedDocs = 0;
+
+            var wordsToGenerateRecommendationFor = new string[] { projectName, "hello world", "performance", "module", "bug" };
+            Stopwatch recommendationTimer = new Stopwatch();
+            double sumRecTimes = 0.0;
+
             for (int j = 0; j < NumberOfExperimentsToAverage; j++)
             {
-                MeasureIndexingTime(projectDir, timer);
-                sumExpTimes += timer.Elapsed.TotalSeconds;
+                indexedDocs = MeasureIndexingTime(projectDir, indexingTimer);
+                sumIndexingTimes += indexingTimer.Elapsed.TotalSeconds;
+                indexingTimer.Reset();
+
+                MeasureRecommendationTime(wordsToGenerateRecommendationFor, recommendationTimer);
+                sumRecTimes += recommendationTimer.Elapsed.TotalSeconds;
+                recommendationTimer.Reset();
+
+                CleanUpAfterIndexing();
             }
-            var avgExpTime = sumExpTimes / NumberOfExperimentsToAverage;
-            fileStream.WriteLine("Time for " + Path.GetFileName(projectDir) + " indexing = " + avgExpTime + "secs");
+
+            fileStream.Write("*** " + projectName + ": ");
+            fileStream.Write(automaticallyIndexingTestClass.GetFileList(projectDir).Count + " source files, ");
+            fileStream.WriteLine(indexedDocs + " program elements");
+
+            var avgIndexingTime = sumIndexingTimes / NumberOfExperimentsToAverage;
+            fileStream.WriteLine("Time for " + projectName + " indexing = " + avgIndexingTime + "secs");
+
+            var avgRecTime = sumRecTimes / (NumberOfExperimentsToAverage * wordsToGenerateRecommendationFor.Count());
+            fileStream.WriteLine("Time for " + projectName + " recommendation generation = " + avgRecTime + "secs");
         }
 
-        private void GitDownloadProjectSource(string url)
+        private void GitDownloadProjectSource(string url, StreamWriter fileStream)
         {
             CreateExternalProjectsDirectory();
 
@@ -86,15 +120,16 @@ namespace Sando.IntegrationTests.Search.Performance
                 using (Process exeProcess = Process.Start(startInfo))
                 {
                     exeProcess.WaitForExit();
+                    fileStream.WriteLine(url + " -- git.exe process exitted with code: {0}", exeProcess.ExitCode);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Problem running git - " + ex.ToString());
+                fileStream.WriteLine(url + " -- problem running git.exe - " + ex.ToString());
             }
         }
 
-        private void MeasureIndexingTime(string projectDirName, Stopwatch timer)
+        private int MeasureIndexingTime(string projectDirName, Stopwatch timer)
         {
             automaticallyIndexingTestClass.CreateSystemWideDefaults(Path.GetFileName(projectDirName) + "_IndexDir");
             automaticallyIndexingTestClass.CreateKey(projectDirName);
@@ -111,10 +146,38 @@ namespace Sando.IntegrationTests.Search.Performance
             timer.Stop();
 
             Thread.Sleep(TimeSpan.FromSeconds(10));
-            ServiceLocator.Resolve<DocumentIndexer>().ClearIndex();
-            Thread.Sleep(TimeSpan.FromSeconds(10));
-            
-            automaticallyIndexingTestClass.TearDown();
+            _indexedAProject = true;
+            var indexedDocs = ServiceLocator.Resolve<DocumentIndexer>().GetNumberOfIndexedDocuments();
+            return indexedDocs;
+        }
+
+        private void MeasureRecommendationTime(string[] wordsToGenerateRecommendationFor, Stopwatch timer)
+        {
+
+            if (_indexedAProject)
+            {       
+                var recommender = ServiceLocator.Resolve<QueryRecommender>();
+
+                timer.Start();
+
+                for (int i = 0; i < wordsToGenerateRecommendationFor.Count(); i++)
+                {
+                    recommender.GenerateRecommendations(wordsToGenerateRecommendationFor[i]);
+                }
+
+                timer.Stop();
+            }
+        }
+
+        private void CleanUpAfterIndexing()
+        {
+            if (_indexedAProject)
+            {
+                ServiceLocator.Resolve<DocumentIndexer>().ClearIndex();
+                Thread.Sleep(TimeSpan.FromSeconds(10));
+                automaticallyIndexingTestClass.TearDown();
+                _indexedAProject = false;
+            }
         }
 
         private void CreateExternalProjectsDirectory()
