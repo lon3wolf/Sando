@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 using Lucene.Net.Analysis;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Portal.LuceneInterface
 {
@@ -524,6 +525,8 @@ namespace Portal.LuceneInterface
                 return;
             }
 
+            var generateOnlyDashSubwords = IsGUID(s);
+
             StringBuilder sb = null;
             StringBuilder sbWithUnderscores = null;
             if (catenateSubwords) sb = new StringBuilder();
@@ -537,6 +540,7 @@ namespace Portal.LuceneInterface
             Token lastToken = null;
             Token tok = null;
             lastToken = null;
+            int subwordIndexForGuids = 0;
             for (int i = start; i < end; i++)
             {
                 tok = lst[i];
@@ -559,7 +563,33 @@ namespace Portal.LuceneInterface
                 }
                 if (generateSubwords)
                 {
-                    queue.Add(tok);
+                    if (generateOnlyDashSubwords)
+                    {
+                        if (
+                            (lastToken != null && lastToken.EndOffset() + 1 == tok.StartOffset()) //at a dash in guid
+                            ||
+                            (i + 1 == end) //at the end of guid
+                            )
+                        {
+                            StringBuilder lastFewGuidTokens = new StringBuilder();
+                            //get last few tokens
+                            for (int index = subwordIndexForGuids; index < i; index++)
+                            {
+                                var subword = lst[index];
+                                lastFewGuidTokens.Append(subword.Term());
+                            }
+                            if (i + 1 == end) //at the end of guid
+                                lastFewGuidTokens.Append(lst[i].Term()); //add last one
+                            Token concatTok = new Token(lastFewGuidTokens.ToString(),
+                                    lst[subwordIndexForGuids].StartOffset(),
+                                    lst[i - 1].EndOffset(),
+                                    lst[subwordIndexForGuids].Type());
+                            queue.Add(concatTok);
+                            subwordIndexForGuids = i;
+                        }
+                    }
+                    else
+                        queue.Add(tok);
                 }
                 lastToken = tok;
             }
@@ -612,6 +642,25 @@ namespace Portal.LuceneInterface
                     lastOne = null;
                 }
             }
+        }
+
+        private static string guid = @"[a-f0-9]*";
+        private static Regex guidRegex = new Regex(guid, RegexOptions.None);
+
+
+        private bool IsGUID(string s)
+        {
+            //61e80ffa-f99b-46ac-8dd0-f3f4171568f3
+            //7e03caf3-06ed-4ff5-962a-effa1fb2f383            
+            if (s.Length == 36 && s.IndexOf('-') == 8 && s[13] == '-')
+                return true;
+            //7e03caf306ed4ff5962aeffa1fb2f383
+            if (s.Length == 32)
+            {
+                if (guidRegex.IsMatch(s,0))
+                    return true;
+            }
+            return false;
         }
 
         private int GetMinusOnePosition(Token firstTok, Token tok)

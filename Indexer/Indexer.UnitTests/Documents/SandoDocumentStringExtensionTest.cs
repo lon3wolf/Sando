@@ -25,6 +25,13 @@ namespace Sando.Indexer.UnitTests.Documents
 		}
 
         [Test]
+        public void SandoDocumentStringExtension_SplitWithGUIDs()
+        {
+            CheckSplits("7e03caf3-06ed-4ff5-962a-effa1fb2f383", "7e03caf3-06ed-4ff5-962a-effa1fb2f383 7e03caf306ed4ff5962aeffa1fb2f383 7e03caf3 06ed 4ff5 962a effa1fb2f383");
+            CheckSplits("7e03caf306ed4ff5962aeffa1fb2f383", "7e03caf306ed4ff5962aeffa1fb2f383");
+        }
+
+        [Test]
         public void SandoDocumentStringExtension_SplitWithUnderscoresAndDashes()
         {
             CheckSplits("size-t", "size-t sizet size t");
