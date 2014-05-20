@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Lucene.Net.Analysis;
+using System.IO;
 
 namespace Portal.LuceneInterface
 {
@@ -182,6 +183,10 @@ namespace Portal.LuceneInterface
             else if (Char.IsLetter(ch))
             {
                 return UPPER;
+            }
+            else if (Char.IsNumber(ch))
+            {
+                return DIGIT;
             }
             else
             {
@@ -463,7 +468,7 @@ namespace Portal.LuceneInterface
                 // Find all adjacent tokens of the same type.
                 //
                 Token tok = tlist[0];
-                bool isWord = (TokType(tok) & ALPHA) != 0;
+                bool isWord = true; // (TokType(tok) & ALPHA) != 0;
                 bool wasWord = isWord;
 
                 for (int i = 0; i < numtok; )
@@ -473,7 +478,7 @@ namespace Portal.LuceneInterface
                     {
                         wasWord = isWord;
                         tok = tlist[j];
-                        isWord = (TokType(tok) & ALPHA) != 0;
+                        isWord = true; //(TokType(tok) & ALPHA) != 0;
                         if (isWord != wasWord) break;
                     }
                     if (wasWord)
@@ -487,11 +492,11 @@ namespace Portal.LuceneInterface
                     i = j;
                 }
 
-                // take care catenating all subwords
-                if (catenateAll != 0)
-                {
-                    AddCombos(s, tlist, 0, numtok, false, true, 0);
-                }
+                //// take care catenating all subwords
+                //if (catenateAll != 0)
+                //{
+                //    AddCombos(s, tlist, 0, numtok, false, true, 0);
+                //}
 
                 // NOTE: in certain cases, queue may be empty (for instance, if catenate
                 // and generate are both set to false).  Only exit the loop if the queue
@@ -543,7 +548,7 @@ namespace Portal.LuceneInterface
                     {                        
                         if (lastToken != null)
                             if (lastToken.EndOffset() + 1 == tok.StartOffset())
-                                sbWithUnderscores.Append('_');
+                                sbWithUnderscores.Append(s[GetMinusOnePosition(firstTok,tok)]);
                         if (startWithUnderscore)
                             {
                                 sbWithUnderscores.Append("_");
@@ -609,29 +614,24 @@ namespace Portal.LuceneInterface
             }
         }
 
+        private int GetMinusOnePosition(Token firstTok, Token tok)
+        {
+            var started = firstTok.StartOffset();
+            var current = tok.StartOffset();
+            return (current - started -1);
+        }
+
         private static Tuple<bool,bool> ShouldCatenateSubwords(string s, List<Token> lst, int start, int end)
         {
             bool catenateSubwordsWithUnderScores = false;
             bool startWithUnderscore = false;
-            Token token = null;
-            Token lastToken = null;
+            if (s.IndexOf('_') != -1 || s.IndexOf('-') != -1)
+                catenateSubwordsWithUnderScores = true;
             if (s.StartsWith("_"))
             {
                 catenateSubwordsWithUnderScores = true;
                 startWithUnderscore = true;
             }
-            if (!catenateSubwordsWithUnderScores)
-                for (int i = start; i < end; i++)
-                {
-                    token = lst[i];
-                    if (lastToken != null)
-                        if (lastToken.EndOffset() + 1 == token.StartOffset())
-                        {
-                            catenateSubwordsWithUnderScores = true;
-                            break;
-                        }
-                    lastToken = token;
-                }
             return new Tuple<bool, bool>(catenateSubwordsWithUnderScores, startWithUnderscore);
         }
 
@@ -641,5 +641,46 @@ namespace Portal.LuceneInterface
         // dollar sign?  $42
         // percent sign?  33%
         // downsides:  if source text is "powershot" then a query of "PowerShot" won't match!
+
+        public static MappingCharFilter GetCharMapper(TextReader r)
+        {
+            var map = new NormalizeCharMap();
+
+            string[] symbols = {  
+"[",
+"\\",
+"]",
+"^",
+"!",
+"\"",        
+"#",
+"$",
+"%",
+"&",
+"'",
+"(",
+")",
+"*",
+"+",
+",",
+".",
+"/",
+":",
+";",
+"<",
+"=",
+">",
+"?",
+"@",
+"{",
+"|",
+"}",
+"~"};
+            foreach (var symbol in symbols)
+                map.Add(symbol, " ");
+            var mappingCharFilter = new MappingCharFilter(map, r);
+            return mappingCharFilter;
+        }
+
     }
 }

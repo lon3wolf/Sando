@@ -1,6 +1,7 @@
 ﻿using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Snowball;
 using Lucene.Net.Analysis.Standard;
+using Portal.LuceneInterface;
 using Sando.Indexer.Documents;
 using System;
 using System.Collections.Generic;
@@ -21,14 +22,20 @@ namespace Sando.Indexer.Splitter
 
             public override TokenStream TokenStream(System.String fieldName, System.IO.TextReader reader)
             {
-                TokenStream result = new StandardTokenizer(matchVersion, reader);
-                result = new Portal.LuceneInterface.WordDelimiterFilter(result, 1, 1, 1, 1, 1);
-                result = new StandardFilter(result);
-                result = new LowerCaseFilter(result);
+                TokenStream result = GetStandardFilterSet(reader);
                 if (stopSet != null)
                     result = new StopFilter(StopFilter.GetEnablePositionIncrementsVersionDefault(matchVersion),
                     result, stopSet);
                 result = new SnowballFilter(result, "English");
+                return result;
+            }
+
+            public static Lucene.Net.Analysis.TokenStream GetStandardFilterSet(System.IO.TextReader reader)
+            {
+                var mappingCharFilter = WordDelimiterFilter.GetCharMapper(reader);
+                TokenStream ts = new WhitespaceTokenizer(mappingCharFilter);
+                WordDelimiterFilter filter = new WordDelimiterFilter(ts, 1, 1, 1, 1, 1);
+                TokenStream result = new LowerCaseFilter(filter);
                 return result;
             }
 
@@ -111,6 +118,8 @@ namespace Sando.Indexer.Splitter
                 else
                     return base.IsTokenChar(c);
             }
+
+      
         }      
 
   
