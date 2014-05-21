@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
@@ -10,9 +11,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/UI;component/Base/StyleDictionary.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="CommandBarStyle" TargetType="{x:Type WrapPanel}">
+                <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarGradientKey}}" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    <WrapPanel Orientation="Horizontal">
+    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource CommandBarStyle}">
         <Button Name="Options"  Margin="1,3,0,0" FontFamily="ExtraBold" IsEnabled="True"
                     KeyboardNavigation.IsTabStop="False" FontWeight="ExtraBold" 
                     Height="19" Width="19" VerticalAlignment="Top" ToolTip="Open Sando Options"
@@ -25,10 +29,9 @@
                     Style="{StaticResource ToolWindowButtonStyle}">✘
         </Button>
 
-        <!--<Button x:Name="HelpButton"  ToolTip="Help" Margin="1,3,0,0" FontFamily="ExtraBold" VerticalAlignment="Top" 
-            	IsEnabled="{Binding IsOpen, Converter={StaticResource oppositeConverter}, ElementName=SelectionPopup, Mode=TwoWay}" 
+        <Button x:Name="HelpButton"  ToolTip="Help" Margin="1,3,0,0" FontFamily="ExtraBold" VerticalAlignment="Top"             	
             	Style="{StaticResource ToolWindowButtonStyle}"
             	KeyboardNavigation.IsTabStop="False" Height="19" Width="19"
-            	Click="Toggled_Popup" FontWeight="ExtraBold" Content="⁈" />-->
+            	FontWeight="ExtraBold" Content="⁈" />
     </WrapPanel>
 </UserControl>

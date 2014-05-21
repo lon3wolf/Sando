@@ -15,8 +15,11 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="26"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <UserControl Content="{Binding MenuViewModel}"></UserControl>
+        <UserControl Content="{Binding SearchViewModel}" Grid.Row="1"></UserControl>
+        <UserControl Content="{Binding SearchResultViewModel}" Grid.Row="2" Height="Auto"></UserControl>
     </Grid>
 </UserControl>

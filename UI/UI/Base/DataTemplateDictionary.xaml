@@ -4,5 +4,11 @@
                     xmlns:view="clr-namespace:Sando.UI.View">
     <DataTemplate DataType="{x:Type viewModel:MenuViewModel}">
         <view:MenuView></view:MenuView>
-    </DataTemplate> 
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewModel:SearchViewModel}">
+        <view:SearchView></view:SearchView>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewModel:SearchResultViewModel}">
+        <view:SearchResultView></view:SearchResultView>
+    </DataTemplate>
 </ResourceDictionary>

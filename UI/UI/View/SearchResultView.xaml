@@ -1,0 +1,185 @@
+﻿<UserControl x:Class="Sando.UI.View.SearchResultView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Sando.UI" xmlns:view="clr-namespace:Sando.UI.View"
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
+             xmlns:converters="clr-namespace:Sando.UI.View.Search.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <converters:ElementToIcon x:Key="ElementToIcon"/>
+        <converters:ScoreToEndpoint x:Key="ScoreToEndpoint"/>
+        <converters:FileTypeToIcon x:Key="FileTypeToIcon"/>
+        <converters:NullableBoolToBool x:Key="NullableBoolToBool"/>
+        <converters:NullOrEmptyIsHidden x:Key="NullOrEmptyIsHidden"/>
+        <converters:NullOrEmptyToVisibility x:Key="NullOrEmptyToVisibility"/>
+        <converters:HighlightSearchKey x:Key="HighlightSearchKey"/>
+        <local:MyFontConverter x:Key="FontConverter" />
+        <local:MyStrokeConverter x:Key="StrokeConverter" />
+    </UserControl.Resources>
+    <DockPanel Grid.Row="6" Grid.ColumnSpan="2" 
+                       HorizontalAlignment="Stretch"  Height="Auto"
+                       VerticalAlignment="Stretch" >
+        <ListView  Name="searchResultListbox"  ItemsSource="{Binding Path=SearchResults}" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                       Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Height="Auto"
+                        VerticalAlignment="Stretch" MinWidth="270" MinHeight="100" HorizontalContentAlignment="Stretch"
+                                    
+                       Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+
+            <ListView.ContextMenu>
+                <ContextMenu Name="SearchResultMenu" StaysOpen="true">
+                    <ContextMenu.BitmapEffect>
+                        <BitmapEffectGroup/>
+                    </ContextMenu.BitmapEffect>
+                    <MenuItem Header="Remove Entire File from Index" Name="Remove" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" 
+                                            Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" />
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Control.IsMouseOver" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" 
+                                        Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" />
+                        </MultiTrigger>
+                    </Style.Triggers>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="0,0,0,0"/>
+                    <Setter Property="Padding" Value="0,0,0,0"/>
+                    <Setter Property="Height" Value="24"/>
+                    <!--<EventSetter Event="MouseDoubleClick" Handler="UIElement_OnMouseDown"/>
+                    <EventSetter Event="KeyDown" Handler="UIElement_OnKeyDown"/>
+                    <EventSetter Event="LostFocus" Handler="ListViewItem_LostFocus"/>-->
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="Auto" Header="Search Results" >
+                        <GridViewColumn.HeaderContainerStyle>
+                            <Style  TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
+                            </Style>
+                        </GridViewColumn.HeaderContainerStyle>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+
+                                <Grid Margin="0,0,0,0" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="22"/>
+                                        <RowDefinition Height="1"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Margin="0,0,0,0" Grid.Row="0" Grid.Column="0" >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="1"/>
+                                        </Grid.RowDefinitions>
+                                        <Border Grid.Row="0" Grid.ColumnSpan="4" Grid.RowSpan="3" >
+                                        </Border>
+                                        <Canvas Width="Auto" Height="0" Margin="-7,-2,0,0" Grid.Row="0" Grid.Column="0">
+                                            <Line X1="0" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource StrokeConverter}, Mode=OneWay}"></Line>
+                                        </Canvas>
+
+                                        <Popup Name="Details" Placement="Left" StaysOpen="False" Width="Auto" AllowsTransparency="true"                                            
+                                                PlacementTarget="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ListViewItem}}" 
+                                                   IsOpen="False">
+                                            <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.DockTargetBorderKey}}" BorderThickness="3,3,0,0">
+                                                <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}" BorderThickness="1,1,3,3">
+                                                    <Grid Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+                                                        <Grid.Resources>
+                                                            <Style TargetType="{x:Type Border}">
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.EditorExpansionBorderKey}}" />
+                                                                <Setter Property="BorderThickness" Value="0.5" />
+                                                                <Setter Property="CornerRadius" Value="0" />
+                                                            </Style>
+                                                        </Grid.Resources>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="20" />
+                                                            <RowDefinition Height="20" />
+                                                            <RowDefinition Height="80" />
+                                                            <RowDefinition Height="240" />
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="500" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
+                                                        </Border>
+
+                                                        <TextBlock Grid.Row="0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                                                                       Grid.Column="1"  Margin="2" Text="{Binding Mode=OneWay, Path=Name}" />
+                                                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource 
+                                                                {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Margin="2" 
+                                                                       Text="{Binding Mode=OneWay, Path=ParentOrFile}"/>
+                                                        <Image Source="{Binding Mode=OneWay, Path=ProgramElement, 
+                                                                Converter={StaticResource ElementToIcon}}" Width="16" Height="16" Margin="2" 
+                                                                   Grid.Row="0" Grid.Column="0" >
+                                                        </Image>
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Foreground="{DynamicResource 
+                                                                {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                                                                       Margin="2" TextElement.FontStyle="Italic" Text="in" />
+
+                                                        <Border Grid.Row="2" Grid.ColumnSpan="2"></Border>
+                                                        <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                                            <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                                                                           Margin="2" 
+                                                                           local:TextBlockEx.FormattedText="{Binding Mode=OneWay, 
+                                                                            Path=HighlightInfo, 
+                                                                            Converter={StaticResource HighlightSearchKey}}"/>
+                                                        </ScrollViewer>
+                                                        <Border Grid.Row="3" Grid.ColumnSpan="2"></Border>
+                                                        <ScrollViewer Grid.Row="3" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                                            <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
+                                                                    Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"  
+                                                                        Margin="4" local:TextBlockEx.FormattedText="{Binding Mode=OneWay, 
+                                                                            Path=RawHighlightInfo, Converter={StaticResource HighlightSearchKey}}"/>
+                                                        </ScrollViewer>
+                                                    </Grid>
+                                                </Border>
+                                            </Border>
+                                        </Popup>
+                                        <Image Source="{Binding Mode=OneWay, Path=ProgramElement, Converter={StaticResource ElementToIcon}}" Width="16" Height="16" Margin="0,0,2,2" Grid.Row="1" Grid.Column="0" >
+                                        </Image>
+                                        <TextBlock Name="Name" MaxWidth="210" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Text="{Binding Mode=OneWay, Path=Name}" Margin="1,0,0,0" TextTrimming="CharacterEllipsis" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontStyle="Italic" FontWeight="Light" Margin="5,0,5,0">in</TextBlock>
+                                        <TextBlock Name="Parent" Text="{Binding Mode=OneWay, Path=ParentOrFile}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" TextTrimming="WordEllipsis" Grid.Row="1" Grid.Column="3" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
+                                        <Canvas Width="Auto" Height="0" Margin="-7,0,0,0" Grid.Row="2" Grid.Column="0">
+                                            <Line X1="0" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource StrokeConverter}, Mode=OneWay}"></Line>
+                                        </Canvas>
+                                    </Grid>
+                                    <TextBlock Name="Snippet" Margin="5,2,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontFamily="Consolas" MinWidth="200" FontSize="10" TextAlignment="Left" VerticalAlignment="Top" Width="Auto" Height="60" 
+                                               Text="{Binding Mode=OneWay, Path=Snippet}" Grid.Row="1" Grid.Column="0" TextTrimming="CharacterEllipsis"/>
+                                    <Canvas Width="Auto" Height="0" Margin="-7,0,0,0" Grid.Row="2" Grid.Column="0">
+                                        <Line X1="1" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="2"></Line>
+                                    </Canvas>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</UserControl>
