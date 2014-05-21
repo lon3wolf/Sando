@@ -117,6 +117,15 @@ namespace Sando.IntegrationTests.Search
         }
 
         [Test]
+        public void GUIDSearch()
+        {
+            string keywords = "61e80ffa-f99b-46ac-8dd0-f3f4171568f3";
+            var expectedLowestRank = 4;
+            Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Field && (el.ProgramElement.Name == "guidUICmdSetString");
+            EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
+        }
+
+        [Test]
         public void UnderscoreSearch()
         {
             string keywords = "solutionEvents";

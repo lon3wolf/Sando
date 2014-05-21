@@ -21,6 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Lucene.Net.Analysis;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Portal.LuceneInterface
 {
@@ -182,6 +184,10 @@ namespace Portal.LuceneInterface
             else if (Char.IsLetter(ch))
             {
                 return UPPER;
+            }
+            else if (Char.IsNumber(ch))
+            {
+                return DIGIT;
             }
             else
             {
@@ -463,7 +469,7 @@ namespace Portal.LuceneInterface
                 // Find all adjacent tokens of the same type.
                 //
                 Token tok = tlist[0];
-                bool isWord = (TokType(tok) & ALPHA) != 0;
+                bool isWord = true; // (TokType(tok) & ALPHA) != 0;
                 bool wasWord = isWord;
 
                 for (int i = 0; i < numtok; )
@@ -473,7 +479,7 @@ namespace Portal.LuceneInterface
                     {
                         wasWord = isWord;
                         tok = tlist[j];
-                        isWord = (TokType(tok) & ALPHA) != 0;
+                        isWord = true; //(TokType(tok) & ALPHA) != 0;
                         if (isWord != wasWord) break;
                     }
                     if (wasWord)
@@ -487,11 +493,11 @@ namespace Portal.LuceneInterface
                     i = j;
                 }
 
-                // take care catenating all subwords
-                if (catenateAll != 0)
-                {
-                    AddCombos(s, tlist, 0, numtok, false, true, 0);
-                }
+                //// take care catenating all subwords
+                //if (catenateAll != 0)
+                //{
+                //    AddCombos(s, tlist, 0, numtok, false, true, 0);
+                //}
 
                 // NOTE: in certain cases, queue may be empty (for instance, if catenate
                 // and generate are both set to false).  Only exit the loop if the queue
@@ -519,6 +525,8 @@ namespace Portal.LuceneInterface
                 return;
             }
 
+            var generateOnlyDashSubwords = IsGUID(s);
+
             StringBuilder sb = null;
             StringBuilder sbWithUnderscores = null;
             if (catenateSubwords) sb = new StringBuilder();
@@ -532,6 +540,7 @@ namespace Portal.LuceneInterface
             Token lastToken = null;
             Token tok = null;
             lastToken = null;
+            int subwordIndexForGuids = 0;
             for (int i = start; i < end; i++)
             {
                 tok = lst[i];
@@ -543,7 +552,7 @@ namespace Portal.LuceneInterface
                     {                        
                         if (lastToken != null)
                             if (lastToken.EndOffset() + 1 == tok.StartOffset())
-                                sbWithUnderscores.Append('_');
+                                sbWithUnderscores.Append(s[GetMinusOnePosition(firstTok,tok)]);
                         if (startWithUnderscore)
                             {
                                 sbWithUnderscores.Append("_");
@@ -554,7 +563,33 @@ namespace Portal.LuceneInterface
                 }
                 if (generateSubwords)
                 {
-                    queue.Add(tok);
+                    if (generateOnlyDashSubwords)
+                    {
+                        if (
+                            (lastToken != null && lastToken.EndOffset() + 1 == tok.StartOffset()) //at a dash in guid
+                            ||
+                            (i + 1 == end) //at the end of guid
+                            )
+                        {
+                            StringBuilder lastFewGuidTokens = new StringBuilder();
+                            //get last few tokens
+                            for (int index = subwordIndexForGuids; index < i; index++)
+                            {
+                                var subword = lst[index];
+                                lastFewGuidTokens.Append(subword.Term());
+                            }
+                            if (i + 1 == end) //at the end of guid
+                                lastFewGuidTokens.Append(lst[i].Term()); //add last one
+                            Token concatTok = new Token(lastFewGuidTokens.ToString(),
+                                    lst[subwordIndexForGuids].StartOffset(),
+                                    lst[i - 1].EndOffset(),
+                                    lst[subwordIndexForGuids].Type());
+                            queue.Add(concatTok);
+                            subwordIndexForGuids = i;
+                        }
+                    }
+                    else
+                        queue.Add(tok);
                 }
                 lastToken = tok;
             }
@@ -609,29 +644,43 @@ namespace Portal.LuceneInterface
             }
         }
 
+        private static string guid = @"[a-f0-9]*";
+        private static Regex guidRegex = new Regex(guid, RegexOptions.None);
+
+
+        private bool IsGUID(string s)
+        {
+            //61e80ffa-f99b-46ac-8dd0-f3f4171568f3
+            //7e03caf3-06ed-4ff5-962a-effa1fb2f383            
+            if (s.Length == 36 && s.IndexOf('-') == 8 && s[13] == '-')
+                return true;
+            //7e03caf306ed4ff5962aeffa1fb2f383
+            if (s.Length == 32)
+            {
+                if (guidRegex.IsMatch(s,0))
+                    return true;
+            }
+            return false;
+        }
+
+        private int GetMinusOnePosition(Token firstTok, Token tok)
+        {
+            var started = firstTok.StartOffset();
+            var current = tok.StartOffset();
+            return (current - started -1);
+        }
+
         private static Tuple<bool,bool> ShouldCatenateSubwords(string s, List<Token> lst, int start, int end)
         {
             bool catenateSubwordsWithUnderScores = false;
             bool startWithUnderscore = false;
-            Token token = null;
-            Token lastToken = null;
+            if (s.IndexOf('_') != -1 || s.IndexOf('-') != -1)
+                catenateSubwordsWithUnderScores = true;
             if (s.StartsWith("_"))
             {
                 catenateSubwordsWithUnderScores = true;
                 startWithUnderscore = true;
             }
-            if (!catenateSubwordsWithUnderScores)
-                for (int i = start; i < end; i++)
-                {
-                    token = lst[i];
-                    if (lastToken != null)
-                        if (lastToken.EndOffset() + 1 == token.StartOffset())
-                        {
-                            catenateSubwordsWithUnderScores = true;
-                            break;
-                        }
-                    lastToken = token;
-                }
             return new Tuple<bool, bool>(catenateSubwordsWithUnderScores, startWithUnderscore);
         }
 
@@ -641,5 +690,46 @@ namespace Portal.LuceneInterface
         // dollar sign?  $42
         // percent sign?  33%
         // downsides:  if source text is "powershot" then a query of "PowerShot" won't match!
+
+        public static MappingCharFilter GetCharMapper(TextReader r)
+        {
+            var map = new NormalizeCharMap();
+
+            string[] symbols = {  
+"[",
+"\\",
+"]",
+"^",
+"!",
+"\"",        
+"#",
+"$",
+"%",
+"&",
+"'",
+"(",
+")",
+"*",
+"+",
+",",
+".",
+"/",
+":",
+";",
+"<",
+"=",
+">",
+"?",
+"@",
+"{",
+"|",
+"}",
+"~"};
+            foreach (var symbol in symbols)
+                map.Add(symbol, " ");
+            var mappingCharFilter = new MappingCharFilter(map, r);
+            return mappingCharFilter;
+        }
+
     }
 }

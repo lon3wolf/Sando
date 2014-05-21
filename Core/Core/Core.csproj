@@ -169,6 +169,7 @@
     <Compile Include="Tools\PathManager.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Tools\SandoField.cs" />
     <Compile Include="Tools\SandoLogAnalyzer.cs" />
     <Compile Include="Tools\SandoQueryParser.cs">
       <SubType>Code</SubType>
@@ -177,6 +178,7 @@
     <Compile Include="Tools\SeSpecificThesaurus.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Tools\SnowballAndWordSplitterAnalyzer.cs" />
     <Compile Include="Tools\SparseMatrixForWordPairs.cs" />
     <Compile Include="Tools\SpecialWords.cs" />
     <Compile Include="Tools\TimedProcessor.cs" />
@@ -190,6 +192,7 @@
     <Compile Include="Tools\WordCorrector.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Tools\WordDelimiterFilter.cs" />
     <Compile Include="Tools\WordSplitter.cs">
       <SubType>Code</SubType>
     </Compile>
