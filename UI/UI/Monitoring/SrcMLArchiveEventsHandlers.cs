@@ -112,12 +112,12 @@ namespace Sando.UI.Monitoring
                     documentIndexer.DeleteDocuments(args.FilePath, commitImmediately);
                 }
             };
-            CommitEveryOneHundredFiles(cancelTokenSource, action);
+            CommitEveryOneHundredFiles(cancelTokenSource);
             StartNew(action, cancelTokenSource);
         }
 
         //Note: if you don't commit every so often then Lucene will take up a lot of RAM, causing performance issues on most machines.
-        private void CommitEveryOneHundredFiles(CancellationTokenSource cancelTokenSource, Action action)
+        private void CommitEveryOneHundredFiles(CancellationTokenSource cancelTokenSource)
         {
             if (counter % 100 == 0)
             {
@@ -128,7 +128,7 @@ namespace Sando.UI.Monitoring
                     //only public API that forces a commit
                     documentIndexer.ForceReaderRefresh();
                 };
-                StartNew(action, cancelTokenSource);
+                StartNew(commitAction, cancelTokenSource);
             }
             else
             {

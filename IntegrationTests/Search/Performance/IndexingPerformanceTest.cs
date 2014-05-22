@@ -62,6 +62,15 @@ namespace Sando.IntegrationTests.Search.Performance
             }
             PerformAndWritePerformanceExperiments(fileStream, linuxDirectory);
 
+            /*
+            var cmsswDirectory = Path.Combine(ExternalProjectsDirectory, "cmssw");
+            if (!System.IO.Directory.Exists(cmsswDirectory))
+            {
+                GitDownloadProjectSource("https://github.com/cms-sw/cmssw.git", fileStream);
+            }
+            PerformAndWritePerformanceExperiments(fileStream, cmsswDirectory);
+            */
+
             fileStream.Close();
         }
 
