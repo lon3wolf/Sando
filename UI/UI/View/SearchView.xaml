@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewmodel="clr-namespace:Sando.UI.ViewModel"
              xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              xmlns:converters="clr-namespace:Sando.UI.View.Search.Converters"
@@ -14,6 +15,7 @@
                 <ResourceDictionary Source="pack://application:,,,/UI;component/Base/StyleDictionary.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
             <converters:SwumTypeToColorConverter x:Key="SwumTypeToColorConverter"/>
+            <converters:BackgroundConverter x:Key="BackgroundConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -25,9 +27,87 @@
             <RowDefinition Height="15" MinHeight="15"/>
             <RowDefinition Height="Auto" MinHeight="15"/>
         </Grid.RowDefinitions>
-        <TextBox Margin="-3,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" BorderThickness="0" FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" IsReadOnly="True"   Grid.Row="0"  HorizontalAlignment="Left" 
-                     Width="127"  Height="Auto"  
+        <Grid Grid.Row="0" Margin="5,0,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90">
+                </ColumnDefinition>
+                <ColumnDefinition Width="*">
+                </ColumnDefinition>
+
+            </Grid.ColumnDefinitions>
+
+            <TextBox Margin="-3,0,0,0"  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" BorderThickness="0" FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" IsReadOnly="True"   Grid.Row="0"  HorizontalAlignment="Left" 
+                     Width="127"  Grid.Column="0" Height="Auto"  
                      KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" Text="Currently Indexing:" Grid.ColumnSpan="2"/>
+
+
+            <TextBox KeyboardNavigation.IsTabStop="False"   BorderThickness="0" IsReadOnly="True" Grid.Column="1" Name="IndexingList" Margin="2,0,5,1" FontSize="11" FontStyle="Italic" HorizontalAlignment="Stretch" Text="{Binding Path=OpenSolutionPaths, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="IndexingList_KeyDown" PreviewMouseDown="IndexingList_MouseButtonDown"
+                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" ToolTip="Specify folders to index for open solution" Grid.ColumnSpan="2">
+                <TextBox.Background>
+                    <Binding Path="OpenSolutionPaths" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" Converter="{StaticResource BackgroundConverter}"/>
+                </TextBox.Background>
+            </TextBox>
+            <Popup Name="CurrentlyIndexingFoldersPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=IndexingList}" StaysOpen="True" IsOpen="False" Width="Auto">
+                <Grid Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolboxBackgroundKey   }}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Border Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="0,0,5,5"></Border>
+                    <Grid Margin="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition Height="40"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="70"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <ListBox ItemsSource="{Binding Path=IndexedFiles}" SelectedItem="{Binding SelectedIndexedFile}" Height="120" VerticalAlignment="Top" Width="236" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewmodel:IndexedFile}">
+                                        <TextBlock Text="{Binding FilePath}" ></TextBlock>
+                                    </DataTemplate>                                    
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <StackPanel Grid.Column="1">
+                                <Button Margin="5" Width="60" Height="25" Command="{Binding AddIndexFolderCommand}">Add</Button>
+                                <Button Margin="5" Width="60" Height="25" Command="{Binding RemoveIndexFolderCommand}">Remove</Button>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="80"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Border BorderBrush="Black" BorderThickness="0,0,0,1" Grid.ColumnSpan="2"></Border>
+                            <TextBox Margin="5" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Height="25" Width="220" 
+                                     Text="{Binding SelectedIndexedFile.FilePath, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="{Binding SelectedIndexedFile.FilePath}">
+                                
+                            </TextBox>
+                            <Button Height="25" Width="60" Grid.Column="1" Click="BrowserButton_Click">Browser</Button>
+                        </Grid>
+                        
+                    </Grid>
+                                       
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Name="OKButton" Margin="5" Width="60" Height="25" Click="OKButton_Click" Command="{Binding ApplyCommand}">OK</Button>
+                        <!--<Button Name="CancelButton" Margin="5" Width="60" Height="25">Cancel</Button>-->
+                    </StackPanel>
+                </Grid>
+                
+                
+                <!--<StackPanel>
+                    
+                    <Button Name="UpdateFolders" >Apply Changes</Button>
+                    <Button Name="AddFolder" >Add Folder</Button>
+                    
+                </StackPanel>-->
+            </Popup>
+        </Grid>
         <Grid Grid.Row="1" Margin="5,0,5,0" Grid.Column="0">
 
             <Grid.ColumnDefinitions>

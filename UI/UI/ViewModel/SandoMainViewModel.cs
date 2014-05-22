@@ -39,6 +39,8 @@ namespace Sando.UI.ViewModel
             this.SearchResultViewModel = new SearchResultViewModel();
             this.SearchViewModel = new SearchViewModel();
 
+
+
         }
 
 

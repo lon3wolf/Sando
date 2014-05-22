@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Sando.UI.ViewModel;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Sando.UI.View
 {
@@ -23,5 +15,42 @@ namespace Sando.UI.View
         {
             InitializeComponent();
         }
+
+        private void IndexingList_KeyDown(object sender, KeyEventArgs e)
+        {
+            CurrentlyIndexingFoldersPopup.IsOpen = true;
+        }
+
+        private void IndexingList_MouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CurrentlyIndexingFoldersPopup.IsOpen = true;
+        }
+
+        private void BrowserButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                //if (MonitoredFiles.Count > 0)
+                //    dialog.SelectedPath = MonitoredFiles.First().Id;
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (System.Windows.Forms.DialogResult.OK.Equals(result))
+                {
+                    //MonitoredFiles.Add(new CheckedListItem(dialog.SelectedPath));
+                    SearchViewModel vm = this.DataContext as SearchViewModel;
+                    if (null != vm)
+                    {
+                        vm.AddIndexFolder(dialog.SelectedPath);
+                    }
+                }
+            }
+            
+        }
+
+        private void OKButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentlyIndexingFoldersPopup.IsOpen = false;
+        }
+
+        
     }
 }
