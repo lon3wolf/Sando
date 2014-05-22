@@ -11,4 +11,5 @@
     <DataTemplate DataType="{x:Type viewModel:SearchResultViewModel}">
         <view:SearchResultView></view:SearchResultView>
     </DataTemplate>
+    
 </ResourceDictionary>

@@ -23,5 +23,11 @@ namespace Sando.UI.View
         {
             InitializeComponent();
         }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (HelpPopup != null && !HelpPopup.IsOpen)
+                HelpPopup.IsOpen = true;
+        }
     }
 }
