@@ -47,6 +47,7 @@ namespace Sando.Indexer
 				_indexSearcher = new IndexSearcher(Reader);
                 QueryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Configuration.Configuration.GetValue("DefaultSearchFieldName"), Analyzer);
                 SetupTimedUpdates(refreshIndexSearcherThreadInterval, commitChangesThreadInterval);
+                IndexWriter.SetRAMBufferSizeMB(250);
 			}
 			catch(CorruptIndexException corruptIndexEx)
 			{

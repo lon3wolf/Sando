@@ -134,7 +134,7 @@ namespace Sando.Core.Tools
                 sandoQueryDescription.SearchTerms.Add(term.Trim());           
             }
 
-            var searchTerms = wordSplitter.ExtractWords(query).Where(w => !String.IsNullOrWhiteSpace(w)).OrderByDescending(s => s.Length);
+            var searchTerms = wordSplitter.ExtractWords(query).Where(w => !String.IsNullOrWhiteSpace(w) && !splitTerms.Contains("-"+w)).OrderByDescending(s => s.Length);
             foreach (var searchTerm in searchTerms)
             {
                 sandoQueryDescription.SearchTerms.Add(searchTerm.Trim());
