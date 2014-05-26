@@ -16,6 +16,7 @@ namespace Sando.UI.ViewModel
         #region Properties
 
         private IndexedFile _indexedFile;
+        private bool _isBrowseButtonEnabled;
 
         public ICommand AddIndexFolderCommand
         {
@@ -35,7 +36,19 @@ namespace Sando.UI.ViewModel
             set;
         }
 
+        public ICommand CancelCommand
+        {
+            get;
+            set;
+        }
+
         public ObservableCollection<IndexedFile> IndexedFiles
+        {
+            get;
+            set;
+        }
+
+        public List<IndexedFile> ModifiedIndexedFile
         {
             get;
             set;
@@ -51,6 +64,28 @@ namespace Sando.UI.ViewModel
             {
                 this._indexedFile = value;
                 OnPropertyChanged("SelectedIndexedFile");
+
+                if (null != this._indexedFile)
+                {
+                    this.IsBrowseButtonEnabled = true;
+                }
+                else
+                {
+                    this.IsBrowseButtonEnabled = false;
+                }
+            }
+        }
+
+        public bool IsBrowseButtonEnabled
+        {
+            get
+            {
+                return this._isBrowseButtonEnabled;
+            }
+            set
+            {
+                this._isBrowseButtonEnabled = value;
+                OnPropertyChanged("IsBrowseButtonEnabled");
             }
         }
 
@@ -59,39 +94,64 @@ namespace Sando.UI.ViewModel
 
         public SearchViewModel()
         {
-
+            this.ModifiedIndexedFile = new List<IndexedFile>();
             this.IndexedFiles = new ObservableCollection<IndexedFile>();
 
             this.AddIndexFolderCommand = new RelayCommand(AddIndexFolder);
             this.RemoveIndexFolderCommand = new RelayCommand(RemoveIndexFolder);
             this.ApplyCommand = new RelayCommand(Apply);
+            this.CancelCommand = new RelayCommand(Cancel);
+
+            this.IsBrowseButtonEnabled = false;
 
             this.RegisterSrcMLService();
 
         }
 
-        public void AddIndexFolder(String path)
+        /// <summary>
+        /// Used by Browse button in the user interface
+        /// </summary>
+        /// <param name="path"></param>
+        public void SetIndexFolderPath(String path)
         {
-            IndexedFile file = new IndexedFile();
-            file.FilePath = path;
+            if (null != this.SelectedIndexedFile)
+            {
+                IndexedFile file = new IndexedFile();
+                file.FilePath = this.SelectedIndexedFile.FilePath;
+                file.OperationStatus = IndexedFile.Status.Modified;
+                file.GUID = this.SelectedIndexedFile.GUID;
+                this.ModifiedIndexedFile.Add(file);
+
+                this.SelectedIndexedFile.FilePath = path;
+            }
+        }
+
+        private void AddIndexFolder(IndexedFile file)
+        {
             this.IndexedFiles.Add(file);
             this.SelectedIndexedFile = file;
         }
 
         private void AddIndexFolder(object param)
         {
-            AddIndexFolder("C:\\");
+            IndexedFile file = new IndexedFile();
+            file.FilePath = "C:\\";
+            file.OperationStatus = IndexedFile.Status.Add;
+
+            this.ModifiedIndexedFile.Add(file);
+
+            this.AddIndexFolder(file);
         }
 
         private void RemoveIndexFolder(object param)
         {
             if (null != this.SelectedIndexedFile)
             {
+                this.SelectedIndexedFile.OperationStatus = IndexedFile.Status.Remove;
                 int index = this.IndexedFiles.IndexOf(this.SelectedIndexedFile);
 
                 if (index > 0)
                 {
-
                     if (index != this.IndexedFiles.Count - 1)
                     {
                         this.SelectedIndexedFile = this.IndexedFiles[index + 1];
@@ -100,22 +160,62 @@ namespace Sando.UI.ViewModel
                     {
                         this.SelectedIndexedFile = this.IndexedFiles[index - 1];
                     }
-
-                    this.IndexedFiles.RemoveAt(index);
+                    
                 }
                 else if (index == 0)
                 {
-
                     this.SelectedIndexedFile = null;
-
-                    this.IndexedFiles.RemoveAt(index);
                 }
-                 
+
+                this.ModifiedIndexedFile.Add(this.IndexedFiles[index]);
+                this.IndexedFiles.RemoveAt(index);
             }
         }
 
         private void Apply(object param)
         {
+            foreach (var file in this.IndexedFiles)
+            {
+                file.OperationStatus = IndexedFile.Status.Normal;
+            }
+
+
+            this.ModifiedIndexedFile.Clear();
+        }
+
+        private void Cancel(object param)
+        {
+            foreach (var file in this.ModifiedIndexedFile)
+            {
+                if (file.OperationStatus == IndexedFile.Status.Add)
+                {
+                    this.IndexedFiles.Remove(file);
+                }
+                else if (file.OperationStatus == IndexedFile.Status.Remove)
+                {
+                    this.IndexedFiles.Add(file);
+                }
+                else if (file.OperationStatus == IndexedFile.Status.Modified)
+                {
+
+                    foreach (var indexedFile in this.IndexedFiles)
+                    {
+                        if (indexedFile.GUID == file.GUID)
+                        {
+
+                            indexedFile.FilePath = file.FilePath;
+
+                        }
+                    }
+                }
+            }
+
+            foreach (var file in this.IndexedFiles)
+            {
+                file.OperationStatus = IndexedFile.Status.Normal;
+            }
+            this.ModifiedIndexedFile.Clear();
+
 
         }
 
@@ -126,12 +226,13 @@ namespace Sando.UI.ViewModel
             {
                 IndexedFile file = new IndexedFile();
                 file.FilePath = e.Directory;
-                this.SelectedIndexedFile = file;
+                file.OperationStatus = IndexedFile.Status.Normal;
+                
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(delegate()
                 {
 
-                    this.IndexedFiles.Add(file);
+                    this.AddIndexFolder(file);
 
                 }), null);
 
@@ -146,6 +247,11 @@ namespace Sando.UI.ViewModel
 
         private String _filePath;
 
+        public IndexedFile()
+        {
+            this.GUID = Guid.NewGuid();
+        }
+
         public String FilePath
         {
             get
@@ -159,6 +265,27 @@ namespace Sando.UI.ViewModel
             }
         }
 
+        internal Guid GUID
+        {
+            get;
+            set;
+        }
+
+        internal Status OperationStatus
+        {
+            get;
+            set;
+        }
+
+        internal enum Status
+        {
+
+            Add,
+            Remove,
+            Modified,
+            Normal
+
+        }
     }
 
     

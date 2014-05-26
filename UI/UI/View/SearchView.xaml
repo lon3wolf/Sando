@@ -88,14 +88,14 @@
                                      ToolTip="{Binding SelectedIndexedFile.FilePath}">
                                 
                             </TextBox>
-                            <Button Height="25" Width="60" Grid.Column="1" Click="BrowserButton_Click">Browser</Button>
+                            <Button Height="25" Width="60" Grid.Column="1" Click="BrowserButton_Click" IsEnabled="{Binding IsBrowseButtonEnabled}">Browser</Button>
                         </Grid>
                         
                     </Grid>
                                        
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Name="OKButton" Margin="5" Width="60" Height="25" Click="OKButton_Click" Command="{Binding ApplyCommand}">OK</Button>
-                        <!--<Button Name="CancelButton" Margin="5" Width="60" Height="25">Cancel</Button>-->
+                        <Button Name="CancelButton" Margin="5" Width="60" Height="25" Click="CancelButton_Click" Command="{Binding CancelCommand}">Cancel</Button>
                     </StackPanel>
                 </Grid>
                 

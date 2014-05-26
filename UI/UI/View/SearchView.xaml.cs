@@ -39,7 +39,7 @@ namespace Sando.UI.View
                     SearchViewModel vm = this.DataContext as SearchViewModel;
                     if (null != vm)
                     {
-                        vm.AddIndexFolder(dialog.SelectedPath);
+                        vm.SetIndexFolderPath(dialog.SelectedPath);
                     }
                 }
             }
@@ -47,6 +47,11 @@ namespace Sando.UI.View
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentlyIndexingFoldersPopup.IsOpen = false;
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             CurrentlyIndexingFoldersPopup.IsOpen = false;
         }
