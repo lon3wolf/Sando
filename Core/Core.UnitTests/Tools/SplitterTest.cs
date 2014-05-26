@@ -17,7 +17,7 @@ namespace Sando.Core.UnitTests.Tools
         public void TestSplitCamelCase()
         {
             string[] parts = wordSplitter.ExtractWords("aLongVariableNameInCamelCase");
-            Assert.AreEqual(parts.Length, 7);
+            Assert.AreEqual(parts.Length, 8);
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace Sando.Core.UnitTests.Tools
         public void TestSplitUnderscores()
         {
             string[] parts = wordSplitter.ExtractWords("a_name_separated_by_lots_of_underscores");
-            Assert.AreEqual(parts.Length, 7);
+            Assert.AreEqual(parts.Length, 9);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Sando.Core.UnitTests.Tools
         public void TestAbbreviations()
         {
             string[] parts = wordSplitter.ExtractWords("whatAboutALM");
-            Assert.IsTrue(parts.Length == 3);
+            Assert.IsTrue(parts.Length == 4);
         }
 
         [Test]
@@ -62,28 +62,28 @@ namespace Sando.Core.UnitTests.Tools
         public void TestAllCapsUnderscore()
         {
             string[] parts = wordSplitter.ExtractWords("WHAT_IF_ALL_IN_CAPS");
-            Assert.AreEqual(parts.Length, 5);
+            Assert.AreEqual(parts.Length, 7);
         }
 
         [Test]
         public void TestBeginUnderscore()
         {
             string[] parts = wordSplitter.ExtractWords("_beginInUnderscore");
-            Assert.AreEqual(parts.Length, 3);
+            Assert.AreEqual(parts.Length, 5);
         }
 
         [Test]
         public void ShortcutInName()
         {
             string[] parts = wordSplitter.ExtractWords("FBIInUnderscore");
-            Assert.AreEqual(parts.Length, 3);
+            Assert.AreEqual(parts.Length, 6);
         }
 
         [Test]
         public void PseudoShortcutInName()
         {
             string[] parts = wordSplitter.ExtractWords("IInUnderscore");
-            Assert.AreEqual(parts.Length, 3);
+            Assert.AreEqual(parts.Length, 5);
         }
 
         [Test]
@@ -307,7 +307,7 @@ namespace Sando.Core.UnitTests.Tools
             for (int i = 0; i < 500; i++)
             {
                 string[] parts = wordSplitter.ExtractWords("_beginInUnderscore");
-                Assert.IsTrue(parts.Length == 3);
+                Assert.IsTrue(parts.Length ==5);
             }
             watch.Stop();
             Assert.IsTrue(watch.ElapsedMilliseconds < 500);

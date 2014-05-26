@@ -111,30 +111,11 @@ namespace Sando.UI.Monitoring
                 } else {
                     documentIndexer.DeleteDocuments(args.FilePath, commitImmediately);
                 }
-            };
-            CommitEveryOneHundredFiles(cancelTokenSource);
+            };            
             StartNew(action, cancelTokenSource);
         }
 
-        //Note: if you don't commit every so often then Lucene will take up a lot of RAM, causing performance issues on most machines.
-        private void CommitEveryOneHundredFiles(CancellationTokenSource cancelTokenSource)
-        {
-            if (counter % 100 == 0)
-            {
-                counter = 1;
-                Action commitAction = () =>
-                {
-                    var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
-                    //only public API that forces a commit
-                    documentIndexer.ForceReaderRefresh();
-                };
-                StartNew(commitAction, cancelTokenSource);
-            }
-            else
-            {
-                counter++;
-            }
-        }
+
 
         private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args, bool commitImmediately, DocumentIndexer documentIndexer) {                        
             string sourceFilePath = args.FilePath;
