@@ -236,6 +236,7 @@
     <Compile Include="Scaffold.cs" />
     <Compile Include="Search\AutomaticallyIndexingTestClass.cs" />
     <Compile Include="Search\DoubleIndexingTest.cs" />
+    <Compile Include="Search\PreSearchRecommendationsTest.cs" />
     <Compile Include="Search\RetrievalMetricsTest.cs" />
     <Compile Include="Search\TestFilesSearchingTest.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

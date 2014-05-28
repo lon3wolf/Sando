@@ -29,7 +29,7 @@ namespace Sando.Recommender.UnitTests {
         public void TestReadingRealCache()
         {
             manager.ReadSwumCache(@"..\..\Recommender\Recommender.UnitTests\TestFiles\swum-cache.txt");
-            var datas = manager.GetSwumData();
+            var datas = manager.GetAllSwumData();
             Assert.IsTrue(datas.Count > 400);
             foreach (var data in datas)
                 Assert.IsTrue(data.Value.SwumNode != null);
@@ -38,20 +38,20 @@ namespace Sando.Recommender.UnitTests {
         [Test]
         public void TestCacheRoundTrip() {
             manager.AddSrcMLFile(SrcMLElement.Load(@"TestFiles\json_reader.cpp.xml"));
-            int beforeCount = manager.GetSwumData().Count;
+            int beforeCount = manager.GetAllSwumData().Count;
             //string tempFile = Path.GetTempFileName();
             string tempFile = "swum_cache.txt";
             manager.PrintSwumCache(tempFile);
             manager.ReadSwumCache(tempFile);
-            Assert.AreEqual(beforeCount, manager.GetSwumData().Count);
+            Assert.AreEqual(beforeCount, manager.GetAllSwumData().Count);
             //TODO: add assertions that verify contents of SWUM
         }
 
         [Test]
         public void TestAddSourceFile() {
-            Assert.IsFalse(manager.GetSwumData().Any());
+            Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\small_json_reader.cpp");
-            Assert.AreEqual(5, manager.GetSwumData().Keys.Count);
+            Assert.AreEqual(5, manager.GetAllSwumData().Keys.Count);
             Assert.IsNotNull(manager.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
             Assert.IsNotNull(manager.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
             Assert.IsNotNull(manager.GetSwumForSignature("Reader::Reader()"));
@@ -61,9 +61,9 @@ namespace Sando.Recommender.UnitTests {
 
         [Test]
         public void TestAddSourceFile_DoubleExtension() {
-            Assert.IsFalse(manager.GetSwumData().Any());
+            Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\small_json.reader.cpp");
-            Assert.AreEqual(5, manager.GetSwumData().Keys.Count);
+            Assert.AreEqual(5, manager.GetAllSwumData().Keys.Count);
             Assert.IsNotNull(manager.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
             Assert.IsNotNull(manager.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
             Assert.IsNotNull(manager.GetSwumForSignature("Reader::Reader()"));
@@ -73,9 +73,9 @@ namespace Sando.Recommender.UnitTests {
 
         [Test]
         public void TestAddSourceFile_CSharp_Property() {
-            Assert.IsFalse(manager.GetSwumData().Any());
+            Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\CSharp_with_property.cs");
-            Assert.AreEqual(3, manager.GetSwumData().Keys.Count);
+            Assert.AreEqual(3, manager.GetAllSwumData().Keys.Count);
             Assert.IsNotNull(manager.GetSwumForSignature("public TestClass()"));
             Assert.IsNotNull(manager.GetSwumForSignature("public void DoStuff(string theStuff, int count)"));
             Assert.IsNotNull(manager.GetSwumForSignature("private int PrivateStuff(int count)"));
@@ -94,12 +94,12 @@ namespace Sando.Recommender.UnitTests {
         public void TestUpdateSourceFile() {
             File.Copy(@"TestFiles\function_def.cpp", @"TestFiles\SwumUpdateTest.cpp", true);
             manager.AddSourceFile(@"TestFiles\SwumUpdateTest.cpp");
-            Assert.AreEqual(2, manager.GetSwumData().Count);
+            Assert.AreEqual(2, manager.GetAllSwumData().Count);
             Assert.IsNotNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
 
             File.Copy(@"TestFiles\function_def2.cpp", @"TestFiles\SwumUpdateTest.cpp", true);
             manager.UpdateSourceFile(@"TestFiles\SwumUpdateTest.cpp");
-            Assert.AreEqual(2, manager.GetSwumData().Count);
+            Assert.AreEqual(2, manager.GetAllSwumData().Count);
             Assert.IsNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
             Assert.IsNotNull(manager.GetSwumForSignature("char* UpdatedMyFunction(int foo)"));
 
@@ -111,7 +111,7 @@ namespace Sando.Recommender.UnitTests {
             manager.AddSourceFile(@"TestFiles\json_reader.cpp");
             Thread addThread = new Thread(AddSourceFiles);
             addThread.Start();
-            foreach(var sig in manager.GetSwumData()) {
+            foreach(var sig in manager.GetAllSwumData()) {
                 Console.WriteLine("From file {0}, found sig: {1}", sig.Value.FileNames.FirstOrDefault(), sig.Key);
             }
             addThread.Join(5000);

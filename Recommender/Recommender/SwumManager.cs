@@ -349,7 +349,7 @@ namespace Sando.Recommender {
         /// <summary>
         /// Returns a dictionary mapping method signatures to their SWUM data.
         /// </summary>
-        public Dictionary<string,SwumDataRecord> GetSwumData() {
+        public Dictionary<string,SwumDataRecord> GetAllSwumData() {
             var currentSwum = new Dictionary<string, SwumDataRecord>();
             lock(signaturesToSwum) {
                 foreach(var entry in signaturesToSwum) {
@@ -357,6 +357,30 @@ namespace Sando.Recommender {
                 }
             }
             return currentSwum;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="term"></param>
+        /// <returns></returns>
+        public Dictionary<string, SwumDataRecord> GetSwumForTerm(string term)
+        {
+            var termSwum = new Dictionary<string, SwumDataRecord>();
+            lock (signaturesToSwum)
+            {
+                foreach (var entry in signaturesToSwum)
+                {
+
+                    if (entry.Value.Action.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()) ||
+                        entry.Value.Theme.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()) ||
+                        entry.Value.IndirectObject.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()))
+                    {
+                        termSwum[entry.Key] = entry.Value;
+                    }
+                }
+            }
+            return termSwum;
         } 
 
         #region Protected methods
