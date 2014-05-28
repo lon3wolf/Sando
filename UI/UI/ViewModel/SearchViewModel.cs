@@ -1,9 +1,12 @@
-﻿using ABB.SrcML.VisualStudio.SrcMLService;
+﻿using ABB.SrcML;
+using ABB.SrcML.VisualStudio.SrcMLService;
+using Microsoft.Practices.Unity;
 using Sando.DependencyInjection;
 using Sando.UI.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -116,29 +119,28 @@ namespace Sando.UI.ViewModel
         {
             if (null != this.SelectedIndexedFile)
             {
-                IndexedFile file = new IndexedFile();
-                file.FilePath = this.SelectedIndexedFile.FilePath;
-                file.OperationStatus = IndexedFile.Status.Modified;
-                file.GUID = this.SelectedIndexedFile.GUID;
-                this.ModifiedIndexedFile.Add(file);
-
                 this.SelectedIndexedFile.FilePath = path;
+                if (this.SelectedIndexedFile.OperationStatus == IndexedFile.Status.Normal)
+                {
+                    this.SelectedIndexedFile.OperationStatus = IndexedFile.Status.Modified;
+                }
+
+                IndexedFile file = this.ModifiedIndexedFile.Find((f) => f.GUID == this.SelectedIndexedFile.GUID);
+                if (null != file)
+                {
+                    if(file.OperationStatus == IndexedFile.Status.Normal)
+                        file.OperationStatus = IndexedFile.Status.Modified;
+                }
             }
         }
 
-        private void AddIndexFolder(IndexedFile file)
-        {
-            this.IndexedFiles.Add(file);
-            this.SelectedIndexedFile = file;
-        }
+        #region Command Methods
 
         private void AddIndexFolder(object param)
         {
             IndexedFile file = new IndexedFile();
             file.FilePath = "C:\\";
             file.OperationStatus = IndexedFile.Status.Add;
-
-            this.ModifiedIndexedFile.Add(file);
 
             this.AddIndexFolder(file);
         }
@@ -147,7 +149,14 @@ namespace Sando.UI.ViewModel
         {
             if (null != this.SelectedIndexedFile)
             {
-                this.SelectedIndexedFile.OperationStatus = IndexedFile.Status.Remove;
+
+                IndexedFile file = this.ModifiedIndexedFile.Find((f) => this.SelectedIndexedFile.GUID == f.GUID);
+                if (null != file)
+                {
+                    file.OperationStatus = IndexedFile.Status.Remove;
+                }
+
+
                 int index = this.IndexedFiles.IndexOf(this.SelectedIndexedFile);
 
                 if (index > 0)
@@ -167,20 +176,49 @@ namespace Sando.UI.ViewModel
                     this.SelectedIndexedFile = null;
                 }
 
-                this.ModifiedIndexedFile.Add(this.IndexedFiles[index]);
+                
                 this.IndexedFiles.RemoveAt(index);
             }
         }
 
         private void Apply(object param)
         {
-            foreach (var file in this.IndexedFiles)
+            ISrcMLGlobalService srcMlService = null;
+            try
             {
-                file.OperationStatus = IndexedFile.Status.Normal;
+                srcMlService = ServiceLocator.Resolve<ISrcMLGlobalService>();
+            }
+            catch (ResolutionFailedException resFailed)
+            {
+                //ignore
+            }
+
+            if (null != srcMlService)
+            {
+                foreach (var file in this.ModifiedIndexedFile)
+                {
+
+                    if (file.OperationStatus == IndexedFile.Status.Remove)
+                    {
+                        srcMlService.RemoveDirectoryFromMonitor(file.FilePath);
+                    }
+                    else if (file.OperationStatus == IndexedFile.Status.Add)
+                    {
+                        AddDirectoryToMonitor(srcMlService, file);
+                    }
+                    else if (file.OperationStatus == IndexedFile.Status.Modified)
+                    {
+
+                        srcMlService.RemoveDirectoryFromMonitor(file.FilePath);
+
+                        AddDirectoryToMonitor(srcMlService, file);
+                    }
+                }
             }
 
 
-            this.ModifiedIndexedFile.Clear();
+            Synchronize();
+            
         }
 
         private void Cancel(object param)
@@ -189,7 +227,7 @@ namespace Sando.UI.ViewModel
             {
                 if (file.OperationStatus == IndexedFile.Status.Add)
                 {
-                    this.IndexedFiles.Remove(file);
+                    this.IndexedFiles.Remove(GetFileFromIndexedFiles(file.GUID));
                 }
                 else if (file.OperationStatus == IndexedFile.Status.Remove)
                 {
@@ -197,48 +235,161 @@ namespace Sando.UI.ViewModel
                 }
                 else if (file.OperationStatus == IndexedFile.Status.Modified)
                 {
-
-                    foreach (var indexedFile in this.IndexedFiles)
-                    {
-                        if (indexedFile.GUID == file.GUID)
-                        {
-
-                            indexedFile.FilePath = file.FilePath;
-
-                        }
-                    }
+                    GetFileFromIndexedFiles(file.GUID).FilePath = file.FilePath;
                 }
             }
+
+            Synchronize();
+
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void AddIndexFolder(IndexedFile file)
+        {
+            this.IndexedFiles.Add(file);
+            this.SelectedIndexedFile = file;
+
+            IndexedFile backupFile = new IndexedFile();
+            backupFile.FilePath = this.SelectedIndexedFile.FilePath;
+            backupFile.OperationStatus = IndexedFile.Status.Add;
+            backupFile.GUID = this.SelectedIndexedFile.GUID;
+            this.ModifiedIndexedFile.Add(backupFile);
+        }
+
+
+        private IndexedFile GetFileFromIndexedFiles(Guid guid)
+        {
+
+            IndexedFile result = null;
+
+            foreach (var indexedFile in this.IndexedFiles)
+            {
+                if (indexedFile.GUID == guid)
+                {
+
+                    result = indexedFile;
+
+                }
+            }
+
+            return result;
+        }
+
+        private void Synchronize()
+        {
+
+            this.ModifiedIndexedFile.Clear();
 
             foreach (var file in this.IndexedFiles)
             {
                 file.OperationStatus = IndexedFile.Status.Normal;
+                this.ModifiedIndexedFile.Add(file);
             }
-            this.ModifiedIndexedFile.Clear();
 
+        }
 
+        private void AddDirectoryToMonitor(ISrcMLGlobalService srcMlService, IndexedFile file)
+        {
+
+            
+            foreach (IndexedFile addFile in this.IndexedFiles)
+            {
+
+                if (addFile.GUID == file.GUID)
+                {
+                    try
+                    {
+                        srcMlService.AddDirectoryToMonitor(addFile.FilePath);
+                    }
+                    catch (DirectoryScanningMonitorSubDirectoryException cantAdd)
+                    {
+                        MessageBox.Show("Sub-directories of existing directories cannot be added - " + cantAdd.Message, "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    catch (ForbiddenDirectoryException cantAdd)
+                    {
+                        MessageBox.Show(cantAdd.Message, "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+
+            }
+            
+        }
+
+        private bool IsPathEqual(String indexedFilePath, String eventFilePath)
+        {
+            return Path.GetFullPath(indexedFilePath + "\\") == Path.GetFullPath(eventFilePath);
         }
 
         private void RegisterSrcMLService()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
+
             srcMLService.DirectoryAdded += (sender, e) =>
             {
+
                 IndexedFile file = new IndexedFile();
                 file.FilePath = e.Directory;
                 file.OperationStatus = IndexedFile.Status.Normal;
-                
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(delegate()
                 {
+                    bool equals = false;
+                    foreach (IndexedFile currentFile in this.IndexedFiles)
+                    {
+                        
+                        if (IsPathEqual(currentFile.FilePath, file.FilePath))
+                        {
+                            equals = true;
+                        }
+                        
+                    }
 
-                    this.AddIndexFolder(file);
+                    if (!equals)
+                    {
+                        this.AddIndexFolder(file);
+                    }
 
                 }), null);
 
             };
+
+            srcMLService.DirectoryRemoved += (sender, e) =>
+            {
+                Application.Current.Dispatcher.BeginInvoke(new Action(delegate()
+                {
+
+                    IndexedFile toRemoveFile = null;
+
+                    foreach (IndexedFile file in this.IndexedFiles)
+                    {
+
+                        if (IsPathEqual(file.FilePath, e.Directory))
+                        {
+                            toRemoveFile = file;
+                        }
+
+                    }
+
+                    if (null != toRemoveFile)
+                    {
+                        this.IndexedFiles.Remove(toRemoveFile);
+                        toRemoveFile = this.ModifiedIndexedFile.Find((f) => f.GUID == toRemoveFile.GUID);
+                        if (null != toRemoveFile)
+                        {
+                            this.ModifiedIndexedFile.Remove(toRemoveFile);
+                        }
+                            
+                    }
+
+
+                }), null);
+            };
         }
-        
+
+        #endregion
 
     }
 
@@ -279,7 +430,6 @@ namespace Sando.UI.ViewModel
 
         internal enum Status
         {
-
             Add,
             Remove,
             Modified,
