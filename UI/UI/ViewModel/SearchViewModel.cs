@@ -108,6 +108,7 @@ namespace Sando.UI.ViewModel
             this.IsBrowseButtonEnabled = false;
 
             this.RegisterSrcMLService();
+            this.initializeIndexedFile();
 
         }
 
@@ -254,7 +255,7 @@ namespace Sando.UI.ViewModel
 
             IndexedFile backupFile = new IndexedFile();
             backupFile.FilePath = this.SelectedIndexedFile.FilePath;
-            backupFile.OperationStatus = IndexedFile.Status.Add;
+            backupFile.OperationStatus = this.SelectedIndexedFile.OperationStatus;
             backupFile.GUID = this.SelectedIndexedFile.GUID;
             this.ModifiedIndexedFile.Add(backupFile);
         }
@@ -343,6 +344,7 @@ namespace Sando.UI.ViewModel
                         if (IsPathEqual(currentFile.FilePath, file.FilePath))
                         {
                             equals = true;
+                            break;
                         }
                         
                     }
@@ -369,6 +371,7 @@ namespace Sando.UI.ViewModel
                         if (IsPathEqual(file.FilePath, e.Directory))
                         {
                             toRemoveFile = file;
+                            break;
                         }
 
                     }
@@ -387,6 +390,35 @@ namespace Sando.UI.ViewModel
 
                 }), null);
             };
+        }
+
+        private void initializeIndexedFile()
+        {
+            ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
+            foreach (String filePath in srcMLService.MonitoredDirectories)
+            {
+                bool isEqual = false;
+                foreach (IndexedFile indexedFile in this.IndexedFiles)
+                {
+
+                    if (IsPathEqual(indexedFile.FilePath, filePath))
+                    {
+                        isEqual = true;
+                        break;
+                    }
+
+                }
+
+                if (!isEqual)
+                {
+                    IndexedFile file = new IndexedFile();
+                    file.FilePath = filePath + "\\";
+                    file.OperationStatus = IndexedFile.Status.Normal;
+                    this.AddIndexFolder(file);
+                }
+                
+
+            }
         }
 
         #endregion
