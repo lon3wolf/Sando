@@ -34,12 +34,6 @@ namespace Sando.Recommender {
             {
                 var recommendations = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
 
-
-                //TODO: split query into words, search each one? Already implemented for plain method names            
-
-                //WeightByFrequency(query);
-                //WeightBySameField(query);
-                //WeightBySameField_WordsInOrder(query);
                 AddRecommendationForEachTerm(query, recommendations);
 
                 //return the recommendations sorted by score in descending order
@@ -68,18 +62,18 @@ namespace Sando.Recommender {
             return new SwumQueriesSorter().GetAllHistoryItems();
         }
 
-        private void AddRecommendation(string rec, int score, Dictionary<string, int> recommendations)
+        private void AddRecommendationToDictionary(string rec, int score, Dictionary<string, int> recommendations)
         {
             int count;
             recommendations.TryGetValue(rec, out count);
             recommendations[rec] = count + score;
         }
 
-        private void AddRecommendation(Dictionary<string, int> recommendations, string p, int NormalWeight, MethodDeclarationNode methodDeclarationNode = null)
+        private void AddRecommendationToDictionary(Dictionary<string, int> recommendations, string p, int normalWeight, MethodDeclarationNode methodDeclarationNode = null)
         {
-            AddRecommendation(p.Trim(), NormalWeight, recommendations);
+            AddRecommendationToDictionary(p.Trim(), normalWeight, recommendations);
             if(methodDeclarationNode !=null)
-                AddRecommendation(methodDeclarationNode.Name.Trim(), NormalWeight, recommendations);
+                AddRecommendationToDictionary(methodDeclarationNode.Name.Trim(), normalWeight, recommendations);
         }
 
 
@@ -88,7 +82,7 @@ namespace Sando.Recommender {
             var terms = query.Split().Where(t => !String.IsNullOrWhiteSpace(t));
             foreach (var term in terms)
             {
-                WeightByPartOfSpeech(term, recommendations);
+                AddTermRecommendationWeightedByPartOfSpeech(term, recommendations);
             }
         }
 
@@ -96,11 +90,9 @@ namespace Sando.Recommender {
         /// Generates query recommendations. Nouns and verbs are weighted higher than other parts of speech.
         /// The words in the generated recommendations are sorted in the same order as they appear in the method signature.
         /// </summary>
-        /// <param name="query">The query string to create recommended completions for.</param>
-        private void WeightByPartOfSpeech(string query, Dictionary<string, int> recommendations ) {
-            const int NormalWeight = 1;
-
-            var terms = query.Split(' ');
+        /// <param name="term">A query term to create recommended completions for.</param>
+        private void AddTermRecommendationWeightedByPartOfSpeech(string term, Dictionary<string, int> recommendations) {
+            const int normalWeight = 1;
 
             //search through all the SWUM data
             Dictionary<string, SwumDataRecord> swumData = SwumManager.Instance.GetSwumData();            
@@ -112,17 +104,17 @@ namespace Sando.Recommender {
                 int queryActionIndex = -1, queryThemeIndex = -1, queryIndirectIndex = -1;
                 if(swumRecord.ParsedAction != null) {
                     actionWords = swumRecord.ParsedAction.GetPhrase();
-                    queryActionIndex = FindWordInPhraseNode(swumRecord.ParsedAction, query);
+                    queryActionIndex = FindWordInPhraseNode(swumRecord.ParsedAction, term);
                     if(queryActionIndex > -1) { queryInAction = true; }
                 }
                 if(swumRecord.ParsedTheme != null) {
                     themeWords = swumRecord.ParsedTheme.GetPhrase();
-                    queryThemeIndex = FindWordInPhraseNode(swumRecord.ParsedTheme, query);
+                    queryThemeIndex = FindWordInPhraseNode(swumRecord.ParsedTheme, term);
                     if(queryThemeIndex > -1) { queryInTheme = true; }
                 }
                 if(swumRecord.ParsedIndirectObject != null) {
                     indirectWords = swumRecord.ParsedIndirectObject.GetPhrase();
-                    queryIndirectIndex = FindWordInPhraseNode(swumRecord.ParsedIndirectObject, query);
+                    queryIndirectIndex = FindWordInPhraseNode(swumRecord.ParsedIndirectObject, term);
                     if(queryIndirectIndex > -1) { queryInIndirect = true; }
                 }
 
@@ -132,19 +124,19 @@ namespace Sando.Recommender {
                         int wordWeight = GetWeightForPartOfSpeech(actionWords[i].Tag);
                         if(queryInAction) {
                             if(i < queryActionIndex) {
-                                AddRecommendation(recommendations, string.Format("{0} {1}", actionWords[i].Text, query), wordWeight);
+                                AddRecommendationToDictionary(recommendations, string.Format("{0} {1}", actionWords[i].Text, term), wordWeight);
                             } else if(queryActionIndex < i) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", query, actionWords[i].Text), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, actionWords[i].Text), wordWeight);
                             }
                         } else {
                             //the action words do not contain the query word
-                            AddRecommendation( recommendations, string.Format("{0} {1}", actionWords[i].Text, query), wordWeight);
+                            AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", actionWords[i].Text, term), wordWeight);
                         }
                     }
                     if(queryInAction && actionWords.Count() > 2) {
-                        AddRecommendation( recommendations, swumRecord.Action, NormalWeight);
+                        AddRecommendationToDictionary( recommendations, swumRecord.Action, normalWeight);
                     } else if(!queryInAction && actionWords.Count() > 1) {
-                        AddRecommendation( recommendations, string.Format("{0} {1}", swumRecord.Action, query), NormalWeight);
+                        AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", swumRecord.Action, term), normalWeight);
                     }
 
                     //add words from theme
@@ -152,28 +144,28 @@ namespace Sando.Recommender {
                         int wordWeight = GetWeightForPartOfSpeech(themeWords[i].Tag);
                         if(queryInTheme) {
                             if(i < queryThemeIndex) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", themeWords[i].Text, query), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", themeWords[i].Text, term), wordWeight);
                             } else if(queryThemeIndex < i) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", query, themeWords[i].Text), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, themeWords[i].Text), wordWeight);
                             }
                         } else {
                             //the theme words do not contain the query word
                             if(queryInAction) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", query, themeWords[i].Text), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, themeWords[i].Text), wordWeight);
                             }
                             if(queryInIndirect) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", themeWords[i].Text, query), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", themeWords[i].Text, term), wordWeight);
                             }
                         }
                     }
                     if(queryInTheme && themeWords.Count() > 2) {
-                        AddRecommendation( recommendations, swumRecord.Theme, NormalWeight);
+                        AddRecommendationToDictionary( recommendations, swumRecord.Theme, normalWeight);
                     } else if(!queryInTheme && themeWords.Count() > 1) {
                         if(queryInAction) {
-                            AddRecommendation( recommendations, string.Format("{0} {1}", query, swumRecord.Theme), NormalWeight);
+                            AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, swumRecord.Theme), normalWeight);
                         }
                         if(queryInIndirect) {
-                            AddRecommendation( recommendations, string.Format("{0} {1}", swumRecord.Theme, query), NormalWeight);
+                            AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", swumRecord.Theme, term), normalWeight);
                         }
                     }
 
@@ -182,52 +174,31 @@ namespace Sando.Recommender {
                         int wordWeight = GetWeightForPartOfSpeech(indirectWords[i].Tag);
                         if(queryInIndirect) {
                             if(i < queryIndirectIndex) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", indirectWords[i].Text, query), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", indirectWords[i].Text, term), wordWeight);
                             } else if(queryIndirectIndex < i) {
-                                AddRecommendation( recommendations, string.Format("{0} {1}", query, indirectWords[i].Text), wordWeight);
+                                AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, indirectWords[i].Text), wordWeight);
                             }
                         } else {
                             //the indirect object words do not contain the query word
-                            AddRecommendation( recommendations, string.Format("{0} {1}", query, indirectWords[i].Text), wordWeight);
+                            AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, indirectWords[i].Text), wordWeight);
                         }
                     }
                     if(queryInIndirect && indirectWords.Count() > 2) {
-                        AddRecommendation( recommendations, swumRecord.IndirectObject, NormalWeight);
+                        AddRecommendationToDictionary( recommendations, swumRecord.IndirectObject, normalWeight);
                     } else if(!queryInIndirect && indirectWords.Count() > 1) {
-                        AddRecommendation( recommendations, string.Format("{0} {1}", query, swumRecord.IndirectObject), NormalWeight);
+                        AddRecommendationToDictionary( recommendations, string.Format("{0} {1}", term, swumRecord.IndirectObject), normalWeight);
                     }
                 }
-                AddFullMethodName(query, recommendations, NormalWeight, terms, swumRecord);
+                AddFullMethodName(term, recommendations, normalWeight, swumRecord);
             }
         }
 
-        private void AddFullMethodName(string query, Dictionary<string, int> recommendations, int NormalWeight, string[] terms, SwumDataRecord swumRecord)
+        private void AddFullMethodName(string term, Dictionary<string, int> recommendations, int normalWeight, SwumDataRecord swumRecord)
         {
-            try
+            if (swumRecord.SwumNode.Name.ToLower().Contains(term.ToLower()))
             {
-                if (swumRecord.SwumNode.Name.ToLower().Contains(query.ToLower()))
-                {
-                    AddRecommendation(swumRecord.SwumNode.Name, NormalWeight + (int)(NormalWeight * 10 / Distance(swumRecord.SwumNode.Name, query)), recommendations);
-                    //Debug.WriteLine(swumRecord.SwumNode.Name + " " + (NormalWeight + (int)(NormalWeight * 10 / Distance(swumRecord.SwumNode.Name, query))));
-                }
-                else
-                {
-                    bool shouldAdd = true;
-                    foreach (var term in terms)
-                        if (!swumRecord.SwumNode.Name.ToLower().Contains(term))
-                            shouldAdd = false;
-                    if (shouldAdd)
-                    {
-                        AddRecommendation(swumRecord.SwumNode.Name, NormalWeight + (int)(NormalWeight * 10 / Distance(swumRecord.SwumNode.Name, query)), recommendations);
-                        //Debug.WriteLine(swumRecord.SwumNode.Name+" "+(NormalWeight + (int)(NormalWeight * 10 / Distance(swumRecord.SwumNode.Name, query))));
-                    }
-                }
-            }
-            catch (NullReferenceException nre)
-            {
-                Debug.WriteLine("he");
-                //ignore
-            }
+                AddRecommendationToDictionary(swumRecord.SwumNode.Name, normalWeight + (int)(normalWeight * 10 / Distance(swumRecord.SwumNode.Name, term)), recommendations);
+            }               
         }
 
         static int maxOffset = 5;
