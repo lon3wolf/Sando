@@ -52,11 +52,11 @@ namespace Sando.Recommender.UnitTests {
             Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\small_json_reader.cpp");
             Assert.AreEqual(5, manager.GetAllSwumData().Keys.Count);
-            Assert.IsNotNull(manager.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
-            Assert.IsNotNull(manager.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
-            Assert.IsNotNull(manager.GetSwumForSignature("Reader::Reader()"));
-            Assert.IsNotNull(manager.GetSwumForSignature("bool Reader::parse( const std::string &document, Value &root, bool collectComments )"));
-            Assert.IsNotNull(manager.GetSwumForSignature("bool Reader::parse( std::istream& sin, Value &root, bool collectComments )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("Reader::Reader()"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("bool Reader::parse( const std::string &document, Value &root, bool collectComments )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("bool Reader::parse( std::istream& sin, Value &root, bool collectComments )"));
         }
 
         [Test]
@@ -64,11 +64,11 @@ namespace Sando.Recommender.UnitTests {
             Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\small_json.reader.cpp");
             Assert.AreEqual(5, manager.GetAllSwumData().Keys.Count);
-            Assert.IsNotNull(manager.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
-            Assert.IsNotNull(manager.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
-            Assert.IsNotNull(manager.GetSwumForSignature("Reader::Reader()"));
-            Assert.IsNotNull(manager.GetSwumForSignature("bool Reader::parse( const std::string &document, Value &root, bool collectComments )"));
-            Assert.IsNotNull(manager.GetSwumForSignature("bool Reader::parse( std::istream& sin, Value &root, bool collectComments )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("static bool containsNewLine( Reader::Location begin, Reader::Location end )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("static std::string codePointToUTF8(unsigned int cp)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("Reader::Reader()"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("bool Reader::parse( const std::string &document, Value &root, bool collectComments )"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("bool Reader::parse( std::istream& sin, Value &root, bool collectComments )"));
         }
 
         [Test]
@@ -76,18 +76,18 @@ namespace Sando.Recommender.UnitTests {
             Assert.IsFalse(manager.GetAllSwumData().Any());
             manager.AddSourceFile(@"TestFiles\CSharp_with_property.cs");
             Assert.AreEqual(3, manager.GetAllSwumData().Keys.Count);
-            Assert.IsNotNull(manager.GetSwumForSignature("public TestClass()"));
-            Assert.IsNotNull(manager.GetSwumForSignature("public void DoStuff(string theStuff, int count)"));
-            Assert.IsNotNull(manager.GetSwumForSignature("private int PrivateStuff(int count)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("public TestClass()"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("public void DoStuff(string theStuff, int count)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("private int PrivateStuff(int count)"));
         }
 
         [Test]
         public void TestRemoveSourceFile() {
             manager.AddSourceFile(@"TestFiles\small_json_reader.cpp");
             manager.AddSourceFile(@"TestFiles\function_def.cpp");
-            Assert.IsNotNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("char* MyFunction(int foo)"));
             manager.RemoveSourceFile(@"TestFiles\function_def.cpp");
-            Assert.IsNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
+            Assert.IsNull(manager.SwumDataStore.GetSwumForSignature("char* MyFunction(int foo)"));
         }
 
         [Test]
@@ -95,13 +95,13 @@ namespace Sando.Recommender.UnitTests {
             File.Copy(@"TestFiles\function_def.cpp", @"TestFiles\SwumUpdateTest.cpp", true);
             manager.AddSourceFile(@"TestFiles\SwumUpdateTest.cpp");
             Assert.AreEqual(2, manager.GetAllSwumData().Count);
-            Assert.IsNotNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("char* MyFunction(int foo)"));
 
             File.Copy(@"TestFiles\function_def2.cpp", @"TestFiles\SwumUpdateTest.cpp", true);
             manager.UpdateSourceFile(@"TestFiles\SwumUpdateTest.cpp");
             Assert.AreEqual(2, manager.GetAllSwumData().Count);
-            Assert.IsNull(manager.GetSwumForSignature("char* MyFunction(int foo)"));
-            Assert.IsNotNull(manager.GetSwumForSignature("char* UpdatedMyFunction(int foo)"));
+            Assert.IsNull(manager.SwumDataStore.GetSwumForSignature("char* MyFunction(int foo)"));
+            Assert.IsNotNull(manager.SwumDataStore.GetSwumForSignature("char* UpdatedMyFunction(int foo)"));
 
             File.Delete(@"TestFiles\SwumUpdateTest.cpp");
         }
