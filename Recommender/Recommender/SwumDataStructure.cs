@@ -35,7 +35,7 @@ namespace Sando.Recommender
             {
                 foreach (var actionWord in record.Action.ToLowerInvariant().Split(' '))
                 { 
-                    if (!String.IsNullOrEmpty(actionWord) && actionWord.All(Char.IsLetter))
+                    if (!String.IsNullOrEmpty(actionWord))
                     {
                         trie.Add(actionWord.Trim(), record);
                     }
@@ -43,7 +43,7 @@ namespace Sando.Recommender
 
                 foreach (var indirectObjectWord in record.IndirectObject.ToLowerInvariant().Split(' ') )
                 {
-                    if (!String.IsNullOrEmpty(indirectObjectWord) && indirectObjectWord.All(Char.IsLetter))
+                    if (!String.IsNullOrEmpty(indirectObjectWord))
                     {
                         trie.Add(indirectObjectWord.Trim(), record);
                     }
@@ -51,7 +51,7 @@ namespace Sando.Recommender
 
                 foreach (var themeWord in record.Theme.Split(' '))
                 {
-                    if (!String.IsNullOrEmpty(themeWord) && themeWord.ToLowerInvariant().All(Char.IsLetter))
+                    if (!String.IsNullOrEmpty(themeWord))
                     {
                         trie.Add(themeWord.Trim().ToLowerInvariant(), record);
                     }
