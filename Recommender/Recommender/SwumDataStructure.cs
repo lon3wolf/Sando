@@ -13,11 +13,6 @@ namespace Sando.Recommender
         private Dictionary<string, SwumDataRecord> signaturesToSwum;
         private ITrie<SwumDataRecord> trie;
 
-        /*
-         * Note: Memory for trie can get large so limit it to storing only a fixed number of letters
-         */
-        //private const int TrieMaxWordLength = 6;
-
         public SwumDataStructure()
         {
             signaturesToSwum = new Dictionary<string, SwumDataRecord>();
