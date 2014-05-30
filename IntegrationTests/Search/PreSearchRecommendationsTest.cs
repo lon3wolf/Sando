@@ -30,6 +30,15 @@ namespace Sando.IntegrationTests.Search
             Assert.IsTrue(recsForGame[0].Query.Equals("GameEngine"), "Didn't find the correct first result, found: " + recsForGame[0].Query);
         }
 
+        [Test]
+        public void GenerateRecommendationsTest_Game_Shortened()
+        {
+            var recommender = ServiceLocator.Resolve<QueryRecommender>();
+            var recsForGame = recommender.GenerateRecommendations("gam");
+            Assert.IsTrue(recsForGame.Length > 0, "Did not find any recommendations when I should have");
+            Assert.IsTrue(recsForGame[0].Query.Equals("GameEngine"), "Didn't find the correct first result, found: " + recsForGame[0].Query);
+        }
+
         public override string GetIndexDirName()
         {
             return "PreSearchRecommendationsTest";

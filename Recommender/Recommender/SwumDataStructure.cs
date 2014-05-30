@@ -4,16 +4,24 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Gma.DataStructures.StringSearch;
 
 namespace Sando.Recommender
 {
     public class SwumDataStructure
     {
         private Dictionary<string, SwumDataRecord> signaturesToSwum;
+        private ITrie<SwumDataRecord> trie;
+
+        /*
+         * Note: Memory for trie can get large so limit it to storing only a fixed number of letters
+         */
+        //private const int TrieMaxWordLength = 6;
 
         public SwumDataStructure()
         {
             signaturesToSwum = new Dictionary<string, SwumDataRecord>();
+            trie = new PatriciaTrie<SwumDataRecord>();
         }
 
         public void AddRecord(string signature, SwumDataRecord record)
@@ -21,6 +29,33 @@ namespace Sando.Recommender
             lock (signaturesToSwum)
             {
                 signaturesToSwum[signature] = record;
+            }
+            
+            lock (trie)
+            {
+                foreach (var actionWord in record.Action.ToLowerInvariant().Split(' '))
+                { 
+                    if (!String.IsNullOrEmpty(actionWord) && actionWord.All(Char.IsLetter))
+                    {
+                        trie.Add(actionWord.Trim(), record);
+                    }
+                }
+
+                foreach (var indirectObjectWord in record.IndirectObject.ToLowerInvariant().Split(' ') )
+                {
+                    if (!String.IsNullOrEmpty(indirectObjectWord) && indirectObjectWord.All(Char.IsLetter))
+                    {
+                        trie.Add(indirectObjectWord.Trim(), record);
+                    }
+                }
+
+                foreach (var themeWord in record.Theme.Split(' '))
+                {
+                    if (!String.IsNullOrEmpty(themeWord) && themeWord.ToLowerInvariant().All(Char.IsLetter))
+                    {
+                        trie.Add(themeWord.Trim().ToLowerInvariant(), record);
+                    }
+                }
             }
         }
 
@@ -75,17 +110,37 @@ namespace Sando.Recommender
             }
         }
 
-        public Dictionary<string, SwumDataRecord> GetAllSwumData()
+        public List<SwumDataRecord> GetAllSwumData()
+        {
+            var currentSwum = new List<SwumDataRecord>();
+            lock (signaturesToSwum)
+            {
+                currentSwum.AddRange(signaturesToSwum.Select(entry => entry.Value));
+            }
+            return currentSwum;
+        }
+
+        public Dictionary<string, SwumDataRecord> GetAllSwumDataBySignature()
         {
             var currentSwum = new Dictionary<string, SwumDataRecord>();
             lock (signaturesToSwum)
             {
-                foreach (var entry in signaturesToSwum)
+                foreach (var sigToSwum in signaturesToSwum)
                 {
-                    currentSwum[entry.Key] = entry.Value;
+                    currentSwum[sigToSwum.Key] = sigToSwum.Value;                    
                 }
             }
             return currentSwum;
+        }
+
+        public List<SwumDataRecord> GetSwumDataForTerm(String term)
+        {
+            var termSwum = new List<SwumDataRecord>();
+            lock (trie)
+            {
+                termSwum = trie.Retrieve(term).ToList();
+            }
+            return termSwum;
         }
 
         public bool ContainsFile(string sourcePath)

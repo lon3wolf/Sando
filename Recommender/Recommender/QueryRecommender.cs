@@ -94,9 +94,9 @@ namespace Sando.Recommender {
         private void AddTermRecommendationWeightedByPartOfSpeech(string term, Dictionary<string, int> recommendations) {
             const int normalWeight = 1;
 
-            //search through all the SWUM data
-            Dictionary<string, SwumDataRecord> swumData = SwumManager.Instance.GetSwumForTerm(term);            
-            foreach(var swumRecord in swumData.Values) {
+            var swumData = SwumManager.Instance.GetSwumForTerm(term);  
+          
+            foreach(var swumRecord in swumData) {
                 var actionWords = new Collection<WordNode>();
                 var themeWords = new Collection<WordNode>();
                 var indirectWords = new Collection<WordNode>();
@@ -195,9 +195,9 @@ namespace Sando.Recommender {
 
         private void AddFullMethodName(string term, Dictionary<string, int> recommendations, int normalWeight, SwumDataRecord swumRecord)
         {
-            if (swumRecord.SwumNode.Name.ToLower().Contains(term.ToLower()))
+            if (swumRecord.SwumNodeName.ToLower().Contains(term.ToLower()))
             {
-                AddRecommendationToDictionary(swumRecord.SwumNode.Name, normalWeight + (int)(normalWeight * 10 / Distance(swumRecord.SwumNode.Name, term)), recommendations);
+                AddRecommendationToDictionary(swumRecord.SwumNodeName, normalWeight + (int)(normalWeight * 10 / Distance(swumRecord.SwumNodeName, term)), recommendations);
             }               
         }
 

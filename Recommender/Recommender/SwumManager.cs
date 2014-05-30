@@ -253,7 +253,7 @@ namespace Sando.Recommender {
         /// <param name="output">A TextWriter to print the SWUM cache to.</param>
         public void PrintSwumCache(TextWriter output)
         {
-            var allSwumData = SwumDataStore.GetAllSwumData();
+            var allSwumData = SwumDataStore.GetAllSwumDataBySignature();
             foreach(var kvp in allSwumData) {
                 output.WriteLine("{0}|{1}", kvp.Key, kvp.Value.ToString());
             }
@@ -296,34 +296,14 @@ namespace Sando.Recommender {
             }
         }
 
-        /// <summary>
-        /// Returns a dictionary mapping method signatures to their SWUM data.
-        /// </summary>
-        public Dictionary<string,SwumDataRecord> GetAllSwumData()
+        public Dictionary<string, SwumDataRecord> GetAllSwumBySignature()
         {
-            return SwumDataStore.GetAllSwumData();
+            return SwumDataStore.GetAllSwumDataBySignature();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="term"></param>
-        /// <returns></returns>
-        public Dictionary<string, SwumDataRecord> GetSwumForTerm(string term)
+        public List<SwumDataRecord> GetSwumForTerm(string term)
         {
-            var termSwum = new Dictionary<string, SwumDataRecord>();
-            var allSwumData = SwumDataStore.GetAllSwumData();
-            foreach (var entry in allSwumData)
-            {
-                if (entry.Value.Action.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()) ||
-                    entry.Value.Theme.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()) ||
-                    entry.Value.IndirectObject.ToLowerInvariant().Contains(term.Trim().ToLowerInvariant()))
-                {
-                    termSwum[entry.Key] = entry.Value;
-                }
-
-            }
-            return termSwum;
+            return SwumDataStore.GetSwumDataForTerm(term);
         }
 
         public bool ContainsFile(string sourcePath)
@@ -476,11 +456,11 @@ namespace Sando.Recommender {
             return sig.ToString().TrimStart(' ');
         }
 
-                /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
+        /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
         protected SwumDataRecord ProcessSwumNode(FieldDeclarationNode swumNode)
         {
             var record = new SwumDataRecord();
-            record.SwumNode = swumNode;
+            record.SwumNodeName = swumNode.Name;
             return record;
         }
 
@@ -492,7 +472,7 @@ namespace Sando.Recommender {
         /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
         protected SwumDataRecord ProcessSwumNode(MethodDeclarationNode swumNode) {
             var record = new SwumDataRecord();
-            record.SwumNode = swumNode;
+            record.SwumNodeName = swumNode.Name;
             //set Action
             if(swumNode.Action != null) {
                 record.Action = swumNode.Action.ToPlainString();
