@@ -17,6 +17,7 @@ namespace Sando.Recommender {
         public string IndirectObject { get; set; }
         public PhraseNode ParsedIndirectObject { get; set; }
         public ISet<string> FileNames { get; private set; }
+        public string Signature { get; set; }
 
         /// <summary>
         /// Creates a new empty SwumDataRecord.
@@ -30,6 +31,7 @@ namespace Sando.Recommender {
             IndirectObject = string.Empty;
             ParsedIndirectObject = null;
             FileNames = new HashSet<string>();
+            Signature = string.Empty;
         }
 
         /// <summary>

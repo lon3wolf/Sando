@@ -21,6 +21,8 @@ namespace Sando.Recommender
 
         public void AddRecord(string signature, SwumDataRecord record)
         {
+            record.Signature = signature;
+
             lock (signaturesToSwum)
             {
                 signaturesToSwum[signature] = record;
@@ -95,8 +97,6 @@ namespace Sando.Recommender
                     signaturesToSwum.Remove(signature);
                 }
             }
-
-            //TODO: figure out how to remove a node from the trie
         }
 
         public void Clear()
@@ -138,12 +138,19 @@ namespace Sando.Recommender
 
         public List<SwumDataRecord> GetSwumDataForTerm(String term)
         {
-            var termSwum = new List<SwumDataRecord>();
+            var trieRecs = new List<SwumDataRecord>();
+            var finalRecs = new List<SwumDataRecord>();
             lock (trie)
             {
-                termSwum = trie.Retrieve(term).ToList();
+                trieRecs = trie.Retrieve(term).ToList();
+
+                //ensure that these records haven't been removed from signaturesToSwum
+                lock (signaturesToSwum)
+                {
+                    finalRecs.AddRange(trieRecs.Where(trieRec => signaturesToSwum.ContainsKey(trieRec.Signature)));
+                }
             }
-            return termSwum;
+            return finalRecs;
         }
 
         public bool ContainsFile(string sourcePath)
