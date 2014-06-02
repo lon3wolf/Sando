@@ -95,6 +95,8 @@ namespace Sando.Recommender
                     signaturesToSwum.Remove(signature);
                 }
             }
+
+            //TODO: figure out how to remove a node from the trie
         }
 
         public void Clear()
@@ -102,6 +104,12 @@ namespace Sando.Recommender
             lock (signaturesToSwum)
             {
                 signaturesToSwum.Clear();
+            }
+
+            lock (trie)
+            {
+                trie = new PatriciaTrie<SwumDataRecord>();
+                //and let garbage collector deal with previous trie
             }
         }
 
