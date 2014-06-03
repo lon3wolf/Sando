@@ -1,5 +1,14 @@
-﻿using Sando.UI.ViewModel;
+﻿using Sando.Core.Logging.Events;
+using Sando.Core.Tools;
+using Sando.DependencyInjection;
+using Sando.ExtensionContracts.ProgramElementContracts;
+using Sando.Indexer.Searching.Criteria;
+using Sando.Recommender;
+using Sando.UI.ViewModel;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,9 +20,24 @@ namespace Sando.UI.View
     /// </summary>
     public partial class SearchView : UserControl
     {
+
+        private SearchViewModel _searchViewModel;
+
         public SearchView()
         {
             InitializeComponent();
+
+            this.DataContextChanged += SearchView_DataContextChanged;
+        }
+
+        private void SearchView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            SearchViewModel vm = this.DataContext as SearchViewModel;
+            if (null != vm)
+            {
+                this._searchViewModel = vm;
+                
+            }
         }
 
         private void IndexingList_KeyDown(object sender, KeyEventArgs e)
@@ -36,10 +60,9 @@ namespace Sando.UI.View
                 if (System.Windows.Forms.DialogResult.OK.Equals(result))
                 {
                     //MonitoredFiles.Add(new CheckedListItem(dialog.SelectedPath));
-                    SearchViewModel vm = this.DataContext as SearchViewModel;
-                    if (null != vm)
+                    if (null != this._searchViewModel)
                     {
-                        vm.SetIndexFolderPath(dialog.SelectedPath);
+                        this._searchViewModel.SetIndexFolderPath(dialog.SelectedPath);
                     }
                 }
             }
@@ -56,6 +79,83 @@ namespace Sando.UI.View
             CurrentlyIndexingFoldersPopup.IsOpen = false;
         }
 
-        
+        private void SearchBox_Populating(object sender, PopulatingEventArgs e)
+        {
+            e.Cancel = true;
+            var recommender = new QueryRecommender();
+            ServiceLocator.RegisterInstance<QueryRecommender>(recommender);
+            var recommendationWorker = new BackgroundWorker();
+            var queryString = this.searchBox.Text;
+            recommendationWorker.DoWork += (sender1, args) =>
+            {
+                var result = recommender.GenerateRecommendations(queryString);
+
+                Dispatcher.Invoke(new Action(delegate(){
+                    
+                    this.searchBox.ItemsSource = result;
+
+                    this.searchBox.PopulateComplete();
+
+                }), null);
+
+                
+            };
+            recommendationWorker.RunWorkerAsync();
+
+        }
+
+        private void SearchBox_OnKeyUpHandler(object sender, KeyEventArgs e)
+        {
+            if (null != this.searchBox.Text)
+            {
+                BeginSearch(this.searchBox.Text);
+            }
+        }
+
+        private void BeginSearch(string searchString)
+        {
+            AddSearchHistory(searchString);
+
+            SimpleSearchCriteria Criteria = new SimpleSearchCriteria();
+
+            //Store the search key
+            //this.searchKey = searchBox.Text;
+
+            //Clear the old recommendation.
+            this.searchBox.ItemsSource = null;
+
+            var selectedAccessLevels = this._searchViewModel.AccessLevels.Where(a => a.Checked).Select(a => a.Access).ToList();
+            if (selectedAccessLevels.Any())
+            {
+                Criteria.SearchByAccessLevel = true;
+                Criteria.AccessLevels = new SortedSet<AccessLevel>(selectedAccessLevels);
+            }
+            else
+            {
+                Criteria.SearchByAccessLevel = false;
+                Criteria.AccessLevels.Clear();
+            }
+
+            var selectedProgramElementTypes =
+                this._searchViewModel.ProgramElements.Where(e => e.Checked).Select(e => e.ProgramElement).ToList();
+            if (selectedProgramElementTypes.Any())
+            {
+                Criteria.SearchByProgramElementType = true;
+                Criteria.ProgramElementTypes = new SortedSet<ProgramElementType>(selectedProgramElementTypes);
+            }
+            else
+            {
+                Criteria.SearchByProgramElementType = false;
+                Criteria.ProgramElementTypes.Clear();
+            }
+
+            //SearchAsync(searchString, Criteria);
+        }
+
+        private void AddSearchHistory(String query)
+        {
+            var history = ServiceLocator.Resolve<SearchHistory>();
+            history.IssuedSearchString(query);
+        }
     }
 }

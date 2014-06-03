@@ -2,15 +2,21 @@
 using ABB.SrcML.VisualStudio.SrcMLService;
 using Microsoft.Practices.Unity;
 using Sando.DependencyInjection;
+using Sando.ExtensionContracts.ProgramElementContracts;
+using Sando.Recommender;
 using Sando.UI.Base;
+using Sando.UI.View.Search;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Sando.UI.ViewModel
 {
@@ -18,8 +24,12 @@ namespace Sando.UI.ViewModel
     {
         #region Properties
 
+       
+
         private IndexedFile _indexedFile;
         private bool _isBrowseButtonEnabled;
+        private String _searchText;
+        
 
         public ICommand AddIndexFolderCommand
         {
@@ -91,14 +101,26 @@ namespace Sando.UI.ViewModel
                 OnPropertyChanged("IsBrowseButtonEnabled");
             }
         }
+        public ObservableCollection<AccessWrapper> AccessLevels
+        {
+            get;
+            set;
+        }
+
+        public ObservableCollection<ProgramElementWrapper> ProgramElements
+        {
+            get;
+            set;
+        }
 
         #endregion
-
 
         public SearchViewModel()
         {
             this.ModifiedIndexedFile = new List<IndexedFile>();
             this.IndexedFiles = new ObservableCollection<IndexedFile>();
+            this.ProgramElements = new ObservableCollection<ProgramElementWrapper>();
+            this.AccessLevels = new ObservableCollection<AccessWrapper>();
 
             this.AddIndexFolderCommand = new RelayCommand(AddIndexFolder);
             this.RemoveIndexFolderCommand = new RelayCommand(RemoveIndexFolder);
@@ -107,7 +129,11 @@ namespace Sando.UI.ViewModel
 
             this.IsBrowseButtonEnabled = false;
 
+            InitAccessLevels();
+            InitProgramElements();
+
             this.RegisterSrcMLService();
+
             this.initializeIndexedFile();
 
         }
@@ -324,6 +350,35 @@ namespace Sando.UI.ViewModel
             return Path.GetFullPath(indexedFilePath + "\\") == Path.GetFullPath(eventFilePath);
         }
 
+        private void InitProgramElements()
+        {
+            ProgramElements = new ObservableCollection<ProgramElementWrapper>
+                {
+                    new ProgramElementWrapper(true, ProgramElementType.Class),
+                    new ProgramElementWrapper(false, ProgramElementType.Comment),
+                    new ProgramElementWrapper(true, ProgramElementType.Custom),
+                    new ProgramElementWrapper(true, ProgramElementType.Enum),
+                    new ProgramElementWrapper(true, ProgramElementType.Field),
+                    new ProgramElementWrapper(true, ProgramElementType.Method),
+                    new ProgramElementWrapper(true, ProgramElementType.MethodPrototype),
+                    new ProgramElementWrapper(true, ProgramElementType.Property),
+                    new ProgramElementWrapper(true, ProgramElementType.Struct),
+                    new ProgramElementWrapper(true, ProgramElementType.XmlElement)
+                    //new ProgramElementWrapper(true, ProgramElementType.TextLine)
+                };
+        }
+
+        private void InitAccessLevels()
+        {
+            AccessLevels = new ObservableCollection<AccessWrapper>
+                {
+                    new AccessWrapper(true, AccessLevel.Private),
+                    new AccessWrapper(true, AccessLevel.Protected),
+                    new AccessWrapper(true, AccessLevel.Internal),
+                    new AccessWrapper(true, AccessLevel.Public)
+                };
+        }
+
         private void RegisterSrcMLService()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
@@ -374,6 +429,7 @@ namespace Sando.UI.ViewModel
                             break;
                         }
 
+
                     }
 
                     if (null != toRemoveFile)
@@ -412,7 +468,7 @@ namespace Sando.UI.ViewModel
                 if (!isEqual)
                 {
                     IndexedFile file = new IndexedFile();
-                    file.FilePath = filePath + "\\";
+                    file.FilePath = filePath.TrimEnd("\\".ToCharArray());
                     file.OperationStatus = IndexedFile.Status.Normal;
                     this.AddIndexFolder(file);
                 }

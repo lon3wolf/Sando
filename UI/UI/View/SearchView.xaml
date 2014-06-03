@@ -119,7 +119,7 @@
             <!-- Top Part: Query -->
             <controls:AutoCompleteBox HorizontalAlignment="Stretch" Grid.Column="0"
                 Name="searchBox" Margin="0,0,0,0" FilterMode="None"
-                Height="25" BorderBrush="DimGray"                 
+                Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
                 
                 MinimumPrefixLength="0" MaxDropDownHeight="290" 
                 ValueMemberPath="Query" VerticalAlignment="Top" 
@@ -148,8 +148,6 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-
-
                     </DataTemplate>
                 </controls:AutoCompleteBox.ItemTemplate>
             </controls:AutoCompleteBox>
