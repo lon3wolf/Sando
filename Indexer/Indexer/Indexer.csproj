@@ -72,7 +72,7 @@
     <Compile Include="Documents\CommentDocument.cs" />
     <Compile Include="Documents\Converters\ConverterFromHitToProgramElement.cs" />
     <Compile Include="Documents\Converters\ConverterFromProgramElementToDocument.cs" />
-    <Compile Include="Documents\TextLineDocument.cs" />
+    <Compile Include="Documents\TextFileDocument.cs" />
     <Compile Include="Documents\MethodPrototypeDocument.cs" />
     <Compile Include="Documents\DocumentFactory.cs" />
     <Compile Include="Documents\EnumDocument.cs" />

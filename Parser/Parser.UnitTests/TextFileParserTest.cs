@@ -17,17 +17,9 @@ namespace Sando.Parser.UnitTests
 			var parser = new TextFileParser();
 			var elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\SearchViewControl.xaml.txt");
 			Assert.IsNotNull(elements);
-			Assert.AreEqual(205, elements.Count);
-			foreach(var element in elements)
-			{
-				if(element.DefinitionLineNumber == 218)
-				{
-					Assert.AreEqual("</UserControl>", element.Name);
-				}
-
-			}
+			Assert.AreEqual(elements.Count, 1);
+            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("</UserControl>"));
 		}
-
 
         [Test]
         public void ParseTxtFile()
@@ -35,11 +27,17 @@ namespace Sando.Parser.UnitTests
             var parser = new TextFileParser();
             var elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\LongFile.txt");
             Assert.IsNotNull(elements);
-            Assert.AreEqual(elements.Count, 987386);
+            Assert.AreEqual(elements.Count, 1);
+            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("the")); //first word
+            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("16761152")); //second number
+
+            //this file is too big, so a word near the end of it should not have been parsed
+            Assert.IsFalse(elements.ElementAt(0).RawSource.Contains("aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz")); 
+
             elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\NotSoLongFile.txt");
             Assert.IsNotNull(elements);
-            Assert.AreEqual(23945, elements.Count);
-
+            Assert.AreEqual(elements.Count, 1);
+            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("pkcolumn"));   
         }
 
 

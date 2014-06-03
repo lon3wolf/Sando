@@ -47,7 +47,7 @@ namespace Sando.UI.View.Search.Converters
             string resourceName;
             if (programElementType == ProgramElementType.Struct)
                 resourceName = String.Format("../Resources/VS2010Icons/VSObject_{0}{1}.png", "Structure", accessLevel);
-            else if(programElementType == ProgramElementType.TextLine)
+            else if(programElementType == ProgramElementType.TextFile)
                 resourceName = "../Resources/VS2010Icons/xmlIcon.png";
             else
                 resourceName = string.Format("../Resources/VS2010Icons/VSObject_{0}{1}.png", programElementType, accessLevel);
