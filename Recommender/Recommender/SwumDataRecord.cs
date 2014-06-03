@@ -9,7 +9,7 @@ namespace Sando.Recommender {
     /// Contains various data determined by constructing SWUM on a method.
     /// </summary>
     public class SwumDataRecord {
-        public ProgramElementNode SwumNode { get; set; }
+        public string SwumNodeName { get; set; }
         public string Action { get; set; }
         public PhraseNode ParsedAction { get; set; }
         public string Theme { get; set; }
@@ -17,12 +17,13 @@ namespace Sando.Recommender {
         public string IndirectObject { get; set; }
         public PhraseNode ParsedIndirectObject { get; set; }
         public ISet<string> FileNames { get; private set; }
+        public string Signature { get; set; }
 
         /// <summary>
         /// Creates a new empty SwumDataRecord.
         /// </summary>
         public SwumDataRecord() {
-            SwumNode = null;
+            SwumNodeName = string.Empty;
             Action = string.Empty;
             ParsedAction = null;
             Theme = string.Empty;
@@ -30,14 +31,14 @@ namespace Sando.Recommender {
             IndirectObject = string.Empty;
             ParsedIndirectObject = null;
             FileNames = new HashSet<string>();
+            Signature = string.Empty;
         }
 
         /// <summary>
         /// Returns a string representation of the object.
         /// </summary>
         public override string ToString() {
-            var name = SwumNode == null ? "" : SwumNode.Name;
-            return string.Format("{0}|{1}|{2}|{3}|{4}", ParsedAction, ParsedTheme, ParsedIndirectObject, string.Join(";", FileNames),name);
+            return string.Format("{0}|{1}|{2}|{3}|{4}", ParsedAction, ParsedTheme, ParsedIndirectObject, string.Join(";", FileNames), SwumNodeName);
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace Sando.Recommender {
             }
             if (!string.IsNullOrWhiteSpace(fields[4]))
             {
-                sdr.SwumNode = new MethodDeclarationNode(fields[4]);
+                sdr.SwumNodeName = fields[4].Trim();
             }
             return sdr;
         }
