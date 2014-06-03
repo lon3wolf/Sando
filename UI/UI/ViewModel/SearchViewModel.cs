@@ -24,12 +24,8 @@ namespace Sando.UI.ViewModel
     {
         #region Properties
 
-       
-
         private IndexedFile _indexedFile;
         private bool _isBrowseButtonEnabled;
-        private String _searchText;
-        
 
         public ICommand AddIndexFolderCommand
         {
@@ -217,7 +213,7 @@ namespace Sando.UI.ViewModel
             }
             catch (ResolutionFailedException resFailed)
             {
-                //ignore
+                //TODO:Should not ignore exception here.
             }
 
             if (null != srcMlService)

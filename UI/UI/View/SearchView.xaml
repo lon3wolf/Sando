@@ -120,7 +120,7 @@
             <controls:AutoCompleteBox HorizontalAlignment="Stretch" Grid.Column="0"
                 Name="searchBox" Margin="0,0,0,0" FilterMode="None"
                 Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
-                
+                KeyUp="SearchBox_OnKeyUpHandler"
                 MinimumPrefixLength="0" MaxDropDownHeight="290" 
                 ValueMemberPath="Query" VerticalAlignment="Top" 
                 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"

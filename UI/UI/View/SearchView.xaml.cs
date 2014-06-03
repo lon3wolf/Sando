@@ -22,12 +22,16 @@ namespace Sando.UI.View
     {
 
         private SearchViewModel _searchViewModel;
+        private SearchManager _searchManager;
 
         public SearchView()
         {
             InitializeComponent();
 
             this.DataContextChanged += SearchView_DataContextChanged;
+
+            this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
+            //_searchManager.AddListener(this);
         }
 
         private void SearchView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -106,10 +110,33 @@ namespace Sando.UI.View
 
         private void SearchBox_OnKeyUpHandler(object sender, KeyEventArgs e)
         {
-            if (null != this.searchBox.Text)
+            if (e.Key == Key.Return)
             {
-                BeginSearch(this.searchBox.Text);
+                if (null != this.searchBox.Text)
+                {
+                    BeginSearch(this.searchBox.Text);
+                }
             }
+        }
+
+        private void SearchAsync(String text, SimpleSearchCriteria searchCriteria)
+        {
+            var searchWorker = new BackgroundWorker();
+            searchWorker.DoWork += SearchWorker_DoWork;
+            var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
+            searchWorker.RunWorkerAsync(workerSearchParams);
+        }
+
+        private class WorkerSearchParameters
+        {
+            public SimpleSearchCriteria Criteria { get; set; }
+            public String Query { get; set; }
+        }
+
+        void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var searchParams = (WorkerSearchParameters)e.Argument;
+            _searchManager.Search(searchParams.Query, searchParams.Criteria);
         }
 
         private void BeginSearch(string searchString)
@@ -149,7 +176,7 @@ namespace Sando.UI.View
                 Criteria.ProgramElementTypes.Clear();
             }
 
-            //SearchAsync(searchString, Criteria);
+            SearchAsync(searchString, Criteria);
         }
 
         private void AddSearchHistory(String query)
