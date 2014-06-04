@@ -117,8 +117,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- Top Part: Query -->
-            <controls:AutoCompleteBox HorizontalAlignment="Stretch" Grid.Column="0"
-                Name="searchBox" Margin="0,0,0,0" FilterMode="None"
+            <controls:AutoCompleteBox Loaded="SearchBox_Loaded" HorizontalAlignment="Stretch" Grid.Column="0"
+                Name="SearchBox" Margin="0,0,0,0" FilterMode="None"
                 Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
                 KeyUp="SearchBox_OnKeyUpHandler"
                 MinimumPrefixLength="0" MaxDropDownHeight="290" 
@@ -158,8 +158,9 @@
                 <Image Source="../Resources/cloud.png"/>
             </Button>
 
-            <Button Grid.Row="0" Grid.Column="2" Margin="0,0,5,0" Content="{Binding Path=SearchLabel}"  VerticalAlignment="Top" 
-                    HorizontalAlignment="Right" Width="60" Height="25" Name="searchButton"/>
+            <Button Grid.Row="0" Grid.Column="2" Margin="0,0,5,0" Content="Search"  VerticalAlignment="Top" 
+                    HorizontalAlignment="Right" Width="60" Height="25" Name="SearchButton" Command="{Binding SearchCommand}"
+                    CommandParameter="{Binding ElementName=SearchBox,Path=Text}"/>
         </Grid>
         
 
@@ -307,7 +308,8 @@
                     </Grid.RowDefinitions>
                     <Button Name="Reset"  Margin="5,0,0,3" FontFamily="ExtraBold" IsEnabled="True" 
                                 KeyboardNavigation.IsTabStop="False" Height="23" Width="120" 
-                                VerticalAlignment="Top" ToolTip="Reset Sando Index">Reset Sando Index
+                                VerticalAlignment="Top" ToolTip="Reset Sando Index"
+                                Command="{Binding ResetCommand}">Reset Sando Index
                     </Button>
                     <!--Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"-->
 

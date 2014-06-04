@@ -1,10 +1,16 @@
 ﻿using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
 using Microsoft.Practices.Unity;
+using Sando.Core.QueryRefomers;
+using Sando.Core.Tools;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ProgramElementContracts;
+using Sando.ExtensionContracts.SearchContracts;
+using Sando.Indexer;
+using Sando.Indexer.Searching.Criteria;
 using Sando.Recommender;
 using Sando.UI.Base;
+using Sando.UI.View;
 using Sando.UI.View.Search;
 using System;
 using System.Collections.Generic;
@@ -20,12 +26,14 @@ using System.Windows.Threading;
 
 namespace Sando.UI.ViewModel
 {
-    public class SearchViewModel : BaseViewModel
+    public class SearchViewModel : BaseViewModel, ISearchResultListener
     {
         #region Properties
 
         private IndexedFile _indexedFile;
         private bool _isBrowseButtonEnabled;
+        private String _searchStatus;
+        private SearchManager _searchManager;
 
         public ICommand AddIndexFolderCommand
         {
@@ -46,6 +54,18 @@ namespace Sando.UI.ViewModel
         }
 
         public ICommand CancelCommand
+        {
+            get;
+            set;
+        }
+
+        public ICommand SearchCommand
+        {
+            get;
+            set;
+        }
+
+        public ICommand ResetCommand
         {
             get;
             set;
@@ -97,6 +117,21 @@ namespace Sando.UI.ViewModel
                 OnPropertyChanged("IsBrowseButtonEnabled");
             }
         }
+
+        public String SearchStatus
+        {
+            get
+            {
+                return this._searchStatus;
+            }
+            set
+            {
+                this._searchStatus = value;
+                OnPropertyChanged("SearchStatus");
+            }
+        }
+
+
         public ObservableCollection<AccessWrapper> AccessLevels
         {
             get;
@@ -122,6 +157,8 @@ namespace Sando.UI.ViewModel
             this.RemoveIndexFolderCommand = new RelayCommand(RemoveIndexFolder);
             this.ApplyCommand = new RelayCommand(Apply);
             this.CancelCommand = new RelayCommand(Cancel);
+            this.SearchCommand = new RelayCommand(Search);
+            this.ResetCommand = new RelayCommand(Reset);
 
             this.IsBrowseButtonEnabled = false;
 
@@ -129,6 +166,9 @@ namespace Sando.UI.ViewModel
             InitProgramElements();
 
             this.RegisterSrcMLService();
+
+            this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
+            this._searchManager.AddListener(this);
 
             this.initializeIndexedFile();
 
@@ -264,6 +304,27 @@ namespace Sando.UI.ViewModel
 
             Synchronize();
 
+        }
+
+        private void Search(object param)
+        {
+            BeginSearch(param.ToString());
+        }
+
+        private void Reset(object param)
+        {
+            var srcMlService = ServiceLocator.Resolve<ISrcMLGlobalService>();
+            var indexer = ServiceLocator.Resolve<DocumentIndexer>();
+            if (srcMlService == null)
+            {
+                MessageBox.Show("Could not reset the index.", "Failed to Reset", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            else
+            {
+                srcMlService.Reset();
+                indexer.AddDeletionFile();
+                MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.", "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         #endregion
@@ -475,6 +536,94 @@ namespace Sando.UI.ViewModel
 
         #endregion
 
+        #region Search
+
+        private void SearchAsync(String text, SimpleSearchCriteria searchCriteria)
+        {
+            var searchWorker = new BackgroundWorker();
+            searchWorker.DoWork += SearchWorker_DoWork;
+            var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
+            searchWorker.RunWorkerAsync(workerSearchParams);
+        }
+
+        private class WorkerSearchParameters
+        {
+            public SimpleSearchCriteria Criteria { get; set; }
+            public String Query { get; set; }
+        }
+
+        void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var searchParams = (WorkerSearchParameters)e.Argument;
+            _searchManager.Search(searchParams.Query, searchParams.Criteria);
+        }
+
+        private void BeginSearch(string searchString)
+        {
+
+            this.BeforeSearch(this, new EventArgs());
+
+            AddSearchHistory(searchString);
+
+            SimpleSearchCriteria Criteria = new SimpleSearchCriteria();
+
+            var selectedAccessLevels = this.AccessLevels.Where(a => a.Checked).Select(a => a.Access).ToList();
+            if (selectedAccessLevels.Any())
+            {
+                Criteria.SearchByAccessLevel = true;
+                Criteria.AccessLevels = new SortedSet<AccessLevel>(selectedAccessLevels);
+            }
+            else
+            {
+                Criteria.SearchByAccessLevel = false;
+                Criteria.AccessLevels.Clear();
+            }
+
+            var selectedProgramElementTypes =
+                this.ProgramElements.Where(e => e.Checked).Select(e => e.ProgramElement).ToList();
+            if (selectedProgramElementTypes.Any())
+            {
+                Criteria.SearchByProgramElementType = true;
+                Criteria.ProgramElementTypes = new SortedSet<ProgramElementType>(selectedProgramElementTypes);
+            }
+            else
+            {
+                Criteria.SearchByProgramElementType = false;
+                Criteria.ProgramElementTypes.Clear();
+            }
+
+            SearchAsync(searchString, Criteria);
+        }
+
+        private void AddSearchHistory(String query)
+        {
+            var history = ServiceLocator.Resolve<SearchHistory>();
+            history.IssuedSearchString(query);
+        }
+
+
+        #endregion
+
+        public event EventHandler BeforeSearch;
+
+        #region ISearchResultListener Implementation
+
+        public void Update(string searchString, IQueryable<ExtensionContracts.ResultsReordererContracts.CodeSearchResult> results)
+        {
+            //Do nothing
+        }
+
+        public void UpdateMessage(string message)
+        {
+            this.SearchStatus = message;
+        }
+
+        public void UpdateRecommendedQueries(IQueryable<string> queries)
+        {
+            //Do nothing
+        }
+
+        #endregion
     }
 
     public class IndexedFile : BaseViewModel

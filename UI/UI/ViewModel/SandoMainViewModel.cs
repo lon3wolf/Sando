@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace Sando.UI.ViewModel
 {
@@ -39,7 +40,13 @@ namespace Sando.UI.ViewModel
             this.SearchResultViewModel = new SearchResultViewModel();
             this.SearchViewModel = new SearchViewModel();
 
-
+            this.SearchViewModel.BeforeSearch += (sender, e) =>
+            {
+                Application.Current.Dispatcher.Invoke(new Action(delegate(){
+                    this.SearchResultViewModel.ClearSearchResults();
+                }));
+                
+            };
 
         }
 

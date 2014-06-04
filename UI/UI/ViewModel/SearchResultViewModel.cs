@@ -39,7 +39,19 @@ namespace Sando.UI.ViewModel
 
         }
 
+        #region Public Methods
+
+        public void ClearSearchResults()
+        {
+
+            this.SearchResults.Clear();
+
+        }
+
+        #endregion
+
         #region ISearchResultListener Implementation
+
         public void Update(string searchString, IQueryable<CodeSearchResult> results)
         {
             object[] parameter = { results };
@@ -80,7 +92,7 @@ namespace Sando.UI.ViewModel
 
         #endregion
 
-        #region
+        #region Update Search Results
 
         public delegate void UiUpdateDelagate(IEnumerable<CodeSearchResult> results);
 
@@ -242,8 +254,6 @@ namespace Sando.UI.ViewModel
             }
             return sortedWords.ToArray();
         }
-
-
 
         #endregion
     }
