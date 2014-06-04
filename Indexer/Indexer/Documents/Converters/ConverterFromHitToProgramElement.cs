@@ -51,8 +51,8 @@ namespace Sando.Indexer.Documents.Converters
                     return new MethodPrototypeDocument(document);
                 case ProgramElementType.Struct:
                     return new StructDocument(document);
-                case ProgramElementType.TextLine:
-                    return new TextLineDocument(document);
+                case ProgramElementType.TextFile:
+                    return new TextFileDocument(document);
                 case ProgramElementType.XmlElement:
                     return new XmlXElementDocument(document);
                 case ProgramElementType.Custom:

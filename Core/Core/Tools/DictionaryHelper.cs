@@ -58,9 +58,9 @@ namespace Sando.Core.Tools
                 list.AddRange(ExtractStructWords(element as StructElement));
                 return list;
             }
-            if (element as TextLineElement != null)
+            if (element as TextFileElement != null)
             {
-                list.AddRange(ExtractTextLineElement(element as TextLineElement));
+                list.AddRange(ExtractTextLineElement(element as TextFileElement));
                 return list;
             }
             if (element as XmlXElement != null)
@@ -131,7 +131,7 @@ namespace Sando.Core.Tools
             return GetDefaultLetterWords(new []{element.Arguments, element.Name});
         }
 
-        private static IEnumerable<string> ExtractTextLineElement(TextLineElement element)
+        private static IEnumerable<string> ExtractTextLineElement(TextFileElement element)
         {
             return GetDefaultLetterWords(element.Body);
         }
