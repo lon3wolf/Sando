@@ -42,12 +42,6 @@ namespace Sando.UI.View
             //Use SandoMainView instead!
             base.Content = new SandoMainView();
         }
-
-        public SearchViewControl GetSearchViewControl()
-        {            
-            return base.Content as SearchViewControl;
-        }
-
         
         
     }

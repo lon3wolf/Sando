@@ -1,5 +1,6 @@
 ﻿using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
+using EnvDTE80;
 using Microsoft.Practices.Unity;
 using Sando.Core.QueryRefomers;
 using Sando.Core.Tools;
@@ -169,6 +170,25 @@ namespace Sando.UI.ViewModel
 
             this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
             this._searchManager.AddListener(this);
+
+            var dte = ServiceLocator.Resolve<DTE2>();
+            if (dte != null)
+            {
+                dte.Events.SolutionEvents.BeforeClosing += () => {
+
+                    Application.Current.Dispatcher.Invoke(new Action(delegate() {
+
+                        //clear the state
+                        this.IndexedFiles.Clear();
+                        this.ModifiedIndexedFile.Clear();
+                        this.SelectedIndexedFile = null;
+
+                        this.SearchStatus = String.Empty;
+                    
+                    }));
+                
+                };
+            }
 
             this.initializeIndexedFile();
 

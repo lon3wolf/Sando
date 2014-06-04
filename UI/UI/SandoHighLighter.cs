@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using Sando.DependencyInjection;
 using Sando.UI.View;
+using System.Windows;
 
 namespace Sando.UI
 {
@@ -147,8 +148,13 @@ namespace Sando.UI
     {
         public HighlightWordFormatDefinition()
         {
-            this.BackgroundColor = ServiceLocator.Resolve<SearchViewControl>().GetHighlightColor();
-            this.ForegroundColor = ServiceLocator.Resolve<SearchViewControl>().GetHighlightBorderColor();
+            //this.BackgroundColor = ServiceLocator.Resolve<SearchViewControl>().GetHighlightColor();
+            this.BackgroundColor = ((SolidColorBrush)Application.Current.Resources[Microsoft.VisualStudio.Shell.VsBrushes.HighlightKey]).Color;
+
+            //this.ForegroundColor = ServiceLocator.Resolve<SearchViewControl>().GetHighlightBorderColor();
+            this.ForegroundColor = ((SolidColorBrush)Application.Current.Resources[Microsoft.VisualStudio.Shell.VsBrushes.HighlightTextKey]).Color;
+
+
             this.DisplayName = "Highlight Word";
             this.ZOrder = 5;
         }

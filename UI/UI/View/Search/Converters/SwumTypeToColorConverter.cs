@@ -9,13 +9,14 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
 using Sando.Recommender;
 using Sando.DependencyInjection;
+using System.Windows;
+using Sando.UI.Actions;
 
 namespace Sando.UI.View.Search.Converters
 {
     [ValueConversion(typeof(SwumRecommnedationType), typeof(Brush))]
     public class SwumTypeToColorConverter : IMultiValueConverter
     {
-        
 
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -25,42 +26,24 @@ namespace Sando.UI.View.Search.Converters
                 var value = (((System.Windows.Controls.ListBoxItem)listBoxItem).Content as Sando.Recommender.SwumQueriesSorter.InternalSwumRecommendedQuey).Type;
                 var selected = (bool)values[1];
                 if (selected)
-                    return GetColorHistory();
+                    return ColorGenerator.GetHistoryTextColor();
                 switch (value is SwumRecommnedationType ? (SwumRecommnedationType)value : SwumRecommnedationType.History)
                 {
                     case SwumRecommnedationType.History:
-                        return GetColorHistory();
+                        return ColorGenerator.GetHistoryTextColor();
                     default:
-                        return GetColorNormal();
+                        return ColorGenerator.GetNormalTextColor();
                 }
             }
             catch (Exception e)
             {
-                return GetColorNormal();
+                return ColorGenerator.GetNormalTextColor();
             }
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-
-  
-        private Brush normalColor = null;
-        private Brush historyColor = null;
-
-        private Brush GetColorNormal()
-        {
-            if (normalColor == null)
-                normalColor = SearchViewControl.GetNormalTextColor();
-            return normalColor;
-        }
-
-        private Brush GetColorHistory()
-        {
-            if (historyColor == null)
-                historyColor = SearchViewControl.GetHistoryTextColor();
-            return historyColor;
         }
 
     }

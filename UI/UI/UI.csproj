@@ -284,6 +284,7 @@
     <Compile Include="Options\KeyBindingsManager.cs" />
     <Compile Include="Options\SandoOptionsProvider.cs" />
     <Compile Include="SandoHighLighter.cs" />
+    <Compile Include="View\ColorGenerator.cs" />
     <Compile Include="View\SearchResultView.xaml.cs">
       <DependentUpon>SearchResultView.xaml</DependentUpon>
     </Compile>
@@ -305,7 +306,6 @@
       <DependentUpon>SandoMainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Search\Converters\BackgroundConverter.cs" />
-    <Compile Include="View\RecommendedQueryView.cs" />
     <Compile Include="View\Search\Converters\HighlightSearchKey.cs" />
     <Compile Include="View\Converters\MyFontConverter.cs" />
     <Compile Include="View\Converters\MyStrokeConverter.cs" />
@@ -314,9 +314,6 @@
       <DependentUpon>IntroToSando.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\SearchManager.cs" />
-    <Compile Include="View\SearchViewControl.xaml.cs">
-      <DependentUpon>SearchViewControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\SearchToolWindow.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -610,14 +607,6 @@
     <Page Include="View\SandoMainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\SearchViewControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

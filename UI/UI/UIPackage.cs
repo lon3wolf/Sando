@@ -251,9 +251,10 @@ namespace Sando.UI
                     if (stw != null)
                     {
                         WindowActivated = true;    
-                        stw.GetSearchViewControl().FocusOnText();                        
-                        ShowProgressBar(lastShowValue);
-                        UpdateIndexingFilesList();                    
+                        //TODO:Check this later
+                        //stw.GetSearchViewControl().FocusOnText();                        
+                        //ShowProgressBar(lastShowValue);
+                        //UpdateIndexingFilesList();                    
                     }
                 }
             }
@@ -414,8 +415,6 @@ namespace Sando.UI
                 // XiGe: dispose the dictionary.
                 ServiceLocator.Resolve<DictionaryBasedSplitter>().Dispose();
                 ServiceLocator.Resolve<SearchHistory>().Dispose();
-                var control = ServiceLocator.Resolve<SearchViewControl>();
-                control.Dispatcher.Invoke((Action)(() => UpdateDirectory(SearchViewControl.DefaultOpenSolutionMessage, control)));                                                                    
             }
             catch (Exception e)
             {
@@ -430,19 +429,17 @@ namespace Sando.UI
 		    bw.RunWorkerAsync();
 		}
 
-
-    
-
+        [Obsolete]
         public void UpdateIndexingFilesList(String directory, bool emptyDirectorySpecified=false)
         {
             var window = FindToolWindow(typeof(SearchToolWindow), 0, false);
             if(null != window && null != window.Frame) {
                 var path = directory;
                 try {
-                    var control = ServiceLocator.Resolve<SearchViewControl>();
-                    control.Dispatcher.Invoke((Action) (() => UpdateDirectory(path, control)));
-                    if(!emptyDirectorySpecified)
-                        updatedForThisSolution = true;
+                    //var control = ServiceLocator.Resolve<SearchViewControl>();
+                    //control.Dispatcher.Invoke((Action) (() => UpdateDirectory(path, control)));
+                    //if(!emptyDirectorySpecified)
+                    //    updatedForThisSolution = true;
                 } catch(InvalidOperationException notInited) {
                     //OK, window not inited so can't update it
                 }
@@ -451,14 +448,6 @@ namespace Sando.UI
 
 
 
-        private void UpdateDirectory(string path, SearchViewControl control)
-        {
-            if (control != null)
-            { 
-                control.OpenSolutionPaths = path;
-            }
-        }
-
         private bool lastShowValue = false;
 
         public void ShowProgressBar(bool show)
@@ -466,11 +455,12 @@ namespace Sando.UI
             if(WindowActivated)
             {
                 try {
-                    var control = ServiceLocator.Resolve<SearchViewControl>();
-                    if (null != control)
-                    {
-                        control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
-                    }                                            
+                    //TODO:Check this later
+                    //var control = ServiceLocator.Resolve<SearchViewControl>();
+                    //if (null != control)
+                    //{
+                    //    control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
+                    //}                                            
                 } catch(TargetInvocationException e) {
                     FileLogger.DefaultLogger.Error(e);
                 }
@@ -486,9 +476,6 @@ namespace Sando.UI
         {
             try
             {
-                if(srcMLService==null || srcMLService.MonitoredDirectories==null || srcMLService.MonitoredDirectories.Count()==0)
-                    UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage, true);
-
                 SolutionKey key = SetupSolutionKey();
 
                 bool isIndexRecreationRequired = IndexStateManager.IsIndexRecreationRequired();
@@ -650,13 +637,7 @@ namespace Sando.UI
                 srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
                 srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
-                srcMLService.DirectoryAdded += srcMLService_DirectoryAdded;
             }
-        }
-
-        void srcMLService_DirectoryAdded(object sender, DirectoryScanningMonitorEventArgs e)
-        {
-            UpdateIndexingFilesList(e.Directory);
         }
 
         private SolutionKey SetupSolutionKey()
@@ -714,13 +695,5 @@ namespace Sando.UI
             ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
         }
 
-
-        public void UpdateIndexingFilesList()
-        {
-            if (srcMLService != null && srcMLService.MonitoredDirectories != null && srcMLService.MonitoredDirectories.Count > 0)
-            {
-                UpdateIndexingFilesList(srcMLService.MonitoredDirectories.First());
-            }
-        }
     }
 }

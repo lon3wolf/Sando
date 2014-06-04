@@ -45,7 +45,8 @@ namespace Sando.UI.View
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            _toolWindowFinder.UpdateIndexingFilesList();
+            //TODO:Check this later
+            //_toolWindowFinder.UpdateIndexingFilesList();
             return windowFrame;
         }
 
@@ -128,7 +129,5 @@ namespace Sando.UI.View
     public  interface IToolWindowFinder
     {
         ToolWindowPane FindToolWindow(Type type, int i, bool b);
-
-        void UpdateIndexingFilesList();
     }
 }

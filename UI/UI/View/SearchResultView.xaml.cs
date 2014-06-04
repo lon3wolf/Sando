@@ -23,5 +23,6 @@ namespace Sando.UI.View
         {
             InitializeComponent();
         }
+
     }
 }

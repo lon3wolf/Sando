@@ -172,7 +172,7 @@ namespace Sando.UI.View.Search.Converters {
                         foreach (string item in temp)
                         {
                             span.Inlines.Add(IsSearchKey(item, key)
-                                ? CreateRun(item, highlightedWeight, SearchViewControl.GetHistoryTextColor())
+                                ? CreateRun(item, highlightedWeight, ColorGenerator.GetHistoryTextColor())
                                     : CreateRun(item, regularWeight));
                         }
                     }

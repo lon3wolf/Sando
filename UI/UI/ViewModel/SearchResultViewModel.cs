@@ -1,5 +1,7 @@
-﻿using Sando.Core.Logging.Events;
+﻿using EnvDTE80;
+using Sando.Core.Logging.Events;
 using Sando.Core.Tools;
+using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.ExtensionContracts.SearchContracts;
 using Sando.UI.Base;
@@ -37,15 +39,30 @@ namespace Sando.UI.ViewModel
             var searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
             searchManager.AddListener(this);
 
+            var dte = ServiceLocator.Resolve<DTE2>();
+            if (dte != null)
+            {
+                dte.Events.SolutionEvents.BeforeClosing += () =>
+                {
+
+                    Application.Current.Dispatcher.Invoke(new Action(delegate()
+                    {
+
+                        //clear the state
+                        this.SearchResults.Clear();
+
+                    }));
+
+                };
+            }
+
         }
 
         #region Public Methods
 
         public void ClearSearchResults()
         {
-
             this.SearchResults.Clear();
-
         }
 
         #endregion

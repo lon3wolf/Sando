@@ -244,7 +244,7 @@ namespace Sando.UI.View
                 : base(run)
             {
                 this.Query = query;
-                this.Foreground = GetHistoryTextColor();
+                this.Foreground = ColorGenerator.GetHistoryTextColor();
                 this.Index = index;
             }
         }
@@ -268,27 +268,6 @@ namespace Sando.UI.View
                 this.SearchBox.Text = reformedQuery;
 
                 this.SearchButton.Command.Execute(this.SearchButton.CommandParameter);
-            }
-        }
-
-        internal static Brush GetHistoryTextColor()
-        {
-            if (FileOpener.Is2012OrLater())
-            {
-                var key = Microsoft.VisualStudio.Shell.VsBrushes.ToolWindowTabMouseOverTextKey;
-                var color = (Brush)Application.Current.Resources[key];
-                var other = (Brush)Application.Current.Resources[Microsoft.VisualStudio.Shell.VsBrushes.ToolWindowBackgroundKey];
-                if (color.ToString().Equals(other.ToString()))
-                {
-                    return (Brush)Application.Current.Resources[Microsoft.VisualStudio.Shell.VsBrushes.HelpSearchResultLinkSelectedKey];
-                }
-                else
-                    return color;
-            }
-            else
-            {
-                var key = Microsoft.VisualStudio.Shell.VsBrushes.HelpSearchResultLinkSelectedKey;
-                return (Brush)Application.Current.Resources[key];
             }
         }
 
