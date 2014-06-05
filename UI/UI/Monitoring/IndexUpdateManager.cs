@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Xml.Linq;
@@ -10,6 +11,7 @@ using Sando.Indexer;
 using Sando.Indexer.Documents;
 using Sando.Indexer.IndexState;
 using Sando.Core.Logging.Events;
+using Sando.Parser;
 
 
 namespace Sando.UI.Monitoring
@@ -31,7 +33,20 @@ namespace Sando.UI.Monitoring
             var fileInfo = new FileInfo(filePath);            
             try
             {
-                var parsed = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension).Parse(filePath, xElement);
+                var codeParser = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension);
+                var textFileParser = new TextFileParser();
+                var parsed = new List<ProgramElement>();
+                if (codeParser != null)
+                {
+                    parsed.AddRange(codeParser.Parse(filePath, xElement));
+
+                    //double parse code with the text file parser until we can parse everything in the file (e.g. C# attributes)
+                    parsed.AddRange(textFileParser.Parse(filePath, xElement));
+                }
+                else if (!IsBinaryFile(filePath))
+                {
+                    parsed.AddRange(textFileParser.Parse(filePath, xElement));
+                }
 
                 var unresolvedElements = parsed.FindAll(pe => pe is CppUnresolvedMethodElement);
                 if (unresolvedElements.Count > 0)
@@ -71,6 +86,29 @@ namespace Sando.UI.Monitoring
                 LogEvents.UIIndexUpdateError(this, e);
             }
         }
+
+
+        /*
+         * from: http://stackoverflow.com/questions/910873/how-can-i-determine-if-a-file-is-binary-or-text-in-c
+         */
+        private bool IsBinaryFile(string filePath, int sampleSize = 10240)
+        {
+            var buffer = new char[sampleSize];
+            string sampleContent;
+
+            using (var sr = new StreamReader(filePath))
+            {
+                int length = sr.Read(buffer, 0, sampleSize);
+                sampleContent = new string(buffer, 0, length);
+            }
+
+            //Look for 4 consecutive binary zeroes
+            if (sampleContent.Contains("\0\0\0\0"))
+                return true;
+
+            return false;
+        }
+
 	}
 
    
