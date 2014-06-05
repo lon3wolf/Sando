@@ -16,13 +16,18 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Sando.UI.Actions;
 using FocusTestVC;
+using Sando.ExtensionContracts.SearchContracts;
+using ABB.SrcML.VisualStudio.SrcMLService;
 
 namespace Sando.UI.View
 {
     /// <summary>
-    /// Interaction logic for SearchView.xaml
+    /// Interaction logic for SearchView.xaml. 
+    /// Since autocomplete textbox doesn't support data binding.
+    /// We have to implement ISearchResultListener interface here.
+    /// TODO:Replace the implementation of ISearchResultListener to SearchViewModel
     /// </summary>
-    public partial class SearchView : UserControl
+    public partial class SearchView : UserControl, ISearchResultListener
     {
 
         private SearchViewModel _searchViewModel;
@@ -34,6 +39,8 @@ namespace Sando.UI.View
 
             this._recommender = new QueryRecommender();
             ServiceLocator.RegisterInstance<QueryRecommender>(this._recommender);
+
+            SearchManagerFactory.GetUserInterfaceSearchManager().AddListener(this);
 
             this.DataContextChanged += SearchView_DataContextChanged;
 
@@ -169,7 +176,7 @@ namespace Sando.UI.View
         //we have to implement ths recommendataion updated functions here.
         #region Update Recommendation
 
-        private void UpdateRecommendedQueries(IQueryable<string> queries)
+        public void UpdateRecommendedQueries(IQueryable<string> queries)
         {
             queries = SortRecommendedQueriesInUI(ControlRecommendedQueriesCount(queries));
             if (Thread.CurrentThread == Dispatcher.Thread)
@@ -272,5 +279,17 @@ namespace Sando.UI.View
         }
 
         #endregion
+
+        public void Update(string searchString, IQueryable<ExtensionContracts.ResultsReordererContracts.CodeSearchResult> results)
+        {
+            //Do nothing
+        }
+
+        public void UpdateMessage(string message)
+        {
+            //Do nothing
+        }
+
+        
     }
 }

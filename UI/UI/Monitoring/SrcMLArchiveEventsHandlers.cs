@@ -65,11 +65,11 @@ namespace Sando.UI.Monitoring
             return package;
         }
 
-        public int TaskCount()
-        {
-            lock (tasksTrackerLock)
-                return tasks.Count;
-        }
+        //public int TaskCount()
+        //{
+        //    lock (tasksTrackerLock)
+        //        return tasks.Count;
+        //}
 
 
         public Task StartNew(Action a, CancellationTokenSource c)
@@ -191,8 +191,6 @@ namespace Sando.UI.Monitoring
         private object tasksTrackerLock = new object();        
         private int counter=0;
         private UIPackage package;
-        
-
    
 
         public void MonitoringStopped(object sender, EventArgs args)
@@ -215,24 +213,18 @@ namespace Sando.UI.Monitoring
             }
         }
 
-
-
-        public void UpdateStarted(object sender, EventArgs e) {
-            GetPackage().ShowProgressBar(true);
-        }
-
-        public void UpdateCompleted(object sender, EventArgs e) {            
-            //hide progress bar when all *current* tasks are complete
-            whenDoneWithTasks = () =>
-            {
-                GetPackage().ShowProgressBar(false);
-            };
-            if (TaskCount() == 0)
-            {
-                factory.StartNew(whenDoneWithTasks);
-                whenDoneWithTasks = null;
-            }
-        }
+        //public void UpdateCompleted(object sender, EventArgs e) {            
+        //    //hide progress bar when all *current* tasks are complete
+        //    whenDoneWithTasks = () =>
+        //    {
+        //        GetPackage().ShowProgressBar(false);
+        //    };
+        //    if (TaskCount() == 0)
+        //    {
+        //        factory.StartNew(whenDoneWithTasks);
+        //        whenDoneWithTasks = null;
+        //    }
+        //}
 
     }
 }

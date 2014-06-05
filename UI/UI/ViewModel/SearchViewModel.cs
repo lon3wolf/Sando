@@ -34,6 +34,7 @@ namespace Sando.UI.ViewModel
         private IndexedFile _indexedFile;
         private bool _isBrowseButtonEnabled;
         private String _searchStatus;
+        private Visibility _progressBarVisibility;
         private SearchManager _searchManager;
 
         public ICommand AddIndexFolderCommand
@@ -119,6 +120,19 @@ namespace Sando.UI.ViewModel
             }
         }
 
+        public Visibility ProgressBarVisibility
+        {
+            get
+            {
+                return this._progressBarVisibility;
+            }
+            set
+            {
+                this._progressBarVisibility = value;
+                OnPropertyChanged("ProgressBarVisibility");
+            }
+        }
+
         public String SearchStatus
         {
             get
@@ -162,35 +176,18 @@ namespace Sando.UI.ViewModel
             this.ResetCommand = new RelayCommand(Reset);
 
             this.IsBrowseButtonEnabled = false;
+            this.ProgressBarVisibility = Visibility.Collapsed;
 
             InitAccessLevels();
             InitProgramElements();
 
             this.RegisterSrcMLService();
+            this.RegisterSolutionEvents();
 
             this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
             this._searchManager.AddListener(this);
 
-            var dte = ServiceLocator.Resolve<DTE2>();
-            if (dte != null)
-            {
-                dte.Events.SolutionEvents.BeforeClosing += () => {
-
-                    Application.Current.Dispatcher.Invoke(new Action(delegate() {
-
-                        //clear the state
-                        this.IndexedFiles.Clear();
-                        this.ModifiedIndexedFile.Clear();
-                        this.SelectedIndexedFile = null;
-
-                        this.SearchStatus = String.Empty;
-                    
-                    }));
-                
-                };
-            }
-
-            this.initializeIndexedFile();
+            this.InitializeIndexedFile();
 
         }
 
@@ -460,6 +457,11 @@ namespace Sando.UI.ViewModel
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
 
+            if (srcMLService.IsUpdating)
+            {
+                this.ProgressBarVisibility = Visibility.Visible;
+            }
+
             srcMLService.DirectoryAdded += (sender, e) =>
             {
 
@@ -523,35 +525,74 @@ namespace Sando.UI.ViewModel
 
                 }), null);
             };
+
+            srcMLService.UpdateArchivesStarted += (sender, args) =>
+            {
+                this.ProgressBarVisibility = Visibility.Visible;
+            };
+
+            srcMLService.UpdateArchivesCompleted += (sender, args) =>
+            {
+                this.ProgressBarVisibility = Visibility.Collapsed;
+            };
         }
 
-        private void initializeIndexedFile()
+        private void RegisterSolutionEvents()
+        {
+            var dte = ServiceLocator.Resolve<DTE2>();
+            if (dte != null)
+            {
+                dte.Events.SolutionEvents.BeforeClosing += () =>
+                {
+
+                    Application.Current.Dispatcher.Invoke(new Action(delegate()
+                    {
+
+                        //clear the state
+                        this.IndexedFiles.Clear();
+                        this.ModifiedIndexedFile.Clear();
+                        this.SelectedIndexedFile = null;
+
+                        this.SearchStatus = String.Empty;
+
+                    }));
+
+                };
+            }
+        }
+
+        private void InitializeIndexedFile()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
-            foreach (String filePath in srcMLService.MonitoredDirectories)
-            {
-                bool isEqual = false;
-                foreach (IndexedFile indexedFile in this.IndexedFiles)
-                {
 
-                    if (IsPathEqual(indexedFile.FilePath, filePath))
+            if (null != srcMLService.MonitoredDirectories)
+            {
+                foreach (String filePath in srcMLService.MonitoredDirectories)
+                {
+                    bool isEqual = false;
+                    foreach (IndexedFile indexedFile in this.IndexedFiles)
                     {
-                        isEqual = true;
-                        break;
+
+                        if (IsPathEqual(indexedFile.FilePath, filePath))
+                        {
+                            isEqual = true;
+                            break;
+                        }
+
                     }
 
-                }
+                    if (!isEqual)
+                    {
+                        IndexedFile file = new IndexedFile();
+                        file.FilePath = filePath.TrimEnd("\\".ToCharArray());
+                        file.OperationStatus = IndexedFile.Status.Normal;
+                        this.AddIndexFolder(file);
+                    }
 
-                if (!isEqual)
-                {
-                    IndexedFile file = new IndexedFile();
-                    file.FilePath = filePath.TrimEnd("\\".ToCharArray());
-                    file.OperationStatus = IndexedFile.Status.Normal;
-                    this.AddIndexFolder(file);
-                }
-                
 
+                }
             }
+            
         }
 
         #endregion

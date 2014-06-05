@@ -232,38 +232,39 @@ namespace Sando.UI
             _dteEvents.OnBeginShutdown += DteEventsOnOnBeginShutdown;
             _dteEvents.OnStartupComplete += StartupCompleted;
             _windowEvents = dte.Events.WindowEvents;
-            _windowEvents.WindowActivated += SandoWindowActivated;
+            
+            //_windowEvents.WindowActivated += SandoWindowActivated;
             
         }
 
-        private void SandoWindowActivated(Window gotFocus, Window lostFocus)
-        {
-            try
-            {
-                if (gotFocus.ObjectKind.Equals("{AC71D0B7-7613-4EDD-95CC-9BE31C0A993A}"))
-                {
-                    var window = FindToolWindow(typeof(SearchToolWindow), 0, true);
-                    if ((null == window) || (null == window.Frame))
-                    {
-                        throw new NotSupportedException(Resources.CanNotCreateWindow);
-                    }
-                    var stw = window as SearchToolWindow;
-                    if (stw != null)
-                    {
-                        WindowActivated = true;    
-                        //TODO:Check this later
-                        //stw.GetSearchViewControl().FocusOnText();                        
-                        //ShowProgressBar(lastShowValue);
-                        //UpdateIndexingFilesList();                    
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                LogEvents.UISandoWindowActivationError(this, e);
-            }
+        //If this is needed, then it should be done in SearchView.xaml.cs
+        //private void SandoWindowActivated(Window gotFocus, Window lostFocus)
+        //{
+        //    try
+        //    {
+        //        if (gotFocus.ObjectKind.Equals("{AC71D0B7-7613-4EDD-95CC-9BE31C0A993A}"))
+        //        {
+        //            var window = FindToolWindow(typeof(SearchToolWindow), 0, true);
+        //            if ((null == window) || (null == window.Frame))
+        //            {
+        //                throw new NotSupportedException(Resources.CanNotCreateWindow);
+        //            }
+        //            var stw = window as SearchToolWindow;
+        //            if (stw != null)
+        //            {
+        //                WindowActivated = true;    
+        //                //TODO:Check this later
+        //                //stw.GetSearchViewControl().FocusOnText();                        
+                                         
+        //            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        LogEvents.UISandoWindowActivationError(this, e);
+        //    }
             
-        }
+        //}
 
         private void AddCommand()
         {
@@ -429,44 +430,7 @@ namespace Sando.UI
 		    bw.RunWorkerAsync();
 		}
 
-        [Obsolete]
-        public void UpdateIndexingFilesList(String directory, bool emptyDirectorySpecified=false)
-        {
-            var window = FindToolWindow(typeof(SearchToolWindow), 0, false);
-            if(null != window && null != window.Frame) {
-                var path = directory;
-                try {
-                    //var control = ServiceLocator.Resolve<SearchViewControl>();
-                    //control.Dispatcher.Invoke((Action) (() => UpdateDirectory(path, control)));
-                    //if(!emptyDirectorySpecified)
-                    //    updatedForThisSolution = true;
-                } catch(InvalidOperationException notInited) {
-                    //OK, window not inited so can't update it
-                }
-            }
-        }
-
-
-
         private bool lastShowValue = false;
-
-        public void ShowProgressBar(bool show)
-        {
-            if(WindowActivated)
-            {
-                try {
-                    //TODO:Check this later
-                    //var control = ServiceLocator.Resolve<SearchViewControl>();
-                    //if (null != control)
-                    //{
-                    //    control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
-                    //}                                            
-                } catch(TargetInvocationException e) {
-                    FileLogger.DefaultLogger.Error(e);
-                }
-            }
-            lastShowValue = show;
-        }
 
         /// <summary>
         /// Respond to solution opening.
@@ -630,11 +594,8 @@ namespace Sando.UI
             if (!SetupHandlers)
             {
                 SetupHandlers = true;
-                if(srcMLService.IsUpdating) {
-                    ShowProgressBar(true);
-                }
-                srcMLService.UpdateArchivesStarted += srcMLArchiveEventsHandlers.UpdateStarted;
-                srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
+                
+                //srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
                 srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
             }
