@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
 using Configuration.OptionsPages;
@@ -355,7 +356,7 @@ namespace Sando.UI
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".cs" }, new SrcMLCSharpParser(_srcMLArchive));
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".h", ".cpp", ".cxx", ".c" }, new SrcMLCppParser(_srcMLArchive));
             // JZ: End of code changes
-            extensionPointsRepository.RegisterParserImplementation(new List<string> { ".xaml" }, new XAMLFileParser());
+            //extensionPointsRepository.RegisterParserImplementation(new List<string> { ".xaml" }, new XAMLFileParser());
 			//extensionPointsRepository.RegisterParserImplementation(new List<string> { ".txt" },
 																  // new TextFileParser());
 
@@ -562,7 +563,9 @@ namespace Sando.UI
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                var fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
                 }
@@ -587,13 +590,26 @@ namespace Sando.UI
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                foreach (var file in srcMLService.GetSrcMLArchive().FileUnits)
+                var fileNames = srcMLService.GetSrcMLArchive().FileUnits.Select(ABB.SrcML.SrcMLElement.GetFileNameForUnit).ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                foreach (var fileName in fileNames)
                 {
-                    var fileName = ABB.SrcML.SrcMLElement.GetFileNameForUnit(file);
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
                 }
                 //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
+        }
+
+        private IEnumerable<string> GetNonSourceFileNamesToIndex()
+        {
+            var nonSourceFiles = new List<string>();
+            foreach (var monitoredDir in srcMLService.MonitoredDirectories)
+            {
+                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(s => 
+                    s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) || 
+                    s.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)));
+            }
+            return nonSourceFiles;
         }
 
         private static void SetupDataLogging()

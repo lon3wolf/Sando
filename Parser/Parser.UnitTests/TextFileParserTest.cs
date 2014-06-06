@@ -33,13 +33,7 @@ namespace Sando.Parser.UnitTests
 
             //this file is too big, so a word near the end of it should not have been parsed
             Assert.IsFalse(elements.ElementAt(0).RawSource.Contains("aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz")); 
-
-            elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\NotSoLongFile.txt");
-            Assert.IsNotNull(elements);
-            Assert.AreEqual(elements.Count, 1);
-            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("pkcolumn"));   
         }
-
 
 		[Test]
 		public void ParseXAMLFile2()

@@ -33,18 +33,16 @@ namespace Sando.UI.Monitoring
             var fileInfo = new FileInfo(filePath);            
             try
             {
-                var codeParser = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension);
-                var textFileParser = new TextFileParser();
                 var parsed = new List<ProgramElement>();
+                var codeParser = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension);
                 if (codeParser != null)
                 {
                     parsed.AddRange(codeParser.Parse(filePath, xElement));
-
-                    //double parse code with the text file parser until we can parse everything in the file (e.g. C# attributes)
-                    parsed.AddRange(textFileParser.Parse(filePath, xElement));
                 }
-                else if (!IsBinaryFile(filePath))
+                else
                 {
+                    //TODO: parse everything with the TextFileParser (double parsing things that were parsed with SrcML)
+                    var textFileParser = new TextFileParser();
                     parsed.AddRange(textFileParser.Parse(filePath, xElement));
                 }
 
@@ -85,28 +83,6 @@ namespace Sando.UI.Monitoring
             {
                 LogEvents.UIIndexUpdateError(this, e);
             }
-        }
-
-
-        /*
-         * from: http://stackoverflow.com/questions/910873/how-can-i-determine-if-a-file-is-binary-or-text-in-c
-         */
-        private bool IsBinaryFile(string filePath, int sampleSize = 10240)
-        {
-            var buffer = new char[sampleSize];
-            string sampleContent;
-
-            using (var sr = new StreamReader(filePath))
-            {
-                int length = sr.Read(buffer, 0, sampleSize);
-                sampleContent = new string(buffer, 0, length);
-            }
-
-            //Look for 4 consecutive binary zeroes
-            if (sampleContent.Contains("\0\0\0\0"))
-                return true;
-
-            return false;
         }
 
 	}
