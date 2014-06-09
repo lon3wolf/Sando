@@ -24,7 +24,7 @@ namespace Sando.Core.UnitTests.Tools
             var sandoQueryDescription = sandoQueryParser.Parse(query);
 
             Assert.IsTrue(sandoQueryDescription.IsValid);
-            Assert.AreEqual(expectedQueryDescription.ToLowerInvariant(), sandoQueryDescription.ToString().ToLowerInvariant());
+            Assert.AreEqual(expectedQueryDescription, sandoQueryDescription.ToString());
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace Sando.Core.UnitTests.Tools
             var sandoQueryDescription = sandoQueryParser.Parse(query);
 
             Assert.IsTrue(sandoQueryDescription.IsValid);
-            Assert.AreEqual(expectedQueryDescription, sandoQueryDescription.ToString());
+            Assert.AreEqual(expectedQueryDescription.ToLowerInvariant(), sandoQueryDescription.ToString().ToLowerInvariant());
         }
 
 
