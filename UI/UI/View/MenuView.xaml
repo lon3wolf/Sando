@@ -28,7 +28,7 @@
         <Button Name="ClearHistoryButton"  Margin="1,3,0,0" FontFamily="ExtraBold" IsEnabled="True" 
                     KeyboardNavigation.IsTabStop="False" FontWeight="ExtraBold" 
                     Height="19" Width="19" VerticalAlignment="Top" ToolTip="Clear search history"
-                    Style="{StaticResource ToolWindowButtonStyle}">✘
+                    Style="{StaticResource ToolWindowButtonStyle}" Command="{Binding ClearSearchHistoryCommand}">✘
         </Button>
 
         <Button x:Name="HelpButton"  ToolTip="Help" Margin="1,3,0,0" FontFamily="ExtraBold" VerticalAlignment="Top"   
