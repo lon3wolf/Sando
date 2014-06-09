@@ -113,7 +113,8 @@ namespace Sando.IntegrationTests.Search
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx")
+                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx") ||
+                    Path.GetExtension(Path.GetFullPath(file)).Equals(".txt")
                     )
                     HandleFileUpdated(file);
             }
@@ -309,7 +310,7 @@ namespace Sando.IntegrationTests.Search
 
         public ISrcMLArchive GetSrcMLArchive()
         {
-            throw new NotImplementedException();
+            return _srcMLArchive;
         }
 
         public bool IsMonitoring { get { return true; } }

@@ -117,44 +117,62 @@ namespace Sando.UI.Monitoring
 
 
 
-        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args, bool commitImmediately, DocumentIndexer documentIndexer) {                        
+        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args,
+            bool commitImmediately, DocumentIndexer documentIndexer)
+        {
             string sourceFilePath = args.FilePath;
             var fileExtension = Path.GetExtension(sourceFilePath);
-            if(ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null) {
-                if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath))
-                    return;
-                var xelement = GetXElement(args, srcMLService);
-                if (xelement == null)
-                    return;
-                var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
-                switch(args.EventType) {
-                    case FileEventType.FileAdded:
-                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());    //"just to be safe!"
-                        indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+            var parsableToXml = (ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null);
+            if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath)) return;
+            XElement xelement = null;
+            if (parsableToXml)
+            {
+                xelement = GetXElement(args, srcMLService);
+                if (xelement == null) return;
+            }
+            var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
+            switch (args.EventType)
+            {
+                case FileEventType.FileAdded:
+                    documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant()); //"just to be safe!"
+                    indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+                    if (parsableToXml)
+                    {
                         SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
-                        break;
-                    case FileEventType.FileChanged:
-                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());
-                        indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+                    }
+                    break;
+                case FileEventType.FileChanged:
+                    documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());
+                    indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+                    if (parsableToXml)
+                    {
                         SwumManager.Instance.UpdateSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
-                        break;
-                    case FileEventType.FileDeleted:
-                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant(), commitImmediately);
+                    }
+                    break;
+                case FileEventType.FileDeleted:
+                    documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant(), commitImmediately);
+                    if (parsableToXml)
+                    {
                         SwumManager.Instance.RemoveSourceFile(sourceFilePath.ToLowerInvariant());
-                        break;
-                    case FileEventType.FileRenamed: // FileRenamed is repurposed. Now means you may already know about it, so check and only parse if not existing
-                        if(!SwumManager.Instance.ContainsFile(sourceFilePath.ToLowerInvariant())) {
-                            documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());    //"just to be safe!"
-                            indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+                    }
+                    break;
+                case FileEventType.FileRenamed:
+                    // FileRenamed is repurposed. Now means you may already know about it, so check and only parse if not existing
+                    if (!SwumManager.Instance.ContainsFile(sourceFilePath.ToLowerInvariant()))
+                    {
+                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant()); //"just to be safe!"
+                        indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
+                        if (parsableToXml)
+                        {
                             SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
                         }
-                        break;
-                    default:
-                        // if we get here, a new event was probably added. for now, no-op
-                        break;
-                }
-                ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
+                    }
+                    break;
+                default:
+                    // if we get here, a new event was probably added. for now, no-op
+                    break;
             }
+            ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
         }
 
         private static XElement GetXElement(FileEventRaisedArgs args, ISrcMLGlobalService srcMLService)

@@ -11,6 +11,16 @@ namespace Sando.IntegrationTests.Search
     [TestFixture]
     public class SelfSearchTest : AutomaticallyIndexingTestClass
     {
+        [Test]
+        public void SearchRetrievesTextFiles()
+        {
+            string keywords = "gnu";
+            var expectedLowestRank = 10;
+            Predicate<CodeSearchResult> predicate =
+                el => el.ProgramElement.ProgramElementType == ProgramElementType.TextFile && (el.ProgramElement.Name == "notsolongfile.txt");
+            EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
+        }
+
         //document add field should find CustomFieldTest.GetLuceneDocument near top
         [Test]
         public void FindBodyText()
