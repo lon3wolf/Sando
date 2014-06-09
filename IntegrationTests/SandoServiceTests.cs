@@ -58,57 +58,63 @@ namespace Sando.IntegrationTests
             TestHelpers.SrcMLTestScaffold.Service.StopMonitoring();
         }
 
-        [TestMethod]
-        [HostType("VS IDE")]
-        public void SearchTest()
-        {
-            Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 5000));
-            try
-            {
-                var results = TestHelpers.TestScaffold.Service.GetSearchResults("game pad");
-                Assert.IsTrue(results.Count > 0, "Did not find any results when I should have");     
-                Assert.IsTrue(results.First().Name.Equals("GamePadNode"),"Didn't find fthe correct first result, found: "+results.First().Name);
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(false, "Search failed with an exception: " + e.Message);
-            }            
-        }
+        //On 6/9/2014 I commented out the VS IDE style tests here.
+        //We need to have a major investment in testing using the VS IDE environment (e.g., setting up test environments on the server) 
+        //if we want to use these types of tests.
+        //The tests I commented out were not run on the build server and effectively useless.
 
-        [TestMethod]
-        [HostType("VS IDE")]
-        public void RecommendationsTest()
-        {
-            Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 5000));
-            try
-            {
-                var recommender = ServiceLocator.Resolve<QueryRecommender>();
-                Assert.IsTrue(recommender.GenerateRecommendations("play").Length > 0, "Did not find any recommendations when I should have");
-                Assert.IsTrue(recommender.GenerateRecommendations("play")[0].Query.Equals("Player"), "Didn't find the correct first result, found: " + recommender.GenerateRecommendations("game")[0].Query);
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(false, "Search failed with an exception: " + e.Message);
-            }
-        }
 
-        [TestMethod]
-        [HostType("VS IDE")]
-        public void SummarizationTest()
-        {
-            Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 10000));
-            var firstResult = TestHelpers.TestScaffold.Service.GetSearchResults("pc player game").First();            
-            var control = ServiceLocator.Resolve<SearchViewControl>();
-            string highlight;
-            string highlightRaw;
-            control.GenerateHighlight(firstResult.Raw, "play", out highlight, out highlightRaw);
-            //        public PCPlayer PCPlayer
-            //Assert.IsTrue(false, highlight);
-            Assert.IsTrue(highlight.Contains("public PC|~S~|Play|~E~|er PC|~S~|Play|~E~|er"));
-            Assert.IsFalse(highlight.Contains("get"));
-            //                return pcPlayer;
-            Assert.IsTrue(highlight.Contains("return pc|~S~|Play|~E~|er;")); 
-        }
+        //[TestMethod]
+        //[HostType("VS IDE")]
+        //public void SearchTest()
+        //{
+        //    Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 5000));
+        //    try
+        //    {
+        //        var results = TestHelpers.TestScaffold.Service.GetSearchResults("game pad");
+        //        Assert.IsTrue(results.Count > 0, "Did not find any results when I should have");     
+        //        Assert.IsTrue(results.First().Name.Equals("GamePadNode"),"Didn't find fthe correct first result, found: "+results.First().Name);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Assert.IsTrue(false, "Search failed with an exception: " + e.Message);
+        //    }            
+        //}
+
+        //[TestMethod]
+        //[HostType("VS IDE")]
+        //public void RecommendationsTest()
+        //{
+        //    Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 5000));
+        //    try
+        //    {
+        //        var recommender = ServiceLocator.Resolve<QueryRecommender>();
+        //        Assert.IsTrue(recommender.GenerateRecommendations("play").Length > 0, "Did not find any recommendations when I should have");
+        //        Assert.IsTrue(recommender.GenerateRecommendations("play")[0].Query.Equals("Player"), "Didn't find the correct first result, found: " + recommender.GenerateRecommendations("game")[0].Query);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Assert.IsTrue(false, "Search failed with an exception: " + e.Message);
+        //    }
+        //}
+
+        //[TestMethod]
+        //[HostType("VS IDE")]
+        //public void SummarizationTest()
+        //{
+        //    Assert.IsTrue(TestHelpers.WaitForServiceToFinish(TestHelpers.SrcMLTestScaffold.Service, 10000));
+        //    var firstResult = TestHelpers.TestScaffold.Service.GetSearchResults("pc player game").First();            
+        //    //var control = ServiceLocator.Resolve<SearchViewControl>();
+        //    string highlight;
+        //    string highlightRaw;
+        //    control.GenerateHighlight(firstResult.Raw, "play", out highlight, out highlightRaw);
+        //    //        public PCPlayer PCPlayer
+        //    //Assert.IsTrue(false, highlight);
+        //    Assert.IsTrue(highlight.Contains("public PC|~S~|Play|~E~|er PC|~S~|Play|~E~|er"));
+        //    Assert.IsFalse(highlight.Contains("get"));
+        //    //                return pcPlayer;
+        //    Assert.IsTrue(highlight.Contains("return pc|~S~|Play|~E~|er;")); 
+        //}
 
         public void Invoke(MethodInvoker globalSystemWindowsFormsMethodInvoker)
         {

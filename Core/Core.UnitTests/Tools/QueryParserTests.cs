@@ -168,7 +168,7 @@ namespace Sando.Core.UnitTests.Tools
                 new object[]{"identifier",                          "Search terms:[identifier]"},
                 new object[]{"open*file",                           "Search terms:[open*file,open,file]"},
                 new object[]{"do something special",                "Search terms:[do,something,special]"},
-                new object[]{"every*Single*Word",                   "Search terms:[every*Single*Word,every*,Single,Word]"}
+                new object[]{"every*Single*Word",                   "Search terms:[every*Single*Word,Single,every,Word]"}
             };
     }
 }
