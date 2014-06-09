@@ -145,7 +145,7 @@
             </controls:AutoCompleteBox>
 
             <Button Style="{StaticResource NoChromeButton}" Background="Gainsboro"
-                    Grid.Column="1" 
+                    Grid.Column="1" Click="TagCloudButton_Click"
                     Height="25" ToolTip="Show tag cloud">
                 <Image Source="../Resources/cloud.png"/>
             </Button>
@@ -178,8 +178,8 @@
 
 
 
-        <!--<Popup Name="TagCloudPopUpWindow" Placement="Center" StaysOpen="False" IsOpen="False" Width="900" IsEnabled="True" 
-               Grid.Row="3" Grid.Column="2">
+        <Popup Name="TagCloudPopUpWindow" Placement="Center" StaysOpen="False" IsOpen="False" Width="900" IsEnabled="True" 
+               Grid.Row="3">
             <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
                 <DockPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" Margin="0,0,0,0" HorizontalAlignment="Center">
                     <Button Name="previousTagButton"  Margin="0,0,0,0" Width="20" HorizontalAlignment="Right"
@@ -208,9 +208,7 @@
                     TextWrapping="Wrap" FontFamily="Times">
                 </TextBlock>
             </StackPanel>
-        </Popup>-->
-
-
+        </Popup>
 
         <!-- details -->
         <Expander Grid.Row="5" Grid.Column="0" Name="LayoutRoot">

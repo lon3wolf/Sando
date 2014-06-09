@@ -290,6 +290,180 @@ namespace Sando.UI.View
             //Do nothing
         }
 
-        
+
+        #region Tag Cloud
+
+        private void TagCloudButton_Click(object sender, RoutedEventArgs e)
+        {
+            var text = this.SearchBox.Text;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                CreateTagCloud(new string[] { });
+            }
+            else
+            {
+                TagCloudNavigationSession.CreateNewSession(text);
+                CreateTagCloud(new[]{TagCloudNavigationSession.
+                    CurrentSession().GetNextTerm()});
+            }
+        }
+
+        private void ChangeSelectedTag(object sender, RoutedEventArgs e)
+        {
+            var term = sender == previousTagButton
+                ? TagCloudNavigationSession.CurrentSession().GetPreviousTerm()
+                    : TagCloudNavigationSession.CurrentSession().GetNextTerm();
+            CreateTagCloud(new[] { term });
+        }
+
+        private class TagCloudNavigationSession
+        {
+            private static TagCloudNavigationSession session;
+            private readonly string[] terms;
+            private readonly object locker = new object();
+            private int index;
+
+
+            public static TagCloudNavigationSession CurrentSession()
+            {
+                return session;
+            }
+
+            public static void CreateNewSession(String query)
+            {
+                session = new TagCloudNavigationSession(query);
+            }
+
+            private TagCloudNavigationSession(String query)
+            {
+                terms = query.Split().Where(s => !string.IsNullOrWhiteSpace(s)).
+                    Distinct().ToArray();
+                index = terms.Count() * 10;
+            }
+
+            public string GetNextTerm()
+            {
+                lock (locker)
+                {
+                    var term = terms[MakeModulePositive()];
+                    index++;
+                    return term;
+                }
+            }
+
+            public string GetPreviousTerm()
+            {
+                lock (locker)
+                {
+                    var term = terms[MakeModulePositive()];
+                    index--;
+                    return term;
+                }
+            }
+
+            private int MakeModulePositive()
+            {
+                var result = index;
+                for (; result < 0; result += terms.Count()) ;
+                for (; result >= terms.Count(); result -= terms.Count()) ;
+                return result;
+            }
+        }
+
+        private void CreateTagCloud(String[] words)
+        {
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                var dictionary = ServiceLocator.Resolve<DictionaryBasedSplitter>();
+                var builder = new TagCloudBuilder(dictionary, words);
+                var hyperlinks = builder.Build().Select(CreateHyperLinkByShapedWord);
+
+                if (Thread.CurrentThread == Dispatcher.Thread)
+                {
+                    UpdateTagCloudWindow(words, hyperlinks);
+                }
+                else
+                {
+                    Dispatcher.Invoke((Action)(() => UpdateTagCloudWindow(words
+                        , hyperlinks)));
+                }
+            });
+        }
+
+
+        private void UpdateLabel(string[] highlightedTerms)
+        {
+            var terms = this.SearchBox.Text.Split().Select(s => s.Trim().
+                ToLower()).Distinct().Where(t => !string.IsNullOrWhiteSpace(t)).
+                    ToArray();
+            tagCloudTitleTextBlock.Inlines.Clear();
+            if (!terms.Any())
+            {
+                tagCloudTitleTextBlock.Inlines.Add(new Run("Tag cloud for this project")
+                {
+                    //  FontSize = 24, 
+                    Foreground = Brushes.CadetBlue
+                });
+            }
+            else
+            {
+                var runs = terms.Select(t => new Run(t + " ")
+                {
+                    FontSize = highlightedTerms.Contains(t) ? 28 : 24,
+                    Foreground = highlightedTerms.Contains(t)
+                                    ? Brushes.CadetBlue : Brushes.CadetBlue
+                }).ToArray();
+                runs.Last().Text = runs.Last().Text.Trim();
+                tagCloudTitleTextBlock.Inlines.AddRange(runs);
+            }
+        }
+
+        private void UpdateTagCloudWindow(string[] title, IEnumerable<Hyperlink> hyperlinks)
+        {
+            string currentQuery;
+            if (!title.Any())
+            {
+                UpdateLabel(new string[] { });
+                previousTagButton.Visibility = Visibility.Hidden;
+                nextTagButton.Visibility = Visibility.Hidden;
+                currentQuery = string.Empty;
+            }
+            else
+            {
+                currentQuery = title.Aggregate((w1, w2) => w1 + " " + w2);
+                UpdateLabel(title);
+                previousTagButton.Visibility = Visibility.Visible;
+                nextTagButton.Visibility = Visibility.Visible;
+            }
+            TagCloudPopUpWindow.IsOpen = false;
+            TagCloudTextBlock.Inlines.Clear();
+            foreach (var link in hyperlinks)
+            {
+                TagCloudTextBlock.Inlines.Add(link);
+                TagCloudTextBlock.Inlines.Add(" ");
+            }
+            TagCloudPopUpWindow.IsOpen = true;
+            LogEvents.TagCloudShowing(currentQuery);
+        }
+
+        private Hyperlink CreateHyperLinkByShapedWord(IShapedWord shapedWord)
+        {
+            var link = new SandoQueryHyperLink(new Run(shapedWord.Word),
+                this.SearchBox.Text + " " + shapedWord.Word, 0)
+            {
+                FontSize = shapedWord.FontSize,
+                Foreground = shapedWord.Color,
+                IsEnabled = true,
+                TextDecorations = null,
+            };
+            link.Click += (sender, args) => LogEvents.AddWordFromTagCloud(this.SearchBox.Text,
+                "TOFIXTHE", shapedWord.Word);
+            link.Click += StartSearchAfterClick;
+            link.Click += (sender, args) => TagCloudPopUpWindow.IsOpen = false;
+            return link;
+        }
+
+        #endregion
+
     }
 }
