@@ -100,7 +100,7 @@ namespace Sando.UI
         private DTEEvents _dteEvents;
         private ViewManager _viewManager;		
         private WindowEvents _windowEvents;
-        private bool SetupHandlers = false;
+        private bool _setupHandlers = false;
         private bool WindowActivated = false;
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace Sando.UI
                 //load srml package first?
                 taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
-                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
+                RegisterSrcMLService();
             }
             catch(Exception e)
             {
@@ -471,7 +471,9 @@ namespace Sando.UI
                 else
                 {
                     CheckIndexForMissingFiles(srcMLArchiveEventsHandlers);
-                }                
+                }
+
+                RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
             }
             catch (Exception e)
             {
@@ -599,9 +601,9 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(history);
         }
 
-        private void RegisterSrcMLService(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        private void RegisterSrcMLService()
         {
-            srcMLService = GetService(typeof(SSrcMLGlobalService)) as ISrcMLGlobalService;
+            srcMLService = GetService(typeof (SSrcMLGlobalService)) as ISrcMLGlobalService;
             if (null == srcMLService)
             {
                 throw new Exception("Can not get the SrcML global service.");
@@ -609,10 +611,14 @@ namespace Sando.UI
             else
             {
                 ServiceLocator.RegisterInstance(srcMLService);
-            }                         
-            if (!SetupHandlers)
+            }
+        }
+
+        private void RegisterSrcMLHandlers(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        {
+            if (!_setupHandlers)
             {
-                SetupHandlers = true;
+                _setupHandlers = true;
                 
                 //srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
