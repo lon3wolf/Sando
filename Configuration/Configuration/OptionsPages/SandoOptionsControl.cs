@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 
 
@@ -86,9 +88,9 @@ namespace Configuration.OptionsPages
             this.AllowCollectionCheckBox = new System.Windows.Forms.CheckBox();
             this.AllowCollectionLabel = new System.Windows.Forms.Label();
             this.FileExtensionsGroupBox = new System.Windows.Forms.GroupBox();
-            this.FileExtensionsListBox = new System.Windows.Forms.ListBox();
-            this.NewFileExtensionButton = new System.Windows.Forms.Button();
             this.DeleteFileExtensionButton = new System.Windows.Forms.Button();
+            this.NewFileExtensionButton = new System.Windows.Forms.Button();
+            this.FileExtensionsListBox = new System.Windows.Forms.ListBox();
             this.ExtensionPointsConfigurationGroupBox.SuspendLayout();
             this.SearchResultsConfigurationGroupBox.SuspendLayout();
             this.ToggleLogCollectionGroupBox.SuspendLayout();
@@ -203,13 +205,15 @@ namespace Configuration.OptionsPages
             this.FileExtensionsGroupBox.TabStop = false;
             this.FileExtensionsGroupBox.Text = "File extensions to include in index";
             // 
-            // FileExtensionsListBox
+            // DeleteFileExtensionButton
             // 
-            this.FileExtensionsListBox.FormattingEnabled = true;
-            this.FileExtensionsListBox.Location = new System.Drawing.Point(197, 26);
-            this.FileExtensionsListBox.Name = "FileExtensionsListBox";
-            this.FileExtensionsListBox.Size = new System.Drawing.Size(203, 69);
-            this.FileExtensionsListBox.TabIndex = 0;
+            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(96, 65);
+            this.DeleteFileExtensionButton.Name = "DeleteFileExtensionButton";
+            this.DeleteFileExtensionButton.Size = new System.Drawing.Size(75, 23);
+            this.DeleteFileExtensionButton.TabIndex = 2;
+            this.DeleteFileExtensionButton.Text = "Delete";
+            this.DeleteFileExtensionButton.UseVisualStyleBackColor = true;
+            this.DeleteFileExtensionButton.Click += new System.EventHandler(this.DeleteFileExtensionButton_Click);
             // 
             // NewFileExtensionButton
             // 
@@ -219,15 +223,15 @@ namespace Configuration.OptionsPages
             this.NewFileExtensionButton.TabIndex = 1;
             this.NewFileExtensionButton.Text = "New";
             this.NewFileExtensionButton.UseVisualStyleBackColor = true;
+            this.NewFileExtensionButton.Click += new System.EventHandler(this.NewFileExtensionButton_Click);
             // 
-            // DeleteFileExtensionButton
+            // FileExtensionsListBox
             // 
-            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(96, 65);
-            this.DeleteFileExtensionButton.Name = "DeleteFileExtensionButton";
-            this.DeleteFileExtensionButton.Size = new System.Drawing.Size(75, 23);
-            this.DeleteFileExtensionButton.TabIndex = 2;
-            this.DeleteFileExtensionButton.Text = "Delete";
-            this.DeleteFileExtensionButton.UseVisualStyleBackColor = true;
+            this.FileExtensionsListBox.FormattingEnabled = true;
+            this.FileExtensionsListBox.Location = new System.Drawing.Point(197, 26);
+            this.FileExtensionsListBox.Name = "FileExtensionsListBox";
+            this.FileExtensionsListBox.Size = new System.Drawing.Size(203, 69);
+            this.FileExtensionsListBox.TabIndex = 0;
             // 
             // SandoOptionsControl
             // 
@@ -353,6 +357,56 @@ namespace Configuration.OptionsPages
             {
                 customOptionsPage.AllowDataCollectionLogging = Boolean.FalseString;
             }
+        }
+
+        private void NewFileExtensionButton_Click(object sender, EventArgs e)
+        {
+            //popup a popup
+            var addExtensionForm = new AddFileExtensionForm();
+            string newExtension = string.Empty;
+            if (addExtensionForm.ShowDialog() == DialogResult.OK)
+            {
+                newExtension = addExtensionForm.textBoxNewExtension.Text;
+            }
+            if (addExtensionForm != null)
+            {
+                addExtensionForm.Dispose();
+            }
+
+            //add dot if missing
+            if (!newExtension.StartsWith("."))
+            {
+                newExtension = "." + newExtension;
+            }
+
+            //validate entered text (should be dot followed by <3 >0 letters)
+            if (newExtension.Length > 1 && newExtension.Length < 5 && newExtension.Skip(1).All(Char.IsLetter))
+            {
+                var extensionsList = new List<string>(FileExtensionsList);
+                extensionsList.Add(newExtension);
+                FileExtensionsList = null;
+                FileExtensionsList = extensionsList;
+                FileExtensionsListBox.Refresh();
+
+                customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
+
+                //TODO: add missing files to index, possibly issuing warning beforehand                
+            }
+        }
+
+        private void DeleteFileExtensionButton_Click(object sender, EventArgs e)
+        {
+            var extensionsList = new List<string>(FileExtensionsList);
+            foreach (var selected in FileExtensionsListBox.SelectedItems)
+            {
+                extensionsList.Remove(selected.ToString());
+            }
+            FileExtensionsList = null;
+            FileExtensionsList = extensionsList;
+            FileExtensionsListBox.Refresh();
+            customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
+
+            //TODO: recreate entire index, possibly issuing warning beforehand
         }
 	} 
 }
