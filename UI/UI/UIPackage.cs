@@ -515,7 +515,8 @@ namespace Sando.UI
                     }
                 }
                 var fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
@@ -542,7 +543,8 @@ namespace Sando.UI
                     }
                 }
                 var fileNames = srcMLService.GetSrcMLArchive().FileUnits.Select(ABB.SrcML.SrcMLElement.GetFileNameForUnit).ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
@@ -551,14 +553,15 @@ namespace Sando.UI
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
-        private IEnumerable<string> GetNonSourceFileNamesToIndex()
+        private IEnumerable<string> GetNonSourceFileNamesToIndex(IEnumerable<string> sourceExtensions)
         {
+            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+            var nonSourceExtensions = sandoOptions.FileExtensionsToIndex.Except(sourceExtensions);
             var nonSourceFiles = new List<string>();
             foreach (var monitoredDir in srcMLService.MonitoredDirectories)
             {
-                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(s => 
-                    s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) || 
-                    s.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)));
+                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(file =>
+                    nonSourceExtensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))));
             }
             return nonSourceFiles;
         }

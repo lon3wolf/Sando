@@ -18,6 +18,9 @@ namespace Sando.UI.Monitoring
 {
     public class IndexUpdateManager
 	{
+        public static readonly List<string> DefaultFileExtensionsList = new List<string> { ".cs", ".cpp", ".cc", ".h", ".xaml", 
+                                                                                           ".txt", ".js" }; 
+
         private readonly DocumentIndexer _currentIndexer;
 
         public event IndexUpdated indexUpdated;
