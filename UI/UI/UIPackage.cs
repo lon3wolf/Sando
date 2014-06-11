@@ -100,7 +100,7 @@ namespace Sando.UI
         private DTEEvents _dteEvents;
         private ViewManager _viewManager;		
         private WindowEvents _windowEvents;
-        private bool SetupHandlers = false;
+        private bool _setupHandlers = false;
         private bool WindowActivated = false;
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace Sando.UI
                 //load srml package first?
                 taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
-                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
+                RegisterSrcMLService();
             }
             catch(Exception e)
             {
@@ -471,7 +471,9 @@ namespace Sando.UI
                 else
                 {
                     CheckIndexForMissingFiles(srcMLArchiveEventsHandlers);
-                }                
+                }
+
+                RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
             }
             catch (Exception e)
             {
@@ -515,7 +517,8 @@ namespace Sando.UI
                     }
                 }
                 var fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
@@ -542,7 +545,8 @@ namespace Sando.UI
                     }
                 }
                 var fileNames = srcMLService.GetSrcMLArchive().FileUnits.Select(ABB.SrcML.SrcMLElement.GetFileNameForUnit).ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex());
+                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
+                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
@@ -551,14 +555,15 @@ namespace Sando.UI
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
-        private IEnumerable<string> GetNonSourceFileNamesToIndex()
+        private IEnumerable<string> GetNonSourceFileNamesToIndex(IEnumerable<string> sourceExtensions)
         {
+            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+            var nonSourceExtensions = sandoOptions.FileExtensionsToIndex.Except(sourceExtensions);
             var nonSourceFiles = new List<string>();
             foreach (var monitoredDir in srcMLService.MonitoredDirectories)
             {
-                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(s => 
-                    s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) || 
-                    s.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)));
+                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(file =>
+                    nonSourceExtensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))));
             }
             return nonSourceFiles;
         }
@@ -596,9 +601,9 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(history);
         }
 
-        private void RegisterSrcMLService(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        private void RegisterSrcMLService()
         {
-            srcMLService = GetService(typeof(SSrcMLGlobalService)) as ISrcMLGlobalService;
+            srcMLService = GetService(typeof (SSrcMLGlobalService)) as ISrcMLGlobalService;
             if (null == srcMLService)
             {
                 throw new Exception("Can not get the SrcML global service.");
@@ -606,10 +611,14 @@ namespace Sando.UI
             else
             {
                 ServiceLocator.RegisterInstance(srcMLService);
-            }                         
-            if (!SetupHandlers)
+            }
+        }
+
+        private void RegisterSrcMLHandlers(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        {
+            if (!_setupHandlers)
             {
-                SetupHandlers = true;
+                _setupHandlers = true;
                 
                 //srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
                 srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;

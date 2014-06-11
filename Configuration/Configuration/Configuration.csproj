@@ -91,6 +91,12 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="OptionsPages\AddFileExtensionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\AddFileExtensionForm.Designer.cs">
+      <DependentUpon>AddFileExtensionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="OptionsPages\ISandoOptionsProvider.cs" />
     <Compile Include="OptionsPages\SandoOptions.cs" />
     <Compile Include="OptionsPages\SandoOptionsControl.cs">
@@ -108,6 +114,9 @@
     <None Include="sandoKey.snk" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OptionsPages\AddFileExtensionForm.resx">
+      <DependentUpon>AddFileExtensionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="OptionsPages\SandoOptionsControl.resx">
       <DependentUpon>SandoOptionsControl.cs</DependentUpon>
     </EmbeddedResource>

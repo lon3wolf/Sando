@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -41,6 +42,7 @@ namespace Configuration.OptionsPages
                 {
                     optionsControl.AllowDataCollectionLogging = true;
                 }
+			    optionsControl.FileExtensionsList = this.FileExtensionsToIndexList;
 				return optionsControl;
 			}
 		}
@@ -53,6 +55,9 @@ namespace Configuration.OptionsPages
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string AllowDataCollectionLogging { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+        public List<string> FileExtensionsToIndexList { get; set; }
 
 		#endregion Properties 
 	}
