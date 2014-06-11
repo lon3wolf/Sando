@@ -50,6 +50,16 @@ namespace Sando.IntegrationTests.Search
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
 
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            _srcMLArchive.Dispose();
+            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
+            ServiceLocator.Resolve<DocumentIndexer>().Dispose();            
+            DeleteTestDirectoryContents();
+        }
+
+
         public virtual TimeSpan? GetTimeToCommit()
         {
             return null;
@@ -74,18 +84,19 @@ namespace Sando.IntegrationTests.Search
             CreateArchive(filesInThisDirectory);            
             CreateSwum();            
             AddFilesToIndex(filesInThisDirectory);
-            WaitForIndexing();
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
-            Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*2);
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
+            WaitForIndexing();            
         }
 
         public void WaitForIndexing()
         {
+            while (_handler.TaskCount() > 0)
+                Thread.Sleep(1000);
             while (((IEnumerable<Task>)GetATestingScheduler().GetType().InvokeMember("GetScheduledTasks",
                    BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.NonPublic,
                    null, GetATestingScheduler(), null)).Count() != 0)
                 Thread.Sleep(1000);
+            ServiceLocator.Resolve<DocumentIndexer>().ForceFlush();
+            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
         }
 
  
@@ -95,14 +106,7 @@ namespace Sando.IntegrationTests.Search
             return scheduler;
         }
 
-        public class InfiniteCoreStrategy : IConcurrencyStrategy
-        {
-            public int ComputeAvailableCores()
-            {
-                return 100;
-            }
-        }
-
+ 
         public void AddFilesToIndex(string filesInThisDirectory)
         {
             _handler = new SrcMLArchiveEventsHandlers(GetATestingScheduler());
@@ -207,15 +211,7 @@ namespace Sando.IntegrationTests.Search
         }
 
 
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            _srcMLArchive.Dispose();
-            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
-            ServiceLocator.Resolve<DocumentIndexer>().Dispose();
-            DeleteTestDirectoryContents();
-        }
-
+    
         private void DeleteTestDirectoryContents()
         {
             var deleted = false;
@@ -282,7 +278,9 @@ namespace Sando.IntegrationTests.Search
             }
             if (_results != null)
                 foreach (var result in _results)
-                    info.AppendLine(result.Name+" in "+ result.FileName);
+                    info.AppendLine(result.Name + " in " + result.FileName);
+            else
+                info.AppendLine("Returned 0 results");
             return info.ToString();
         }
 
