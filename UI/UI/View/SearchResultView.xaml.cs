@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sando.UI.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,5 +25,13 @@ namespace Sando.UI.View
             InitializeComponent();
         }
 
+        private void TypeHeaderText_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //Control Open/Close behaviour of Popup here. This is a trade-off implementation.
+            TypeColumnHeaderViewModel vm = ((TextBlock)sender).DataContext as TypeColumnHeaderViewModel;
+            vm.IsPopupOpen = !vm.IsPopupOpen;
+        }
+
+    
     }
 }

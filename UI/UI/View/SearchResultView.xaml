@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Sando.UI" xmlns:view="clr-namespace:Sando.UI.View"
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              xmlns:converters="clr-namespace:Sando.UI.View.Search.Converters"
+             xmlns:toolkit="http://schemas.microsoft.com/wpf/2008/toolkit"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -57,12 +58,46 @@
                     <Setter Property="Margin" Value="0,0,0,0"/>
                     <Setter Property="Padding" Value="0,0,0,0"/>
                     <Setter Property="Height" Value="24"/>
-                    <!--<EventSetter Event="MouseDoubleClick" Handler="UIElement_OnMouseDown"/>
-                    <EventSetter Event="KeyDown" Handler="UIElement_OnKeyDown"/>-->
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
+                    <GridViewColumn Width="30" Header="{Binding TypeColumnHeaderViewModel}">
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Grid>
+
+                                    <Popup Name="TypeHeaderPopup" Placement="Bottom" StaysOpen="True" IsOpen="{Binding IsPopupOpen}" Width="Auto" AllowsTransparency="true"                                            
+                                             PlacementTarget="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=GridViewColumn}}">
+                                        
+                                        <ListBox ItemsSource="{Binding SearchResultTypes}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding TypeName}"></CheckBox>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Popup>
+                                    <TextBlock Name="TypeHeaderText" Text="{Binding Header}" MouseDown="TypeHeaderText_MouseDown">
+                                        
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.HeaderContainerStyle>
+                            <Style  TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
+                            </Style>
+                        </GridViewColumn.HeaderContainerStyle>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Mode=OneWay, Path=ProgramElement, Converter={StaticResource ElementToIcon}}" Width="16" Height="16" Margin="0,0,2,2" Grid.Row="1" Grid.Column="0" >
+                                </Image>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Width="Auto" Header="Search Results" >
                         <GridViewColumn.HeaderContainerStyle>
                             <Style  TargetType="{x:Type GridViewColumnHeader}">
@@ -71,6 +106,7 @@
                                 <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
                             </Style>
                         </GridViewColumn.HeaderContainerStyle>
+                        
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
 
@@ -84,7 +120,6 @@
                                     </Grid.ColumnDefinitions>
                                     <Grid Margin="0,0,0,0" Grid.Row="0" Grid.Column="0" >
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="20"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -158,11 +193,9 @@
                                                 </Border>
                                             </Border>
                                         </Popup>
-                                        <Image Source="{Binding Mode=OneWay, Path=ProgramElement, Converter={StaticResource ElementToIcon}}" Width="16" Height="16" Margin="0,0,2,2" Grid.Row="1" Grid.Column="0" >
-                                        </Image>
-                                        <TextBlock Name="Name" MaxWidth="210" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Text="{Binding Mode=OneWay, Path=Name}" Margin="1,0,0,0" TextTrimming="CharacterEllipsis" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
-                                        <TextBlock Grid.Row="1" Grid.Column="2" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontStyle="Italic" FontWeight="Light" Margin="5,0,5,0">in</TextBlock>
-                                        <TextBlock Name="Parent" Text="{Binding Mode=OneWay, Path=ParentOrFile}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" TextTrimming="WordEllipsis" Grid.Row="1" Grid.Column="3" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
+                                        <TextBlock Name="Name" MaxWidth="210" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Text="{Binding Mode=OneWay, Path=Name}" Margin="1,0,0,0" TextTrimming="CharacterEllipsis" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontStyle="Italic" FontWeight="Light" Margin="5,0,5,0">in</TextBlock>
+                                        <TextBlock Name="Parent" Text="{Binding Mode=OneWay, Path=ParentOrFile}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" TextTrimming="WordEllipsis" Grid.Row="1" Grid.Column="2" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
                                         <Canvas Width="Auto" Height="0" Margin="-7,0,0,0" Grid.Row="2" Grid.Column="0">
                                             <Line X1="0" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource StrokeConverter}, Mode=OneWay}"></Line>
                                         </Canvas>

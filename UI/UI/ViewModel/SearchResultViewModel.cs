@@ -2,14 +2,17 @@
 using Sando.Core.Logging.Events;
 using Sando.Core.Tools;
 using Sando.DependencyInjection;
+using Sando.ExtensionContracts.ProgramElementContracts;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.ExtensionContracts.SearchContracts;
 using Sando.UI.Base;
 using Sando.UI.View;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,18 +26,32 @@ namespace Sando.UI.ViewModel
 
         #region Properties
 
+        public List<CodeSearchResult> RealSearchResults
+        {
+            get;
+            set;
+        }
+
         public ObservableCollection<CodeSearchResult> SearchResults
         {
             get;
             set;
         }
 
+        public TypeColumnHeaderViewModel TypeColumnHeaderViewModel
+        {
+            get;
+            set;
+
+        }
+
         #endregion
 
         public SearchResultViewModel()
         {
-
+            this.RealSearchResults = new List<CodeSearchResult>();
             this.SearchResults = new ObservableCollection<CodeSearchResult>();
+            this.TypeColumnHeaderViewModel = new TypeColumnHeaderViewModel();
 
             var searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
             searchManager.AddListener(this);
@@ -49,7 +66,9 @@ namespace Sando.UI.ViewModel
                     {
 
                         //clear the state
+                        this.RealSearchResults.Clear();
                         this.SearchResults.Clear();
+                        this.TypeColumnHeaderViewModel.ClearState();
 
                     }));
 
@@ -63,6 +82,8 @@ namespace Sando.UI.ViewModel
         public void ClearSearchResults()
         {
             this.SearchResults.Clear();
+            this.RealSearchResults.Clear();
+            this.TypeColumnHeaderViewModel.ClearState();
         }
 
         #endregion
@@ -119,13 +140,62 @@ namespace Sando.UI.ViewModel
             {
                 foreach (var codeSearchResult in results)
                 {
-                    SearchResults.Add(codeSearchResult);
+                    this.RealSearchResults.Add(codeSearchResult);
+
+                    this.TypeColumnHeaderViewModel.AddSearchResultType(codeSearchResult.ProgramElementType, 
+                        (sender, args) => {
+
+                            if (args.PropertyName == "IsChecked")
+                            {
+                                FilterSearchResults();
+                            }
+                        
+                        });
                 }
+                FilterSearchResults();
             }
             catch (Exception ee)
             {
                 LogEvents.UIGenericError(this, ee);
             }
+        }
+
+        /// <summary>
+        /// This function clears the result set and adds the results from scratch each time an item
+        /// is checked or unchecked. It doesn't distinguish operation type(check or uncheck) and increment
+        /// filter.
+        /// TODO: May be refactor to increment filter
+        /// </summary>
+        private void FilterSearchResults()
+        {
+            var selectedType = this.TypeColumnHeaderViewModel.SearchResultTypes.Where(searchResultType => {
+
+                if (searchResultType.IsChecked)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }).Select<SearchResultType,ProgramElementType>(searchResultType => {
+            
+                return searchResultType.TypeName;
+            
+            });
+
+            this.SearchResults.Clear();
+
+            foreach (var searchResult in this.RealSearchResults)
+            {
+
+                if (selectedType.Contains(searchResult.ProgramElementType))
+                {
+                    this.SearchResults.Add(searchResult);
+                }
+
+            }
+
         }
 
         public int[] GenerateHighlight(string raw, string searchKey, out string highlight_out,
@@ -273,5 +343,96 @@ namespace Sando.UI.ViewModel
         }
 
         #endregion
+    }
+
+    public class TypeColumnHeaderViewModel : BaseViewModel
+    {
+
+        private bool _isPopupOpen;
+        private HashSet<ProgramElementType> _types;
+
+        public TypeColumnHeaderViewModel()
+        {
+            this._types = new HashSet<ProgramElementType>();
+            this.SearchResultTypes = new ObservableCollection<SearchResultType>();
+            this._isPopupOpen = false;
+        }
+
+        public string Header
+        {
+            get
+            {
+                return "Type";
+            }
+        }
+
+        public bool IsPopupOpen
+        {
+            get
+            {
+                return this._isPopupOpen;
+            }
+            set
+            {
+                this._isPopupOpen = value;
+                OnPropertyChanged("IsPopupOpen");
+            }
+        }
+
+        public ObservableCollection<SearchResultType> SearchResultTypes
+        {
+            get;
+            set;
+        }
+
+        public void ClearState()
+        {
+            this.IsPopupOpen = false;
+            this.SearchResultTypes.Clear();
+            this._types.Clear();
+        }
+
+        public void AddSearchResultType(ProgramElementType type, PropertyChangedEventHandler propertyChangedHandler)
+        {
+            if (!this._types.Contains(type))
+            {
+                var searchResultType = new SearchResultType(type);
+                searchResultType.PropertyChanged += propertyChangedHandler;
+                this.SearchResultTypes.Add(searchResultType);
+                this._types.Add(type);
+            }
+        }
+    }
+
+    public class SearchResultType:BaseViewModel
+    {
+
+        private bool _isChecked;
+
+        public SearchResultType(ProgramElementType type)
+        {
+            this.TypeName = type;
+            this.IsChecked = true;
+        }
+
+        public ProgramElementType TypeName
+        {
+            get;
+            private set;
+        }
+
+        public bool IsChecked
+        {
+            get
+            {
+                return this._isChecked;
+            }
+            set
+            {
+                this._isChecked = value;
+                OnPropertyChanged("IsChecked");
+            }
+        }
+
     }
 }
