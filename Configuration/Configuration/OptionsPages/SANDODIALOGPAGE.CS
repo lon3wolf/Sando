@@ -42,11 +42,8 @@ namespace Configuration.OptionsPages
                 else
                 {
                     optionsControl.AllowDataCollectionLogging = true;
-                }
-                if (FileExtensionsToIndexList != null && FileExtensionsToIndexList.Any())
-                {
-                    optionsControl.FileExtensionsList = FileExtensionsToIndexList;
-                }
+                }                
+                optionsControl.FileExtensionsList = FileExtensionsToIndexList;
 				return optionsControl;
 			}
 		}
@@ -60,8 +57,35 @@ namespace Configuration.OptionsPages
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string AllowDataCollectionLogging { get; set; }
 
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public List<string> FileExtensionsToIndexList { get; set; }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public string _serializedFileExtensions { get; set; }
+        public List<string> FileExtensionsToIndexList {
+            get
+            {
+                if (!String.IsNullOrEmpty(_serializedFileExtensions))
+                {
+                    var splitExtensions = _serializedFileExtensions.Split(new char[] { ';' },
+                                                                StringSplitOptions.RemoveEmptyEntries);
+                    return splitExtensions.ToList();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                if (value != null && value.Any())
+                {
+                    var combinedExtensions = string.Empty;
+                    foreach (var extension in value)
+                    {
+                        combinedExtensions += extension + ";";
+                    }
+                    _serializedFileExtensions = combinedExtensions;
+                }
+            }
+        }
 
 		#endregion Properties 
 	}
