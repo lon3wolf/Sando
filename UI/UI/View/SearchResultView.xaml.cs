@@ -20,9 +20,29 @@ namespace Sando.UI.View
     /// </summary>
     public partial class SearchResultView : UserControl
     {
+
+        private SearchResultViewModel _viewModel;
+
         public SearchResultView()
         {
             InitializeComponent();
+
+            this.DataContextChanged += SearchResultView_DataContextChanged;
+        }
+
+        private void SearchResultView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            this._viewModel = this.DataContext as SearchResultViewModel;
+
+            this._viewModel.SearchResults.CollectionChanged += SearchResults_CollectionChanged;
+        }
+
+        private void SearchResults_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                this.searchResultListbox.Focus();
+            }
         }
 
         private void TypeHeaderText_MouseDown(object sender, MouseButtonEventArgs e)

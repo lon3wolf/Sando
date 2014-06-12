@@ -41,15 +41,15 @@
                      KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" Text="Currently Indexing:" Grid.ColumnSpan="2"/>
 
 
-            <TextBox KeyboardNavigation.IsTabStop="False"   BorderThickness="0" IsReadOnly="True" Grid.Column="1" Name="IndexingList" Margin="2,0,5,1" FontSize="11" FontStyle="Italic" HorizontalAlignment="Stretch" Text="{Binding Path=OpenSolutionPaths, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     KeyDown="IndexingList_KeyDown" PreviewMouseDown="IndexingList_MouseButtonDown"
+            <TextBox KeyboardNavigation.IsTabStop="False"   BorderThickness="0" IsReadOnly="True" Grid.Column="1" Name="IndexingList" Margin="2,0,5,1" FontSize="11" FontStyle="Italic" HorizontalAlignment="Stretch" Text="{Binding Path=CurrentIndexedFile.FilePath}"
+                      KeyDown="IndexingList_KeyDown" PreviewMouseDown="IndexingList_MouseButtonDown"
                 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" ToolTip="Specify folders to index for open solution" Grid.ColumnSpan="2">
                 <TextBox.Background>
                     <Binding Path="OpenSolutionPaths" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" Converter="{StaticResource BackgroundConverter}"/>
                 </TextBox.Background>
             </TextBox>
             <Popup Name="CurrentlyIndexingFoldersPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=IndexingList}" StaysOpen="True" IsOpen="False" Width="Auto">
-                <Grid Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolboxBackgroundKey   }}">
+                <Grid  IsEnabled="{Binding IsIndexFileEnabled}" Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolboxBackgroundKey   }}">
                     <Grid.RowDefinitions>
                         <RowDefinition></RowDefinition>
                         <RowDefinition Height="40"></RowDefinition>

@@ -32,6 +32,8 @@ namespace Sando.UI.ViewModel
         #region Properties
 
         private IndexedFile _indexedFile;
+        private IndexedFile _currentIndexedFile;
+        private bool _isIndexFileEnabled;
         private bool _isBrowseButtonEnabled;
         private String _searchStatus;
         private Visibility _progressBarVisibility;
@@ -85,6 +87,19 @@ namespace Sando.UI.ViewModel
             set;
         }
 
+        public IndexedFile CurrentIndexedFile
+        {
+            get
+            {
+                return this._currentIndexedFile;
+            }
+            set
+            {
+                this._currentIndexedFile = value;
+                OnPropertyChanged("CurrentIndexedFile");
+            }
+        }
+
         public IndexedFile SelectedIndexedFile
         {
             get
@@ -104,6 +119,19 @@ namespace Sando.UI.ViewModel
                 {
                     this.IsBrowseButtonEnabled = false;
                 }
+            }
+        }
+
+        public bool IsIndexFileEnabled
+        {
+            get
+            {
+                return this._isIndexFileEnabled;
+            }
+            set
+            {
+                this._isIndexFileEnabled = value;
+                OnPropertyChanged("IsIndexFileEnabled");
             }
         }
 
@@ -175,6 +203,7 @@ namespace Sando.UI.ViewModel
             this.SearchCommand = new RelayCommand(Search);
             this.ResetCommand = new RelayCommand(Reset);
 
+            this.IsIndexFileEnabled = false;
             this.IsBrowseButtonEnabled = false;
             this.ProgressBarVisibility = Visibility.Collapsed;
 
@@ -249,11 +278,13 @@ namespace Sando.UI.ViewModel
                     {
                         this.SelectedIndexedFile = this.IndexedFiles[index - 1];
                     }
-                    
+
+                    this.CurrentIndexedFile = this.IndexedFiles[0];
                 }
                 else if (index == 0)
                 {
                     this.SelectedIndexedFile = null;
+                    this.CurrentIndexedFile = null;
                 }
 
                 
@@ -312,6 +343,11 @@ namespace Sando.UI.ViewModel
                 else if (file.OperationStatus == IndexedFile.Status.Remove)
                 {
                     this.IndexedFiles.Add(file);
+
+                    if (this.IndexedFiles.IndexOf(file) == 0)
+                    {
+                        this.CurrentIndexedFile = file;
+                    }
                 }
                 else if (file.OperationStatus == IndexedFile.Status.Modified)
                 {
@@ -358,6 +394,8 @@ namespace Sando.UI.ViewModel
             backupFile.OperationStatus = this.SelectedIndexedFile.OperationStatus;
             backupFile.GUID = this.SelectedIndexedFile.GUID;
             this.ModifiedIndexedFile.Add(backupFile);
+
+            this.CurrentIndexedFile = this.IndexedFiles[0];
         }
 
 
@@ -394,7 +432,6 @@ namespace Sando.UI.ViewModel
 
         private void AddDirectoryToMonitor(ISrcMLGlobalService srcMlService, IndexedFile file)
         {
-
             
             foreach (IndexedFile addFile in this.IndexedFiles)
             {
@@ -519,6 +556,11 @@ namespace Sando.UI.ViewModel
                         {
                             this.ModifiedIndexedFile.Remove(toRemoveFile);
                         }
+
+                        if (this.IndexedFiles.Count == 0)
+                        {
+                            this.CurrentIndexedFile = null;
+                        }
                             
                     }
 
@@ -552,11 +594,24 @@ namespace Sando.UI.ViewModel
                         this.IndexedFiles.Clear();
                         this.ModifiedIndexedFile.Clear();
                         this.SelectedIndexedFile = null;
+                        this.CurrentIndexedFile = null;
 
                         this.SearchStatus = String.Empty;
 
+                        this.IsIndexFileEnabled = false;
+
                     }));
 
+                };
+
+                dte.Events.SolutionEvents.Opened += () =>
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(delegate()
+                    {
+
+                        this.IsIndexFileEnabled = true;
+
+                    }));
                 };
             }
         }

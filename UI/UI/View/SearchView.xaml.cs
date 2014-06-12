@@ -43,7 +43,6 @@ namespace Sando.UI.View
             SearchManagerFactory.GetUserInterfaceSearchManager().AddListener(this);
 
             this.DataContextChanged += SearchView_DataContextChanged;
-
         }
 
         private void SearchView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -59,6 +58,7 @@ namespace Sando.UI.View
         private void IndexingList_KeyDown(object sender, KeyEventArgs e)
         {
             CurrentlyIndexingFoldersPopup.IsOpen = true;
+                
         }
 
         private void IndexingList_MouseButtonDown(object sender, MouseButtonEventArgs e)

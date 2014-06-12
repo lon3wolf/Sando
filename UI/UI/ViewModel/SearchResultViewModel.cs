@@ -195,7 +195,7 @@ namespace Sando.UI.ViewModel
                 }
 
             }
-
+            
         }
 
         public int[] GenerateHighlight(string raw, string searchKey, out string highlight_out,
