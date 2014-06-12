@@ -75,15 +75,15 @@ namespace Configuration.OptionsPages
             }
             set
             {
+                var combinedExtensions = string.Empty;
                 if (value != null && value.Any())
                 {
-                    var combinedExtensions = string.Empty;
                     foreach (var extension in value)
                     {
                         combinedExtensions += extension + ";";
                     }
-                    _serializedFileExtensions = combinedExtensions;
                 }
+                _serializedFileExtensions = combinedExtensions;
             }
         }
 
