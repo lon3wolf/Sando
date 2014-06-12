@@ -382,15 +382,27 @@ namespace Configuration.OptionsPages
             //validate entered text (should be dot followed by <3 >0 letters)
             if (newExtension.Length > 1 && newExtension.Length < 5 && newExtension.Skip(1).All(Char.IsLetter))
             {
-                var extensionsList = new List<string>(FileExtensionsList);
-                extensionsList.Add(newExtension);
-                FileExtensionsList = null;
-                FileExtensionsList = extensionsList;
-                FileExtensionsListBox.Refresh();
+                List<string> extensionsList;
+                if (FileExtensionsList != null)
+                {
+                    extensionsList = new List<string>(FileExtensionsList);
+                }
+                else
+                {
+                    extensionsList = new List<string>();
+                }
 
-                customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
+                if (!extensionsList.Contains(newExtension))
+                {
+                    extensionsList.Add(newExtension);
+                    FileExtensionsList = null;
+                    FileExtensionsList = extensionsList;
+                    FileExtensionsListBox.Refresh();
 
-                //TODO: add missing files to index, possibly issuing warning beforehand                
+                    customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
+
+                    //TODO: add missing files to index, possibly issuing warning beforehand  
+                }
             }
         }
 

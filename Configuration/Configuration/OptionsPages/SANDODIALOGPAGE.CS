@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
+using System.Linq;
 
 namespace Configuration.OptionsPages
 {
@@ -42,7 +43,10 @@ namespace Configuration.OptionsPages
                 {
                     optionsControl.AllowDataCollectionLogging = true;
                 }
-			    optionsControl.FileExtensionsList = this.FileExtensionsToIndexList;
+                if (FileExtensionsToIndexList != null && FileExtensionsToIndexList.Any())
+                {
+                    optionsControl.FileExtensionsList = FileExtensionsToIndexList;
+                }
 				return optionsControl;
 			}
 		}
