@@ -44,6 +44,7 @@ namespace Sando.IntegrationTests.Search
             var files = GetFileList(GetFilesDirectory());
             foreach (var file in files)
                 HandleFileUpdated(file);
+            WaitForIndexing();
             var keywords = "open file";
             _results = GetResults(keywords);
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Field && (el.ProgramElement.Name == "fileName") && (el.ParentOrFile == "FileNameTemplate.cs") && (el.ProgramElement.DefinitionLineNumber == 12);
