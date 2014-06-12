@@ -337,5 +337,13 @@ namespace Sando.Indexer
                 File.Create(directoryInfo.FullName + "\\" + DELETE_INIDACTOR);
             }
         }
+
+        public void ForceFlush()
+        {
+            lock (_lock)
+            {
+                IndexWriter.Flush();
+            }
+        }
     }
 }

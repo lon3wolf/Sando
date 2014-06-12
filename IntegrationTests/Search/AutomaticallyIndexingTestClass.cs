@@ -50,6 +50,16 @@ namespace Sando.IntegrationTests.Search
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
 
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            _srcMLArchive.Dispose();
+            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
+            ServiceLocator.Resolve<DocumentIndexer>().Dispose();            
+            DeleteTestDirectoryContents();
+        }
+
+
         public virtual TimeSpan? GetTimeToCommit()
         {
             return null;
@@ -74,18 +84,19 @@ namespace Sando.IntegrationTests.Search
             CreateArchive(filesInThisDirectory);            
             CreateSwum();            
             AddFilesToIndex(filesInThisDirectory);
-            WaitForIndexing();
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
-            Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*2);
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
+            WaitForIndexing();            
         }
 
         public void WaitForIndexing()
         {
+            while (_handler.TaskCount() > 0)
+                Thread.Sleep(1000);
             while (((IEnumerable<Task>)GetATestingScheduler().GetType().InvokeMember("GetScheduledTasks",
                    BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.NonPublic,
                    null, GetATestingScheduler(), null)).Count() != 0)
                 Thread.Sleep(1000);
+            ServiceLocator.Resolve<DocumentIndexer>().ForceFlush();
+            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
         }
 
  
@@ -95,14 +106,7 @@ namespace Sando.IntegrationTests.Search
             return scheduler;
         }
 
-        public class InfiniteCoreStrategy : IConcurrencyStrategy
-        {
-            public int ComputeAvailableCores()
-            {
-                return 100;
-            }
-        }
-
+ 
         public void AddFilesToIndex(string filesInThisDirectory)
         {
             _handler = new SrcMLArchiveEventsHandlers(GetATestingScheduler());
@@ -201,21 +205,13 @@ namespace Sando.IntegrationTests.Search
         {
             _indexPath = Path.Combine(Path.GetTempPath(), indexDirName);
             TestUtils.InitializeDefaultExtensionPoints();
-            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(_indexPath,40,false));
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(_indexPath,40,false,new List<string>()));
             ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(GetATestingScheduler()));
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
         }
 
 
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            _srcMLArchive.Dispose();
-            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
-            ServiceLocator.Resolve<DocumentIndexer>().Dispose();
-            DeleteTestDirectoryContents();
-        }
-
+    
         private void DeleteTestDirectoryContents()
         {
             var deleted = false;
@@ -282,7 +278,9 @@ namespace Sando.IntegrationTests.Search
             }
             if (_results != null)
                 foreach (var result in _results)
-                    info.AppendLine(result.Name+" in "+ result.FileName);
+                    info.AppendLine(result.Name + " in " + result.FileName);
+            else
+                info.AppendLine("Returned 0 results");
             return info.ToString();
         }
 
@@ -356,17 +354,19 @@ namespace Sando.IntegrationTests.Search
             private string _myIndex;
             private int _myResultsNumber;
 			private bool _myAllowLogs;
+            private List<string> _myFileExtensions;
 
-            public FakeOptionsProvider(string index, int num, bool allowLogs)
+            public FakeOptionsProvider(string index, int num, bool allowLogs, List<string> fileExtensions)
             {
                 _myIndex = index;
                 _myResultsNumber = num;
 				_myAllowLogs = allowLogs;
+                _myFileExtensions = fileExtensions;
             }
 
             public SandoOptions GetSandoOptions()
             {
-                return new SandoOptions(_myIndex,_myResultsNumber, _myAllowLogs);
+                return new SandoOptions(_myIndex,_myResultsNumber, _myAllowLogs, _myFileExtensions);
             }
         }
 

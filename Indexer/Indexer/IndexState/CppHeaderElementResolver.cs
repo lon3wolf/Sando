@@ -27,10 +27,10 @@ namespace Sando.Indexer.IndexState
 				string headerPath = System.IO.Path.GetDirectoryName(filePath) + "\\" + headerFile;
 				if(!System.IO.File.Exists(headerPath))
 				{
-					Debug.WriteLine("????? header file -" + headerFile + "- was not found.. this can lead to issues");					
+					//Debug.WriteLine("????? header file -" + headerFile + "- was not found.. this can lead to issues");					
 					continue;
 				}
-				Debug.WriteLine("*** parsing header = " + headerPath);
+				//Debug.WriteLine("*** parsing header = " + headerPath);
 				var headerInfo = new FileInfo(headerPath);
 				headerElements.AddRange(ExtensionPointsRepository.Instance.GetParserImplementation(headerInfo.Extension).Parse(headerPath));
 			}
