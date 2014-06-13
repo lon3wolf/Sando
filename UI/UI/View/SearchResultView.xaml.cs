@@ -1,4 +1,5 @@
-﻿using Sando.UI.ViewModel;
+﻿using Sando.UI.Actions;
+using Sando.UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,33 @@ namespace Sando.UI.View
             vm.IsPopupOpen = !vm.IsPopupOpen;
         }
 
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2 && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Grid control = sender as Grid;
+                this.OpenFile(control.DataContext as CodeSearchResultWrapper);
+            }
+        }
+
+        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Control control = sender as Control;
+                this.OpenFile(control.DataContext as CodeSearchResultWrapper);
+            }
+        }
+
+        /// <summary>
+        /// Implement the open file functionality here temproryly.
+        /// TODO:Try to implement this in view model.
+        /// </summary>
+        /// <param name="wrapper"></param>
+        private void OpenFile(CodeSearchResultWrapper wrapper)
+        {
+            FileOpener.OpenFile(wrapper.CodeSearchResult.HighlightInfo.FullFilePath, 1);
+        }
     
     }
 }

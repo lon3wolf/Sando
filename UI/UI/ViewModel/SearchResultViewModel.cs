@@ -5,6 +5,7 @@ using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.ExtensionContracts.SearchContracts;
+using Sando.UI.Actions;
 using Sando.UI.Base;
 using Sando.UI.View;
 using System;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace Sando.UI.ViewModel
@@ -26,13 +28,28 @@ namespace Sando.UI.ViewModel
 
         #region Properties
 
+        private CodeSearchResult _selectedSearchResult;
+
+        public CodeSearchResult SelectedSearchResult
+        {
+            get
+            {
+                return this._selectedSearchResult;
+            }
+            set
+            {
+                this._selectedSearchResult = value;
+                OnPropertyChanged("SelectedSearchResult");
+            }
+        }
+
         public List<CodeSearchResult> RealSearchResults
         {
             get;
             set;
         }
 
-        public ObservableCollection<CodeSearchResult> SearchResults
+        public ObservableCollection<CodeSearchResultWrapper> SearchResults
         {
             get;
             set;
@@ -50,7 +67,7 @@ namespace Sando.UI.ViewModel
         public SearchResultViewModel()
         {
             this.RealSearchResults = new List<CodeSearchResult>();
-            this.SearchResults = new ObservableCollection<CodeSearchResult>();
+            this.SearchResults = new ObservableCollection<CodeSearchResultWrapper>();
             this.TypeColumnHeaderViewModel = new TypeColumnHeaderViewModel();
 
             var searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
@@ -76,6 +93,12 @@ namespace Sando.UI.ViewModel
             }
 
         }
+
+        #region Command
+
+        
+
+        #endregion
 
         #region Public Methods
 
@@ -191,7 +214,7 @@ namespace Sando.UI.ViewModel
 
                 if (selectedType.Contains(searchResult.ProgramElementType))
                 {
-                    this.SearchResults.Add(searchResult);
+                    this.SearchResults.Add(new CodeSearchResultWrapper(searchResult));
                 }
 
             }
@@ -434,5 +457,33 @@ namespace Sando.UI.ViewModel
             }
         }
 
+    }
+
+    public class CodeSearchResultWrapper : BaseViewModel
+    {
+
+        public ICommand SearchResultOpenFileCommand
+        {
+            get;
+            set;
+        }
+
+        public CodeSearchResult CodeSearchResult
+        {
+            get;
+            set;
+        }
+
+        public CodeSearchResultWrapper(CodeSearchResult codeSearchResult)
+        {
+            this.CodeSearchResult = codeSearchResult;
+
+            this.SearchResultOpenFileCommand = new RelayCommand(SearchResultOpenFile);
+        }
+
+        public void SearchResultOpenFile(object param)
+        {
+            FileOpener.OpenFile(this.CodeSearchResult.HighlightInfo.FullFilePath, 1);
+        }
     }
 }

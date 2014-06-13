@@ -57,13 +57,13 @@ namespace Sando.UI.View
 
         private void IndexingList_KeyDown(object sender, KeyEventArgs e)
         {
-            CurrentlyIndexingFoldersPopup.IsOpen = true;
+            CurrentlyIndexingFoldersPopup.IsOpen = !CurrentlyIndexingFoldersPopup.IsOpen;
                 
         }
 
         private void IndexingList_MouseButtonDown(object sender, MouseButtonEventArgs e)
         {
-            CurrentlyIndexingFoldersPopup.IsOpen = true;
+            CurrentlyIndexingFoldersPopup.IsOpen = !CurrentlyIndexingFoldersPopup.IsOpen;
         }
 
         private void BrowserButton_Click(object sender, System.Windows.RoutedEventArgs e)
