@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-
+using Sando.DependencyInjection;
+using Sando.ExtensionContracts.IndexerContracts;
 
 namespace Configuration.OptionsPages
 {
 	public class SandoOptionsControl : System.Windows.Forms.UserControl
 	{
+        private static readonly List<string> UnremovableFileExtensionsList = 
+            new List<string> { ".cs", ".h", ".cpp", ".cxx", ".c" };
+        public static readonly List<string> DefaultFileExtensionsList = 
+            new List<string> { ".xaml", ".txt", ".js" }.Concat(
+            UnremovableFileExtensionsList).ToList(); 
+
 		#region Fields
 
 		private SandoDialogPage customOptionsPage;
@@ -27,6 +34,7 @@ namespace Configuration.OptionsPages
         private Button DeleteFileExtensionButton;
         private Button NewFileExtensionButton;
         private ListBox FileExtensionsListBox;
+        private Button buttonDefault;
 
 		/// <summary>  
 		/// Required designer variable. 
@@ -91,6 +99,7 @@ namespace Configuration.OptionsPages
             this.DeleteFileExtensionButton = new System.Windows.Forms.Button();
             this.NewFileExtensionButton = new System.Windows.Forms.Button();
             this.FileExtensionsListBox = new System.Windows.Forms.ListBox();
+            this.buttonDefault = new System.Windows.Forms.Button();
             this.ExtensionPointsConfigurationGroupBox.SuspendLayout();
             this.SearchResultsConfigurationGroupBox.SuspendLayout();
             this.ToggleLogCollectionGroupBox.SuspendLayout();
@@ -105,7 +114,7 @@ namespace Configuration.OptionsPages
             // 
             this.ExtensionPointsConfigurationGroupBox.Controls.Add(this.ExtensionPointsPluginDirectoryPathValueTextBox);
             this.ExtensionPointsConfigurationGroupBox.Controls.Add(this.ExtensionPointsPluginDirectoryPathLabel);
-            this.ExtensionPointsConfigurationGroupBox.Location = new System.Drawing.Point(3, 247);
+            this.ExtensionPointsConfigurationGroupBox.Location = new System.Drawing.Point(3, 301);
             this.ExtensionPointsConfigurationGroupBox.Name = "ExtensionPointsConfigurationGroupBox";
             this.ExtensionPointsConfigurationGroupBox.Size = new System.Drawing.Size(445, 60);
             this.ExtensionPointsConfigurationGroupBox.TabIndex = 4;
@@ -134,7 +143,7 @@ namespace Configuration.OptionsPages
             // 
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.SearchResultsConfigurationNumberOfResultsReturnedTextBox);
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.NumberOfResultsReturnedLabel);
-            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 115);
+            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 169);
             this.SearchResultsConfigurationGroupBox.Name = "SearchResultsConfigurationGroupBox";
             this.SearchResultsConfigurationGroupBox.Size = new System.Drawing.Size(445, 60);
             this.SearchResultsConfigurationGroupBox.TabIndex = 7;
@@ -164,7 +173,7 @@ namespace Configuration.OptionsPages
             // 
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionCheckBox);
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionLabel);
-            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 181);
+            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 235);
             this.ToggleLogCollectionGroupBox.Name = "ToggleLogCollectionGroupBox";
             this.ToggleLogCollectionGroupBox.Size = new System.Drawing.Size(445, 60);
             this.ToggleLogCollectionGroupBox.TabIndex = 8;
@@ -195,19 +204,20 @@ namespace Configuration.OptionsPages
             // 
             // FileExtensionsGroupBox
             // 
+            this.FileExtensionsGroupBox.Controls.Add(this.buttonDefault);
             this.FileExtensionsGroupBox.Controls.Add(this.DeleteFileExtensionButton);
             this.FileExtensionsGroupBox.Controls.Add(this.NewFileExtensionButton);
             this.FileExtensionsGroupBox.Controls.Add(this.FileExtensionsListBox);
             this.FileExtensionsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.FileExtensionsGroupBox.Name = "FileExtensionsGroupBox";
-            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 106);
+            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 160);
             this.FileExtensionsGroupBox.TabIndex = 8;
             this.FileExtensionsGroupBox.TabStop = false;
             this.FileExtensionsGroupBox.Text = "File extensions to include in index";
             // 
             // DeleteFileExtensionButton
             // 
-            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(96, 65);
+            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(325, 48);
             this.DeleteFileExtensionButton.Name = "DeleteFileExtensionButton";
             this.DeleteFileExtensionButton.Size = new System.Drawing.Size(75, 23);
             this.DeleteFileExtensionButton.TabIndex = 2;
@@ -217,7 +227,7 @@ namespace Configuration.OptionsPages
             // 
             // NewFileExtensionButton
             // 
-            this.NewFileExtensionButton.Location = new System.Drawing.Point(96, 36);
+            this.NewFileExtensionButton.Location = new System.Drawing.Point(325, 19);
             this.NewFileExtensionButton.Name = "NewFileExtensionButton";
             this.NewFileExtensionButton.Size = new System.Drawing.Size(75, 23);
             this.NewFileExtensionButton.TabIndex = 1;
@@ -228,10 +238,20 @@ namespace Configuration.OptionsPages
             // FileExtensionsListBox
             // 
             this.FileExtensionsListBox.FormattingEnabled = true;
-            this.FileExtensionsListBox.Location = new System.Drawing.Point(197, 26);
+            this.FileExtensionsListBox.Location = new System.Drawing.Point(13, 19);
             this.FileExtensionsListBox.Name = "FileExtensionsListBox";
-            this.FileExtensionsListBox.Size = new System.Drawing.Size(203, 69);
+            this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 134);
             this.FileExtensionsListBox.TabIndex = 0;
+            // 
+            // buttonDefault
+            // 
+            this.buttonDefault.Location = new System.Drawing.Point(325, 77);
+            this.buttonDefault.Name = "buttonDefault";
+            this.buttonDefault.Size = new System.Drawing.Size(75, 23);
+            this.buttonDefault.TabIndex = 3;
+            this.buttonDefault.Text = "Default";
+            this.buttonDefault.UseVisualStyleBackColor = true;
+            this.buttonDefault.Click += new System.EventHandler(this.buttonDefault_Click);
             // 
             // SandoOptionsControl
             // 
@@ -241,7 +261,7 @@ namespace Configuration.OptionsPages
             this.Controls.Add(this.SearchResultsConfigurationGroupBox);
             this.Controls.Add(this.ExtensionPointsConfigurationGroupBox);
             this.Name = "SandoOptionsControl";
-            this.Size = new System.Drawing.Size(465, 316);
+            this.Size = new System.Drawing.Size(465, 361);
             this.ExtensionPointsConfigurationGroupBox.ResumeLayout(false);
             this.ExtensionPointsConfigurationGroupBox.PerformLayout();
             this.SearchResultsConfigurationGroupBox.ResumeLayout(false);
@@ -401,7 +421,8 @@ namespace Configuration.OptionsPages
 
                     customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
 
-                    //TODO: add missing files to index, possibly issuing warning beforehand  
+                    var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
+                    missingFilesIncluder.CheckIndexForMissingFiles();
                 }
             }
         }
@@ -411,14 +432,29 @@ namespace Configuration.OptionsPages
             var extensionsList = new List<string>(FileExtensionsList);
             foreach (var selected in FileExtensionsListBox.SelectedItems)
             {
-                extensionsList.Remove(selected.ToString());
+                if (UnremovableFileExtensionsList.All(uExt => uExt != selected.ToString()))
+                {
+                    extensionsList.Remove(selected.ToString());
+                }
+                else
+                {
+                    MessageBox.Show("Unable the delete the required extension: " + selected.ToString());
+                }
             }
             FileExtensionsList = null;
             FileExtensionsList = extensionsList;
             FileExtensionsListBox.Refresh();
             customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
 
-            //TODO: recreate entire index, possibly issuing warning beforehand
+            var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
+            missingFilesIncluder.CheckIndexForMissingFiles();
+        }
+
+        private void buttonDefault_Click(object sender, EventArgs e)
+        {
+            FileExtensionsList = null;
+            FileExtensionsList = DefaultFileExtensionsList;
+            FileExtensionsListBox.Refresh();
         }
 	} 
 }

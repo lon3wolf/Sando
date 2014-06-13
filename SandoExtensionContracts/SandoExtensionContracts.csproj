@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>sandoKey.snk</AssemblyOriginatorKeyFile>
@@ -54,6 +54,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="IndexerContracts\IMissingFilesIncluder.cs" />
     <Compile Include="IndexerContracts\IndexFilterSettings.cs" />
     <Compile Include="IndexerContracts\IIndexFilterManager.cs" />
     <Compile Include="ProgramElementContracts\AccessLevel.cs" />

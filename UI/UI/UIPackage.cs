@@ -46,6 +46,7 @@ using System.Collections.ObjectModel;
 using ABB.VisualStudio.Interfaces;
 using System.Threading;
 using Sando.Indexer.Splitter;
+using Sando.ExtensionContracts.IndexerContracts;
 
 
 
@@ -87,7 +88,7 @@ namespace Sando.UI
     /// </summary>
     [ProvideService(typeof(SSandoGlobalService))]
 
-    public sealed class UIPackage : Package, IToolWindowFinder
+    public sealed class UIPackage : Package, IToolWindowFinder, IMissingFilesIncluder
     {
         // JZ: SrcMLService Integration
         //private ABB.SrcML.VisualStudio.SolutionMonitor.SolutionMonitor _currentMonitor;
@@ -466,11 +467,11 @@ namespace Sando.UI
 
                 if (isIndexRecreationRequired)
                 {
-                    RecreateEntireIndex(srcMLArchiveEventsHandlers);
+                    RecreateEntireIndex();
                 }
                 else
                 {
-                    CheckIndexForMissingFiles(srcMLArchiveEventsHandlers);
+                    CheckIndexForMissingFiles();
                 }
 
                 RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
@@ -499,7 +500,8 @@ namespace Sando.UI
             return taskSchedulerService.GlobalScheduler;          
         }
 
-        private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        // from IMissingFilesIncluder
+        public void CheckIndexForMissingFiles()
         {
             //make sure you're not missing any files 
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
@@ -519,6 +521,7 @@ namespace Sando.UI
                 var fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
                 var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
                 fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
+                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
@@ -527,7 +530,7 @@ namespace Sando.UI
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
-        private void RecreateEntireIndex(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        private void RecreateEntireIndex()
         {
             //just recreate the whole index
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
@@ -547,6 +550,7 @@ namespace Sando.UI
                 var fileNames = srcMLService.GetSrcMLArchive().FileUnits.Select(ABB.SrcML.SrcMLElement.GetFileNameForUnit).ToList();
                 var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
                 fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
+                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                 foreach (var fileName in fileNames)
                 {
                     srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
@@ -675,6 +679,7 @@ namespace Sando.UI
         {
             ServiceLocator.RegisterInstance(GetService(typeof (DTE)) as DTE2);
             ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance<IMissingFilesIncluder>(this);
             ServiceLocator.RegisterInstance(new ViewManager(this));
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());            
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());

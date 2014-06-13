@@ -12,6 +12,7 @@ using Sando.UI.View;
 using System.Windows.Threading;
 using Microsoft.VisualStudio.Shell;
 using System.Collections.Generic;
+using Sando.Indexer.IndexFiltering;
 
 namespace Sando.UI.Options
 {
@@ -44,7 +45,7 @@ namespace Sando.UI.Options
                 firstRun = true;
             }
 
-            var fileExtensionsList = IndexUpdateManager.DefaultFileExtensionsList;
+            var fileExtensionsList = SandoOptionsControl.DefaultFileExtensionsList;
             if (sandoDialogPage.FileExtensionsToIndexList != null && sandoDialogPage.FileExtensionsToIndexList.Any())
             {
                 fileExtensionsList = sandoDialogPage.FileExtensionsToIndexList;
