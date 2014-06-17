@@ -90,8 +90,8 @@ namespace Sando.UI.ViewModel
                     }));
 
                 };
-            }
-
+                dte.Events.WindowEvents.WindowActivated += WindowEvents_WindowActivated;
+            }                                       
         }
 
         #region Command
@@ -366,6 +366,14 @@ namespace Sando.UI.ViewModel
         }
 
         #endregion
+        void WindowEvents_WindowActivated(EnvDTE.Window GotFocus, EnvDTE.Window LostFocus)
+        {
+            if (LostFocus != null && LostFocus.Caption.Equals("Sando Search"))
+            {
+                this.SelectedSearchResult = null;                            
+            }
+        }
+
     }
 
     public class TypeColumnHeaderViewModel : BaseViewModel
