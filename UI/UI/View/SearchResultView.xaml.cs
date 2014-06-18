@@ -49,7 +49,7 @@ namespace Sando.UI.View
         private void TypeHeaderText_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //Control Open/Close behaviour of Popup here. This is a trade-off implementation.
-            TypeColumnHeaderViewModel vm = ((TextBlock)sender).DataContext as TypeColumnHeaderViewModel;
+            TypeColumnHeaderViewModel vm = ((StackPanel)sender).DataContext as TypeColumnHeaderViewModel;
             vm.IsPopupOpen = !vm.IsPopupOpen;
         }
 

@@ -64,7 +64,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="30" Header="{Binding TypeColumnHeaderViewModel}">
+                    <GridViewColumn Width="50" Header="{Binding TypeColumnHeaderViewModel}">
                         <GridViewColumn.HeaderTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -80,9 +80,13 @@
                                             </ListBox.ItemTemplate>
                                         </ListBox>
                                     </Popup>
-                                    <TextBlock Name="TypeHeaderText" Text="{Binding Header}" MouseDown="TypeHeaderText_MouseDown">
-                                        
-                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" MouseDown="TypeHeaderText_MouseDown">
+                                        <TextBlock Name="TypeHeaderText" Text="{Binding Header}" Margin="0,0,3,0">
+
+                                        </TextBlock>
+                                        <Image Source="..\Resources\filter.png" Width="13" Height="15"></Image>
+                                    </StackPanel>
+                                    
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.HeaderTemplate>
