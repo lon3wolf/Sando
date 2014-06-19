@@ -111,7 +111,7 @@ namespace Sando.Indexer.Searching.Criteria
             {
                 try
                 {
-                    ProgramElementType value = (ProgramElementType)Enum.Parse(typeof(ProgramElementType), elementType);
+                    ProgramElementType value = (ProgramElementType)Enum.Parse(typeof(ProgramElementType), elementType, true);
                     if (value != null)
                         ProgramElementTypes.Add(value);
                 }

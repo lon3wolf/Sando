@@ -671,7 +671,10 @@ namespace Sando.UI.ViewModel
         void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             var searchParams = (WorkerSearchParameters)e.Argument;
-            _searchManager.Search(searchParams.Query, searchParams.Criteria);
+
+            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchParams.Query, searchParams.Criteria);
+
+            _searchManager.Search(searchParams.Query, criteria);
         }
 
         private void BeginSearch(string searchString)
@@ -681,34 +684,34 @@ namespace Sando.UI.ViewModel
 
             AddSearchHistory(searchString);
 
-            SimpleSearchCriteria Criteria = new SimpleSearchCriteria();
+            SimpleSearchCriteria criteria = new SimpleSearchCriteria();
 
             var selectedAccessLevels = this.AccessLevels.Where(a => a.Checked).Select(a => a.Access).ToList();
             if (selectedAccessLevels.Any())
             {
-                Criteria.SearchByAccessLevel = true;
-                Criteria.AccessLevels = new SortedSet<AccessLevel>(selectedAccessLevels);
+                criteria.SearchByAccessLevel = true;
+                criteria.AccessLevels = new SortedSet<AccessLevel>(selectedAccessLevels);
             }
             else
             {
-                Criteria.SearchByAccessLevel = false;
-                Criteria.AccessLevels.Clear();
+                criteria.SearchByAccessLevel = false;
+                criteria.AccessLevels.Clear();
             }
 
             var selectedProgramElementTypes =
                 this.ProgramElements.Where(e => e.Checked).Select(e => e.ProgramElement).ToList();
             if (selectedProgramElementTypes.Any())
             {
-                Criteria.SearchByProgramElementType = true;
-                Criteria.ProgramElementTypes = new SortedSet<ProgramElementType>(selectedProgramElementTypes);
+                criteria.SearchByProgramElementType = true;
+                criteria.ProgramElementTypes = new SortedSet<ProgramElementType>(selectedProgramElementTypes);
             }
             else
             {
-                Criteria.SearchByProgramElementType = false;
-                Criteria.ProgramElementTypes.Clear();
+                criteria.SearchByProgramElementType = false;
+                criteria.ProgramElementTypes.Clear();
             }
 
-            SearchAsync(searchString, Criteria);
+            SearchAsync(searchString, criteria);
         }
 
         private void AddSearchHistory(String query)

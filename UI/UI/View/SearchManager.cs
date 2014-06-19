@@ -112,16 +112,16 @@ namespace Sando.UI.View
                 LogEvents.PreSearchQueryAnalysis(this, QueryMetrics.ExamineQuery(searchString).ToString(), QueryMetrics.DiceCoefficient(QueryMetrics.SavedQuery, searchString));
                 QueryMetrics.SavedQuery = searchString;
 
-				var criteria = GetCriteria(searchString, searchCriteria);
-                var results = codeSearcher.Search(criteria, true).AsQueryable();
+				//var criteria = GetCriteria(searchString, searchCriteria);
+                var results = codeSearcher.Search(searchCriteria, true).AsQueryable();
                 var resultsReorderer = ExtensionPointsRepository.Instance.GetResultsReordererImplementation();
                 results = resultsReorderer.ReorderSearchResults(results);
 
                 var returnString = new StringBuilder();
 
-                if (criteria.IsQueryReformed())
+                if (searchCriteria.IsQueryReformed())
                 {
-                    returnString.Append(criteria.GetQueryReformExplanation());
+                    returnString.Append(searchCriteria.GetQueryReformExplanation());
                 }
 
                 if (!results.Any())
@@ -135,9 +135,9 @@ namespace Sando.UI.View
 
                 _searchResultListener.Update(searchString, results);
                 _searchResultListener.UpdateMessage(returnString.ToString());
-                _searchResultListener.UpdateRecommendedQueries(criteria.GetRecommendedQueries());
-				
-				LogEvents.PostSearch(this, results.Count(), criteria.NumberOfSearchResultsReturned, PostRetrievalMetrics.AvgScore(results.ToList()), PostRetrievalMetrics.StdDevScore(results.ToList()));
+                _searchResultListener.UpdateRecommendedQueries(searchCriteria.GetRecommendedQueries());
+
+                LogEvents.PostSearch(this, results.Count(), searchCriteria.NumberOfSearchResultsReturned, PostRetrievalMetrics.AvgScore(results.ToList()), PostRetrievalMetrics.StdDevScore(results.ToList()));
             }
             catch (Exception e)
             {
@@ -167,18 +167,6 @@ namespace Sando.UI.View
                 isOpen = false;
             }
             return isOpen;
-        }
-
-        private SearchCriteria GetCriteria(string searchString, SimpleSearchCriteria searchCriteria = null)
-        {            
-            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
-            var description = new SandoQueryParser().Parse(searchString);            
-            var builder = CriteriaBuilder.GetBuilder().
-                AddCriteria(searchCriteria).                
-                NumResults(sandoOptions.NumberOfSearchResultsReturned).AddFromDescription(description);
-            var simple = builder.GetCriteria() as SimpleSearchCriteria;
-            SearchCriteriaReformer.ReformSearchCriteria(simple);
-            return simple;
         }
 
         public void AddListener(ISearchResultListener listener)

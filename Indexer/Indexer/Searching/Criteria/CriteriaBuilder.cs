@@ -4,6 +4,7 @@ using Sando.Core.Tools;
 using System.Collections.Generic;
 using System.Linq;
 using Sando.DependencyInjection;
+using Configuration.OptionsPages;
 
 namespace Sando.Indexer.Searching.Criteria
 {
@@ -43,12 +44,6 @@ namespace Sando.Indexer.Searching.Criteria
             return _searchCriteria;
         }
 
-        public CriteriaBuilder AddCriteria(SimpleSearchCriteria searchCriteria)
-        {
-            Initialze(searchCriteria);
-            return this;
-        }
-
         public CriteriaBuilder NumResults(int numResults, SimpleSearchCriteria searchCriteria = null)
         {
             Initialze(searchCriteria);
@@ -56,24 +51,45 @@ namespace Sando.Indexer.Searching.Criteria
             return this;
         }
 
-        public CriteriaBuilder Ext(string searchString, SimpleSearchCriteria searchCriteria = null)
+        public SimpleSearchCriteria GetCriteria(string searchString, SimpleSearchCriteria searchCriteria = null)
         {
             Initialze(searchCriteria);
-            _searchCriteria.FileExtensions = WordSplitter.GetFileExtensions(searchString);
-            _searchCriteria.SearchByFileExtension = _searchCriteria.FileExtensions.Any();
-            return this;
+            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+            var description = new SandoQueryParser().Parse(searchString);
+
+            this.AddFromCriteria(searchCriteria);
+            this.AddFromDescription(description);
+            this.NumResults(sandoOptions.NumberOfSearchResultsReturned);
+            
+            SearchCriteriaReformer.ReformSearchCriteria(this._searchCriteria);
+            return this._searchCriteria;
         }
 
-        public CriteriaBuilder AddFromDescription(SandoQueryDescription description, SimpleSearchCriteria searchCriteria = null)
+        private void AddFromDescription(SandoQueryDescription description)
         {
-            Initialze(searchCriteria);
+            if (description.AccessLevels.Count > 0)
+            {
+                _searchCriteria.AccessLevels.Clear();
+                _searchCriteria.AddAccessLevels(description.AccessLevels);
+            }
+
             _searchCriteria.AddAccessLevels(description.AccessLevels);
             _searchCriteria.FileExtensions.UnionWith(description.FileExtensions);
             _searchCriteria.SearchTerms.UnionWith(description.LiteralSearchTerms);
             _searchCriteria.Locations.UnionWith(description.Locations);
-            _searchCriteria.AddProgramElementTypes(description.ProgramElementTypes);
+
+            if (description.ProgramElementTypes.Count > 0)
+            {
+                _searchCriteria.ProgramElementTypes.Clear();
+                _searchCriteria.AddProgramElementTypes(description.ProgramElementTypes);
+            }
+
             _searchCriteria.SearchTerms.UnionWith(description.SearchTerms);         
-            return this;
+        }
+
+        private void AddFromCriteria(SimpleSearchCriteria searchCriteria)
+        {
+            Initialze(searchCriteria);
         }
     }
 }
