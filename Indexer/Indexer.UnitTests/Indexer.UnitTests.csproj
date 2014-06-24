@@ -97,6 +97,7 @@
     <Compile Include="..\..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="IndexerTestUtils.cs" />
     <Compile Include="QueryParsingAndConvertingTests.cs" />
     <Compile Include="DocumentIndexerTest.cs" />
     <Compile Include="Documents\CustomElementTest.cs" />

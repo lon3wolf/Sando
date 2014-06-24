@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using Sando.UI.View;
 using System.Threading;
 using Sando.ExtensionContracts.ServiceContracts;
+using Sando.Indexer.Searching.Criteria;
 
 
 namespace Sando.UI.Service {
@@ -113,7 +114,8 @@ namespace Sando.UI.Service {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
             manager.AddListener(this);
             _results = null;
-            manager.Search(searchkeywords);
+            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchkeywords);
+            manager.Search(searchkeywords, criteria);
             int i = 0;
             while (_results == null)
             {

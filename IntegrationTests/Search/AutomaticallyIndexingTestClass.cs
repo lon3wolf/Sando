@@ -33,6 +33,7 @@ using ABB.SrcML.Utilities;
 using ABB.VisualStudio;
 using System.Reflection;
 using Sando.Indexer.Splitter;
+using Sando.Indexer.Searching.Criteria;
 
 namespace Sando.IntegrationTests.Search
 {
@@ -40,12 +41,12 @@ namespace Sando.IntegrationTests.Search
     { 
         public void Reset()
         {
-
+             
         }
 
         [TestFixtureSetUp]
         public void Setup()
-        {
+        {            
             SrcMLArchiveEventsHandlers.MAX_PARALLELISM = 8;
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
@@ -289,7 +290,8 @@ namespace Sando.IntegrationTests.Search
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
             manager.AddListener(this);
             _results = null;
-            manager.Search(keywords);
+            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(keywords);
+            manager.Search(keywords, criteria);
             int i = 0;
             while (_results == null)
             {

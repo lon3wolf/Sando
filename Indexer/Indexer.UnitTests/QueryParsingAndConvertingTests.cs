@@ -5,12 +5,23 @@ using System.Text;
 using NUnit.Framework;
 using Sando.Core.Tools;
 using Sando.Indexer.Searching.Criteria;
+using Sando.DependencyInjection;
+using Configuration.OptionsPages;
+using UnitTestHelpers;
 
 namespace Sando.Indexer.UnitTests
 {
     [TestFixture]
     public class QueryParsingAndConvertingTests
     {
+
+
+
+        [SetUp]
+        public void Setup()
+        {
+            IndexerTestUtils.IntializeFrameworkForUnitTests();
+        }
 
         [Test]
         public void TestIfQueryParsesToEmptySearchTerm()

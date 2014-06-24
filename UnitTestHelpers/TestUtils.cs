@@ -88,5 +88,12 @@ namespace UnitTestHelpers
         {
             return testingScheduler;
         }
+
+        public static void InitializeFrameworkForUnitTests()
+        {            
+            ServiceLocator.RegisterInstance<DictionaryBasedSplitter>(new DictionaryBasedSplitter());
+            TestUtils.InitializeDefaultExtensionPoints();
+            SeSpecificThesaurus.GetInstance().Initialize("");
+        }
     }
 }

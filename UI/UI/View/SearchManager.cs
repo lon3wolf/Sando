@@ -87,7 +87,7 @@ namespace Sando.UI.View
         }
 
 
-        public void Search(String searchString, SimpleSearchCriteria searchCriteria = null, bool interactive = true)
+        public void Search(String searchString, SimpleSearchCriteria searchCriteria, bool interactive = true)
         {            
             if (!EnsureSolutionOpen())
                 return;
