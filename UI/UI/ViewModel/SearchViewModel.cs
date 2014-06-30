@@ -613,6 +613,11 @@ namespace Sando.UI.ViewModel
 
                     }));
                 };
+
+                if (dte.Solution.IsOpen)
+                {
+                    this.IsIndexFileEnabled = true;
+                }
             }
         }
 

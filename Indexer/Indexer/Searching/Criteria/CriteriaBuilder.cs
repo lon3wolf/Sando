@@ -57,7 +57,6 @@ namespace Sando.Indexer.Searching.Criteria
             var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
             var description = new SandoQueryParser().Parse(searchString);
 
-            this.AddFromCriteria(searchCriteria);
             this.AddFromDescription(description);
             this.NumResults(sandoOptions.NumberOfSearchResultsReturned);
             
@@ -73,7 +72,6 @@ namespace Sando.Indexer.Searching.Criteria
                 _searchCriteria.AddAccessLevels(description.AccessLevels);
             }
 
-            _searchCriteria.AddAccessLevels(description.AccessLevels);
             _searchCriteria.FileExtensions.UnionWith(description.FileExtensions);
             _searchCriteria.SearchTerms.UnionWith(description.LiteralSearchTerms);
             _searchCriteria.Locations.UnionWith(description.Locations);
@@ -86,10 +84,6 @@ namespace Sando.Indexer.Searching.Criteria
 
             _searchCriteria.SearchTerms.UnionWith(description.SearchTerms);         
         }
-
-        private void AddFromCriteria(SimpleSearchCriteria searchCriteria)
-        {
-            Initialze(searchCriteria);
-        }
+        
     }
 }
