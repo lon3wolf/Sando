@@ -12,9 +12,11 @@ namespace Configuration.OptionsPages
 	{
         private static readonly List<string> UnremovableFileExtensionsList = 
             new List<string> { ".cs", ".h", ".cpp", ".cxx", ".c" };
-        public static readonly List<string> DefaultFileExtensionsList = 
-            new List<string> { ".xaml", ".txt", ".js" }.Concat(
-            UnremovableFileExtensionsList).ToList(); 
+        public static readonly List<string> DefaultFileExtensionsList =
+            new List<string> { ".xaml", ".xml", ".txt", ".text", ".lic", ".js", 
+                               ".java", ".rb", ".py", ".vb", ".asp", ".aspx", 
+                               ".html", ".htm", ".css" }.Concat(
+                                UnremovableFileExtensionsList).ToList(); 
 
 		#region Fields
 
@@ -455,6 +457,10 @@ namespace Configuration.OptionsPages
             FileExtensionsList = null;
             FileExtensionsList = DefaultFileExtensionsList;
             FileExtensionsListBox.Refresh();
+            customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
+
+            var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
+            missingFilesIncluder.CheckIndexForMissingFiles();
         }
 	} 
 }
