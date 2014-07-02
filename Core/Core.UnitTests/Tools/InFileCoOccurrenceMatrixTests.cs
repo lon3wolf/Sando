@@ -20,15 +20,16 @@ namespace Sando.Core.UnitTests.Tools
         }
 
 
-        //[Test]
-        public void TestPerformanceOfMatrix()
+        [Test]
+        public void TestPerformanceOfMatrixSerialization()
         {
             Stopwatch stopwatch = new Stopwatch();            
             matrix.Initialize(@"TestFiles\SandoMatrix");
             stopwatch.Start();
             matrix.Dispose();
             stopwatch.Stop();
-            Assert.IsTrue(stopwatch.ElapsedMilliseconds < 4000 , stopwatch.ElapsedMilliseconds+"");
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            Assert.IsTrue(stopwatch.ElapsedMilliseconds < 1000 , stopwatch.ElapsedMilliseconds+"");
         }
         
     }
