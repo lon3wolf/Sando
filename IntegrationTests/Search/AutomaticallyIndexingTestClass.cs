@@ -37,7 +37,7 @@ using Sando.Indexer.Searching.Criteria;
 
 namespace Sando.IntegrationTests.Search
 {
-    public class AutomaticallyIndexingTestClass : ISrcMLGlobalService, ISearchResultListener
+    public class AutomaticallyIndexingTestClass : ISrcMLGlobalService
     { 
         public void Reset()
         {
@@ -288,7 +288,9 @@ namespace Sando.IntegrationTests.Search
         protected List<CodeSearchResult> GetResults(string keywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
-            manager.AddListener(this);
+            manager.SearchResultUpdated += this.Update;
+            manager.SearchCompletedMessageUpdated += this.UpdateMessage;
+
             _results = null;
             var criteria = CriteriaBuilder.GetBuilder().GetCriteria(keywords);
             manager.Search(keywords, criteria);
@@ -344,11 +346,6 @@ namespace Sando.IntegrationTests.Search
         public void UpdateMessage(string message)
         {
             _myMessage = message;            
-        }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
-            
         }
 
         public class FakeOptionsProvider : ISandoOptionsProvider

@@ -45,45 +45,9 @@ namespace Sando.UI.View
 
     public class SearchManager
     {
-        private readonly MultipleListeners _searchResultListener;
 
         internal SearchManager()
         {
-            _searchResultListener = new MultipleListeners();
-        }
-
-
-        private class MultipleListeners : ISearchResultListener
-        {
-            private readonly List<ISearchResultListener> listeners = new List<ISearchResultListener>();
- 
-            internal void AddListener(ISearchResultListener listener)
-            {
-                this.listeners.Add(listener);
-            }
-           public void Update(String searchString, IQueryable<CodeSearchResult> results)
-           {
-               foreach (var listener in listeners)
-               {
-                   listener.Update(searchString, results);
-               }
-           }
-
-           public void UpdateMessage(string message)
-           {
-               foreach (var listener in listeners)
-               {
-                   listener.UpdateMessage(message);
-               }
-           }
-
-           public void UpdateRecommendedQueries(IQueryable<string> queries)
-           {
-               foreach (var listener in listeners)
-               {
-                   listener.UpdateRecommendedQueries(queries);
-               }
-           }
         }
 
 
@@ -101,7 +65,7 @@ namespace Sando.UI.View
                 var solutionKey = ServiceLocator.ResolveOptional<SolutionKey>(); //no opened solution
                 if (solutionKey == null)
                 {
-                    _searchResultListener.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
+                    this.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
                     return;
                 }
 
@@ -133,15 +97,27 @@ namespace Sando.UI.View
                     returnString.Append(results.Count() + " results returned. ");
                 }
 
-                _searchResultListener.Update(searchString, results);
-                _searchResultListener.UpdateMessage(returnString.ToString());
-                _searchResultListener.UpdateRecommendedQueries(searchCriteria.GetRecommendedQueries());
+                if (null != this.SearchResultUpdated)
+                {
+                    this.SearchResultUpdated(searchString, results);
+                }
+
+                this.UpdateMessage(returnString.ToString());
+
+                if (null != this.RecommendedQueriesUpdated)
+                {
+                    this.RecommendedQueriesUpdated(searchCriteria.GetRecommendedQueries());
+                }
+
+                //_searchResultListener.Update(searchString, results);
+                //_searchResultListener.UpdateMessage(returnString.ToString());
+                //_searchResultListener.UpdateRecommendedQueries(searchCriteria.GetRecommendedQueries());
 
                 LogEvents.PostSearch(this, results.Count(), searchCriteria.NumberOfSearchResultsReturned, PostRetrievalMetrics.AvgScore(results.ToList()), PostRetrievalMetrics.StdDevScore(results.ToList()));
             }
             catch (Exception e)
             {
-                _searchResultListener.UpdateMessage("Sando is experiencing difficulties. See log file for details.");
+                this.UpdateMessage("Sando is experiencing difficulties. See log file for details."); 
                 LogEvents.UISandoSearchingError(this, e);
             }
         }
@@ -155,13 +131,13 @@ namespace Sando.UI.View
                 indexer = ServiceLocator.Resolve<DocumentIndexer>();
                 if (indexer == null || indexer.IsDisposingOrDisposed())
                 {
-                    _searchResultListener.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
+                    this.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
                     isOpen = false;
                 }
             }
             catch (Exception e)
             {
-                _searchResultListener.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
+                this.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
                 if (indexer != null)
                     LogEvents.UISolutionOpeningError(this, e);
                 isOpen = false;
@@ -169,9 +145,24 @@ namespace Sando.UI.View
             return isOpen;
         }
 
-        public void AddListener(ISearchResultListener listener)
+        public event UpdateSearchResult SearchResultUpdated;
+
+        public event UpdateSearchCompletedMessage SearchCompletedMessageUpdated;
+
+        public event UpdateRecommendedQueries RecommendedQueriesUpdated;
+
+        private void UpdateMessage(string message)
         {
-            this._searchResultListener.AddListener(listener);
+            if (null != this.SearchCompletedMessageUpdated)
+            {
+                this.SearchCompletedMessageUpdated(message);
+            }
         }
     }
+
+    public delegate void UpdateSearchResult(string searchString, IQueryable<CodeSearchResult> results);
+
+    public delegate void UpdateSearchCompletedMessage(string message);
+
+    public delegate void UpdateRecommendedQueries(IQueryable<String> queries);
 }

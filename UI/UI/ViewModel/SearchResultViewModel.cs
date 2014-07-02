@@ -23,7 +23,7 @@ using System.Windows.Threading;
 
 namespace Sando.UI.ViewModel
 {
-    public class SearchResultViewModel : BaseViewModel, ISearchResultListener
+    public class SearchResultViewModel : BaseViewModel
     {
 
         #region Properties
@@ -71,7 +71,7 @@ namespace Sando.UI.ViewModel
             this.TypeColumnHeaderViewModel = new TypeColumnHeaderViewModel();
 
             var searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
-            searchManager.AddListener(this);
+            searchManager.SearchResultUpdated += this.Update;
 
             var dte = ServiceLocator.Resolve<DTE2>();
             if (dte != null)
@@ -107,48 +107,6 @@ namespace Sando.UI.ViewModel
             this.SearchResults.Clear();
             this.RealSearchResults.Clear();
             this.TypeColumnHeaderViewModel.ClearState();
-        }
-
-        #endregion
-
-        #region ISearchResultListener Implementation
-
-        public void Update(string searchString, IQueryable<CodeSearchResult> results)
-        {
-            object[] parameter = { results };
-            var exceptions = new ConcurrentQueue<Exception>();
-            System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                Parallel.ForEach(results, item =>
-                {
-                    try
-                    {
-                        string highlight;
-                        string highlightRaw;
-                        item.HighlightOffsets = GenerateHighlight(item.Raw, searchString,
-                            out highlight, out highlightRaw);
-                        item.Highlight = highlight;
-                        item.HighlightRaw = highlightRaw;
-                    }
-                    catch (Exception exc)
-                    {
-                        exceptions.Enqueue(exc);
-                    }
-                }
-               );
-            }).
-                //then update the UI in the UI thread
-            ContinueWith(updateUi => Application.Current.Dispatcher.Invoke(new UiUpdateDelagate(UpdateSearchResults), parameter));
-        }
-
-        public void UpdateMessage(string message)
-        {
-            //Do nothing for now.
-        }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
-            //Do nothing for now
         }
 
         #endregion
@@ -366,6 +324,35 @@ namespace Sando.UI.ViewModel
         }
 
         #endregion
+
+        private void Update(string searchString, IQueryable<CodeSearchResult> results)
+        {
+            object[] parameter = { results };
+            var exceptions = new ConcurrentQueue<Exception>();
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                Parallel.ForEach(results, item =>
+                {
+                    try
+                    {
+                        string highlight;
+                        string highlightRaw;
+                        item.HighlightOffsets = GenerateHighlight(item.Raw, searchString,
+                            out highlight, out highlightRaw);
+                        item.Highlight = highlight;
+                        item.HighlightRaw = highlightRaw;
+                    }
+                    catch (Exception exc)
+                    {
+                        exceptions.Enqueue(exc);
+                    }
+                }
+               );
+            }).
+                //then update the UI in the UI thread
+            ContinueWith(updateUi => Application.Current.Dispatcher.Invoke(new UiUpdateDelagate(UpdateSearchResults), parameter));
+        }
+
         void WindowEvents_WindowActivated(EnvDTE.Window GotFocus, EnvDTE.Window LostFocus)
         {
             if (LostFocus != null && LostFocus.Caption.Equals("Sando Search"))

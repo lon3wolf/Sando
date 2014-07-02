@@ -27,7 +27,7 @@ namespace Sando.UI.View
     /// We have to implement ISearchResultListener interface here.
     /// TODO:Replace the implementation of ISearchResultListener to SearchViewModel
     /// </summary>
-    public partial class SearchView : UserControl, ISearchResultListener
+    public partial class SearchView : UserControl
     {
 
         private SearchViewModel _searchViewModel;
@@ -40,7 +40,8 @@ namespace Sando.UI.View
             this._recommender = new QueryRecommender();
             ServiceLocator.RegisterInstance<QueryRecommender>(this._recommender);
 
-            SearchManagerFactory.GetUserInterfaceSearchManager().AddListener(this);
+            SearchManager searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
+            searchManager.RecommendedQueriesUpdated += this.UpdateRecommendedQueries;
 
             this.DataContextChanged += SearchView_DataContextChanged;
         }
@@ -279,17 +280,6 @@ namespace Sando.UI.View
         }
 
         #endregion
-
-        public void Update(string searchString, IQueryable<ExtensionContracts.ResultsReordererContracts.CodeSearchResult> results)
-        {
-            //Do nothing
-        }
-
-        public void UpdateMessage(string message)
-        {
-            //Do nothing
-        }
-
 
         #region Tag Cloud
 

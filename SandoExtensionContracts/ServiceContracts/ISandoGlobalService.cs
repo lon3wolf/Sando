@@ -29,7 +29,6 @@ namespace Sando.ExtensionContracts.ServiceContracts
         int CallLocalService();
 
         List<CodeSearchResult> GetSearchResults(string searchkeywords);
-        void AddUISearchResultsListener(ISearchResultListener listener);
 
     }
 

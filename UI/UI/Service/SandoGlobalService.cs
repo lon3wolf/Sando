@@ -34,7 +34,7 @@ namespace Sando.UI.Service {
     /// This class also needs to implement the SSandoGlobalService interface in order to notify the 
     /// package that it is actually implementing this service.
     /// </summary>
-    public class SandoGlobalService : ISandoGlobalService, SSandoGlobalService, ISearchResultListener
+    public class SandoGlobalService : ISandoGlobalService, SSandoGlobalService
     {
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Sando.UI.Service {
             return localService.LocalServiceFunction();
         }
 
-        public void Update(string searchString, IQueryable<CodeSearchResult> results)
+        private void Update(string searchString, IQueryable<CodeSearchResult> results)
         {
             var newResults = new List<CodeSearchResult>();
             foreach (var result in results)
@@ -100,19 +100,19 @@ namespace Sando.UI.Service {
             _results = newResults;
         }
 
-        public void UpdateMessage(string message)
+        private void UpdateMessage(string message)
         {
             _myMessage = message;
-        }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
         }
 
         public List<CodeSearchResult> GetSearchResults(string searchkeywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
-            manager.AddListener(this);
+            //manager.AddListener(this);
+
+            manager.SearchResultUpdated += this.Update;
+            manager.SearchCompletedMessageUpdated += this.UpdateMessage;
+
             _results = null;
             var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchkeywords);
             manager.Search(searchkeywords, criteria);
@@ -125,11 +125,6 @@ namespace Sando.UI.Service {
                     break;
             }
             return _results;
-        }
-
-        public void AddUISearchResultsListener(ISearchResultListener listener)
-        {
-            SearchManagerFactory.GetUserInterfaceSearchManager().AddListener(listener);
         }
 
         #endregion        

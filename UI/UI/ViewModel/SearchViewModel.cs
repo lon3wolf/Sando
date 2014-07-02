@@ -27,7 +27,7 @@ using System.Windows.Threading;
 
 namespace Sando.UI.ViewModel
 {
-    public class SearchViewModel : BaseViewModel, ISearchResultListener
+    public class SearchViewModel : BaseViewModel
     {
         #region Properties
 
@@ -214,7 +214,7 @@ namespace Sando.UI.ViewModel
             this.RegisterSolutionEvents();
 
             this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
-            this._searchManager.AddListener(this);
+            this._searchManager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             this.InitializeIndexedFile();
 
@@ -729,25 +729,10 @@ namespace Sando.UI.ViewModel
         #endregion
 
         public event EventHandler BeforeSearch;
-
-        #region ISearchResultListener Implementation
-
-        public void Update(string searchString, IQueryable<ExtensionContracts.ResultsReordererContracts.CodeSearchResult> results)
-        {
-            //Do nothing
-        }
-
-        public void UpdateMessage(string message)
+        private void UpdateMessage(string message)
         {
             this.SearchStatus = message;
         }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
-            //Do nothing
-        }
-
-        #endregion
     }
 
     public class IndexedFile : BaseViewModel
