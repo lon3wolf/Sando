@@ -12,24 +12,25 @@ namespace Sando.Core.Tools
     public class SparseMatrixForWordPairs : IWordCoOccurrenceMatrix
     {
 
-        SerializableDictionary<string, SerializableDictionary<string, int>> theMatrix = new SerializableDictionary<string, SerializableDictionary<string, int>>();
-        private const string fileName = "SparseMatrix.txt";
+        private Dictionary<string, Dictionary<string, int>> theMatrix;
+        private const string fileName = "SparseMatrix.bin";
         private const int GRAM_NUMBER = 3;
         private const int MAX_COOCCURRENCE_WORDS_COUNT = 100;
         private const int MAX_WORD_LENGTH = 3;
         private System.Threading.Tasks.TaskScheduler scheduler;
         private TaskFactory factory;
         private string directory;
-        private XmlSerializer serializer = new XmlSerializer(typeof(SerializableDictionary<string, SerializableDictionary<string, int>>));
 
         public SparseMatrixForWordPairs()
         {
             factory = new TaskFactory();
+            theMatrix = new Dictionary<string, Dictionary<string, int>>();
         }
 
         public SparseMatrixForWordPairs(TaskScheduler scheduler)
         {            
             factory = new TaskFactory(scheduler);
+            theMatrix = new Dictionary<string, Dictionary<string, int>>();
         }
 
         public void AddWordPair(string one, string two, int count = 1)
@@ -78,7 +79,7 @@ namespace Sando.Core.Tools
                 }
                 else
                 {
-                    theMatrix[one] = new SerializableDictionary<string, int>();
+                    theMatrix[one] = new Dictionary<string, int>();
                     theMatrix[one][two] = count;
                 }
             }
@@ -87,7 +88,10 @@ namespace Sando.Core.Tools
    
         private void ClearMemory()
         {
-            theMatrix = new SerializableDictionary<string, SerializableDictionary<string, int>>();
+            lock (theMatrix)
+            {               
+                theMatrix = new Dictionary<string, Dictionary<string, int>>();
+            }
         }
 
 
@@ -146,7 +150,7 @@ namespace Sando.Core.Tools
                 FileStream stream = new FileStream(GetMatrixFilePath(), FileMode.Create);
                 try
                 {                    
-                    serializer.Serialize(stream, theMatrix);
+                    Serialize(theMatrix, stream);
                 }
                 finally
                 {
@@ -179,7 +183,7 @@ namespace Sando.Core.Tools
                 {
                     try
                     {
-                        theMatrix = (SerializableDictionary<string, SerializableDictionary<string, int>>)serializer.Deserialize(stream);
+                        theMatrix = Deserialize(stream);
                     }
                     finally
                     {
@@ -189,6 +193,47 @@ namespace Sando.Core.Tools
             }
         }
 
+        #region serialization
+
+        public static void Serialize(Dictionary<string, Dictionary<string, int>> dictionary, Stream stream)
+        {
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write(dictionary.Count);
+            foreach (var kvp in dictionary)
+            {
+                writer.Write(kvp.Key);
+                writer.Write(kvp.Value.Count);
+                foreach (var innerkvp in kvp.Value)
+                {
+                    writer.Write(innerkvp.Key);
+                    writer.Write(innerkvp.Value);
+                }
+            }
+            writer.Flush();
+        }
+
+        public static Dictionary<string, Dictionary<string, int>> Deserialize(Stream stream)
+        {
+            BinaryReader reader = new BinaryReader(stream);
+            int count = reader.ReadInt32();
+            var dictionary = new Dictionary<string, Dictionary<string, int>>(count);
+            for (int n = 0; n < count; n++)
+            {
+                var key = reader.ReadString();
+                var innercount = reader.ReadInt32();
+                var value = new Dictionary<string, int>(innercount);
+                for (int p = 0; p < innercount; p++)
+                {
+                    var innerkey = reader.ReadString();
+                    var innervalue = reader.ReadInt32();
+                    value.Add(innerkey, innervalue);
+                }
+                dictionary.Add(key, value);
+            }
+            return dictionary;
+        }
+
+        #endregion
 
         /////////////////////////////////////////////////////////
         ///Everything below this line still needs to be reviewed. 
@@ -291,70 +336,4 @@ namespace Sando.Core.Tools
 
     }
 
-    	
- 
-    [XmlRoot("dictionary")]
-    public class SerializableDictionary<TKey, TValue>
-        : Dictionary<TKey, TValue>, IXmlSerializable
-    {
-        #region IXmlSerializable Members
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
-            return null;
-        }
- 
-        public void ReadXml(System.Xml.XmlReader reader)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
- 
-            bool wasEmpty = reader.IsEmptyElement;
-            reader.Read();
- 
-            if (wasEmpty)
-                return;
- 
-            while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
-            {
-                reader.ReadStartElement("item");
- 
-                reader.ReadStartElement("key");
-                TKey key = (TKey)keySerializer.Deserialize(reader);
-                reader.ReadEndElement();
- 
-                reader.ReadStartElement("value");
-                TValue value = (TValue)valueSerializer.Deserialize(reader);
-                reader.ReadEndElement();
- 
-                this.Add(key, value);
- 
-                reader.ReadEndElement();
-                reader.MoveToContent();
-            }
-            reader.ReadEndElement();
-        }
- 
-        public void WriteXml(System.Xml.XmlWriter writer)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
- 
-            foreach (TKey key in this.Keys)
-            {
-                writer.WriteStartElement("item");
- 
-                writer.WriteStartElement("key");
-                keySerializer.Serialize(writer, key);
-                writer.WriteEndElement();
- 
-                writer.WriteStartElement("value");
-                TValue value = this[key];
-                valueSerializer.Serialize(writer, value);
-                writer.WriteEndElement();
- 
-                writer.WriteEndElement();
-            }
-        }
-        #endregion
-    }
 }

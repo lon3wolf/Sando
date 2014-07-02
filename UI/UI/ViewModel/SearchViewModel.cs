@@ -573,6 +573,16 @@ namespace Sando.UI.ViewModel
 
                 }), null);
             };
+
+            srcMLService.UpdateArchivesStarted += (sender, args) =>
+            {
+                this.ProgressBarVisibility = Visibility.Visible;
+            };
+
+            srcMLService.UpdateArchivesCompleted += (sender, args) =>
+            {
+                this.ProgressBarVisibility = Visibility.Collapsed;
+            };
         }
 
         private void RegisterSolutionEvents()
