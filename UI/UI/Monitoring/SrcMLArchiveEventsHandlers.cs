@@ -34,8 +34,9 @@ namespace Sando.UI.Monitoring
         private TaskScheduler scheduler;
         public TaskFactory factory;
         public static SrcMLArchiveEventsHandlers Instance;
-        private Action whenDoneWithTasks = null;
-        
+        public Action WhenDoneWithTasks = null;
+        public Action WhenStartedFirstTask = null;
+
         public static int MAX_PARALLELISM = 2;
 
 
@@ -77,6 +78,14 @@ namespace Sando.UI.Monitoring
             var task = factory.StartNew(a, c.Token);
             lock (tasksTrackerLock)
             {
+                if (tasks.Count() == 0)
+                {
+                    if (WhenStartedFirstTask != null)
+                    {
+                        factory.StartNew(WhenStartedFirstTask);
+                    }
+                }
+
                 tasks.Add(task);
                 cancellers.Add(c);
             }
@@ -197,10 +206,9 @@ namespace Sando.UI.Monitoring
                 cancellers.TryTake(out cancelToken);
                 if (tasks.Count() == 0)
                 {
-                    if (whenDoneWithTasks != null)
+                    if (WhenDoneWithTasks != null)
                     {
-                        factory.StartNew(whenDoneWithTasks);
-                        whenDoneWithTasks = null;
+                        factory.StartNew(WhenDoneWithTasks);
                     }
                 }
             }

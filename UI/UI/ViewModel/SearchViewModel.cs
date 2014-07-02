@@ -11,6 +11,7 @@ using Sando.Indexer;
 using Sando.Indexer.Searching.Criteria;
 using Sando.Recommender;
 using Sando.UI.Base;
+using Sando.UI.Monitoring;
 using Sando.UI.View;
 using Sando.UI.View.Search;
 using System;
@@ -217,6 +218,16 @@ namespace Sando.UI.ViewModel
             this._searchManager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             this.InitializeIndexedFile();
+
+            var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+            srcMLArchiveEventsHandlers.WhenDoneWithTasks = () =>
+            {
+                this.ProgressBarVisibility = Visibility.Collapsed;
+            };
+            srcMLArchiveEventsHandlers.WhenStartedFirstTask = () =>
+            {
+                this.ProgressBarVisibility = Visibility.Visible;
+            };
 
         }
 
@@ -474,7 +485,7 @@ namespace Sando.UI.ViewModel
                     new ProgramElementWrapper(true, ProgramElementType.MethodPrototype),
                     new ProgramElementWrapper(true, ProgramElementType.Property),
                     new ProgramElementWrapper(true, ProgramElementType.Struct),
-                    new ProgramElementWrapper(true, ProgramElementType.XmlElement),
+                    //new ProgramElementWrapper(true, ProgramElementType.XmlElement),
                     new ProgramElementWrapper(true, ProgramElementType.TextFile)
                 };
         }
@@ -493,11 +504,6 @@ namespace Sando.UI.ViewModel
         private void RegisterSrcMLService()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
-
-            if (srcMLService.IsUpdating)
-            {
-                this.ProgressBarVisibility = Visibility.Visible;
-            }
 
             srcMLService.DirectoryAdded += (sender, e) =>
             {
@@ -566,16 +572,6 @@ namespace Sando.UI.ViewModel
 
 
                 }), null);
-            };
-
-            srcMLService.UpdateArchivesStarted += (sender, args) =>
-            {
-                this.ProgressBarVisibility = Visibility.Visible;
-            };
-
-            srcMLService.UpdateArchivesCompleted += (sender, args) =>
-            {
-                this.ProgressBarVisibility = Visibility.Collapsed;
             };
         }
 
