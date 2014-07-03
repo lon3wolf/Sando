@@ -32,7 +32,6 @@ namespace Configuration.OptionsPages
 				SandoOptionsControl optionsControl = new SandoOptionsControl();
 				optionsControl.Location = new Point(0, 0);
 				optionsControl.OptionsPage = this;
-				optionsControl.ExtensionPointsPluginDirectoryPath = this.ExtensionPointsPluginDirectoryPath;
 				optionsControl.NumberOfSearchResultsReturned = this.NumberOfSearchResultsReturned;
                 bool allowCollection = true;
                 if (!string.IsNullOrEmpty(this.AllowDataCollectionLogging) && bool.TryParse(this.AllowDataCollectionLogging, out allowCollection))
@@ -50,9 +49,6 @@ namespace Configuration.OptionsPages
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string NumberOfSearchResultsReturned { get; set; }
-		
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		public string ExtensionPointsPluginDirectoryPath { get; set; }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string AllowDataCollectionLogging { get; set; }
