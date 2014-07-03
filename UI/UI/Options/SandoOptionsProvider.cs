@@ -21,13 +21,11 @@ namespace Sando.UI.Options
         public SandoOptions GetSandoOptions()
         {
             var uiPackage = ServiceLocator.Resolve<UIPackage>();
-            var solutionKey = ServiceLocator.Resolve<SolutionKey>();
             bool firstRun = false;
 
             var sandoDialogPage = uiPackage.GetSandoDialogPage();
 
             var extensionPointsPluginDirectoryPath = PathManager.Instance.GetExtensionRoot();
-            sandoDialogPage.ExtensionPointsPluginDirectoryPath = extensionPointsPluginDirectoryPath;
 
             var numberOfSearchResultsReturned = SearchCriteria.DefaultNumberOfSearchResultsReturned;
             if (!String.IsNullOrWhiteSpace(sandoDialogPage.NumberOfSearchResultsReturned))
@@ -57,7 +55,7 @@ namespace Sando.UI.Options
 
             if (firstRun)
             {
-                SaveNewSettings(sandoDialogPage, extensionPointsPluginDirectoryPath, numberOfSearchResultsReturned,
+                SaveNewSettings(sandoDialogPage, numberOfSearchResultsReturned,
                     allowDataCollectionLogging, fileExtensionsList);
             }
 
@@ -65,14 +63,13 @@ namespace Sando.UI.Options
             return sandoOptions;
         }
 
-        private void SaveNewSettings(SandoDialogPage sandoDialogPage, string extensionPointsPluginDirectoryPath, int numberOfSearchResultsReturned, 
+        private void SaveNewSettings(SandoDialogPage sandoDialogPage, int numberOfSearchResultsReturned, 
                                     bool allowDataCollectionLogging, List<string> fileExtensionsList)
         {
             if (allowDataCollectionLogging)
                 sandoDialogPage.AllowDataCollectionLogging = Boolean.TrueString;
             else
                 sandoDialogPage.AllowDataCollectionLogging = Boolean.FalseString;
-            sandoDialogPage.ExtensionPointsPluginDirectoryPath = extensionPointsPluginDirectoryPath;
             sandoDialogPage.NumberOfSearchResultsReturned = numberOfSearchResultsReturned+String.Empty;
             sandoDialogPage.FileExtensionsToIndexList = fileExtensionsList;
             sandoDialogPage.SaveSettingsToStorage();

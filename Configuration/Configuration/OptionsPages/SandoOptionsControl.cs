@@ -21,11 +21,8 @@ namespace Configuration.OptionsPages
 		#region Fields
 
 		private SandoDialogPage customOptionsPage;
-		private FolderBrowserDialog ExtensionPointsPluginDirectoryPathFolderBrowserDialog;
-		private GroupBox ExtensionPointsConfigurationGroupBox;
-		private TextBox ExtensionPointsPluginDirectoryPathValueTextBox;
-		//private Button ExtensionPointsPluginDirectoryPathButton;
-		private Label ExtensionPointsPluginDirectoryPathLabel;
+        private FolderBrowserDialog ExtensionPointsPluginDirectoryPathFolderBrowserDialog;
+        //private Button ExtensionPointsPluginDirectoryPathButton;
 		private GroupBox SearchResultsConfigurationGroupBox;
 		private TextBox SearchResultsConfigurationNumberOfResultsReturnedTextBox;
 		private Label NumberOfResultsReturnedLabel;
@@ -88,9 +85,6 @@ namespace Configuration.OptionsPages
 		private void InitializeComponent()
 		{
             this.ExtensionPointsPluginDirectoryPathFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.ExtensionPointsConfigurationGroupBox = new System.Windows.Forms.GroupBox();
-            this.ExtensionPointsPluginDirectoryPathValueTextBox = new System.Windows.Forms.TextBox();
-            this.ExtensionPointsPluginDirectoryPathLabel = new System.Windows.Forms.Label();
             this.SearchResultsConfigurationGroupBox = new System.Windows.Forms.GroupBox();
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox = new System.Windows.Forms.TextBox();
             this.NumberOfResultsReturnedLabel = new System.Windows.Forms.Label();
@@ -98,11 +92,10 @@ namespace Configuration.OptionsPages
             this.AllowCollectionCheckBox = new System.Windows.Forms.CheckBox();
             this.AllowCollectionLabel = new System.Windows.Forms.Label();
             this.FileExtensionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.buttonDefault = new System.Windows.Forms.Button();
             this.DeleteFileExtensionButton = new System.Windows.Forms.Button();
             this.NewFileExtensionButton = new System.Windows.Forms.Button();
             this.FileExtensionsListBox = new System.Windows.Forms.ListBox();
-            this.buttonDefault = new System.Windows.Forms.Button();
-            this.ExtensionPointsConfigurationGroupBox.SuspendLayout();
             this.SearchResultsConfigurationGroupBox.SuspendLayout();
             this.ToggleLogCollectionGroupBox.SuspendLayout();
             this.FileExtensionsGroupBox.SuspendLayout();
@@ -111,35 +104,6 @@ namespace Configuration.OptionsPages
             // ExtensionPointsPluginDirectoryPathFolderBrowserDialog
             // 
             this.ExtensionPointsPluginDirectoryPathFolderBrowserDialog.ShowNewFolderButton = false;
-            // 
-            // ExtensionPointsConfigurationGroupBox
-            // 
-            this.ExtensionPointsConfigurationGroupBox.Controls.Add(this.ExtensionPointsPluginDirectoryPathValueTextBox);
-            this.ExtensionPointsConfigurationGroupBox.Controls.Add(this.ExtensionPointsPluginDirectoryPathLabel);
-            this.ExtensionPointsConfigurationGroupBox.Location = new System.Drawing.Point(3, 301);
-            this.ExtensionPointsConfigurationGroupBox.Name = "ExtensionPointsConfigurationGroupBox";
-            this.ExtensionPointsConfigurationGroupBox.Size = new System.Drawing.Size(445, 60);
-            this.ExtensionPointsConfigurationGroupBox.TabIndex = 4;
-            this.ExtensionPointsConfigurationGroupBox.TabStop = false;
-            this.ExtensionPointsConfigurationGroupBox.Text = "Extension points configuration";
-            // 
-            // ExtensionPointsPluginDirectoryPathValueTextBox
-            // 
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.Location = new System.Drawing.Point(155, 29);
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.Name = "ExtensionPointsPluginDirectoryPathValueTextBox";
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.ReadOnly = true;
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.Size = new System.Drawing.Size(245, 20);
-            this.ExtensionPointsPluginDirectoryPathValueTextBox.TabIndex = 6;
-            // 
-            // ExtensionPointsPluginDirectoryPathLabel
-            // 
-            this.ExtensionPointsPluginDirectoryPathLabel.AutoSize = true;
-            this.ExtensionPointsPluginDirectoryPathLabel.Location = new System.Drawing.Point(10, 30);
-            this.ExtensionPointsPluginDirectoryPathLabel.Name = "ExtensionPointsPluginDirectoryPathLabel";
-            this.ExtensionPointsPluginDirectoryPathLabel.Size = new System.Drawing.Size(130, 13);
-            this.ExtensionPointsPluginDirectoryPathLabel.TabIndex = 4;
-            this.ExtensionPointsPluginDirectoryPathLabel.Text = "Extension points directory:";
             // 
             // SearchResultsConfigurationGroupBox
             // 
@@ -177,10 +141,10 @@ namespace Configuration.OptionsPages
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionLabel);
             this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 235);
             this.ToggleLogCollectionGroupBox.Name = "ToggleLogCollectionGroupBox";
-            this.ToggleLogCollectionGroupBox.Size = new System.Drawing.Size(445, 60);
+            this.ToggleLogCollectionGroupBox.Size = new System.Drawing.Size(445, 56);
             this.ToggleLogCollectionGroupBox.TabIndex = 8;
             this.ToggleLogCollectionGroupBox.TabStop = false;
-            this.ToggleLogCollectionGroupBox.Text = "Sando improvement log collection";
+            this.ToggleLogCollectionGroupBox.Text = "Logging";
             // 
             // AllowCollectionCheckBox
             // 
@@ -217,6 +181,16 @@ namespace Configuration.OptionsPages
             this.FileExtensionsGroupBox.TabStop = false;
             this.FileExtensionsGroupBox.Text = "File extensions to include in index";
             // 
+            // buttonDefault
+            // 
+            this.buttonDefault.Location = new System.Drawing.Point(325, 77);
+            this.buttonDefault.Name = "buttonDefault";
+            this.buttonDefault.Size = new System.Drawing.Size(75, 23);
+            this.buttonDefault.TabIndex = 3;
+            this.buttonDefault.Text = "Default";
+            this.buttonDefault.UseVisualStyleBackColor = true;
+            this.buttonDefault.Click += new System.EventHandler(this.buttonDefault_Click);
+            // 
             // DeleteFileExtensionButton
             // 
             this.DeleteFileExtensionButton.Location = new System.Drawing.Point(325, 48);
@@ -245,27 +219,14 @@ namespace Configuration.OptionsPages
             this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 134);
             this.FileExtensionsListBox.TabIndex = 0;
             // 
-            // buttonDefault
-            // 
-            this.buttonDefault.Location = new System.Drawing.Point(325, 77);
-            this.buttonDefault.Name = "buttonDefault";
-            this.buttonDefault.Size = new System.Drawing.Size(75, 23);
-            this.buttonDefault.TabIndex = 3;
-            this.buttonDefault.Text = "Default";
-            this.buttonDefault.UseVisualStyleBackColor = true;
-            this.buttonDefault.Click += new System.EventHandler(this.buttonDefault_Click);
-            // 
             // SandoOptionsControl
             // 
             this.AllowDrop = true;
             this.Controls.Add(this.FileExtensionsGroupBox);
             this.Controls.Add(this.ToggleLogCollectionGroupBox);
             this.Controls.Add(this.SearchResultsConfigurationGroupBox);
-            this.Controls.Add(this.ExtensionPointsConfigurationGroupBox);
             this.Name = "SandoOptionsControl";
-            this.Size = new System.Drawing.Size(465, 361);
-            this.ExtensionPointsConfigurationGroupBox.ResumeLayout(false);
-            this.ExtensionPointsConfigurationGroupBox.PerformLayout();
+            this.Size = new System.Drawing.Size(465, 299);
             this.SearchResultsConfigurationGroupBox.ResumeLayout(false);
             this.SearchResultsConfigurationGroupBox.PerformLayout();
             this.ToggleLogCollectionGroupBox.ResumeLayout(false);
@@ -288,18 +249,6 @@ namespace Configuration.OptionsPages
 			set
 			{
 				customOptionsPage = value;
-			}
-		}
-
-		public string ExtensionPointsPluginDirectoryPath
-		{
-			get
-			{
-				return ExtensionPointsPluginDirectoryPathValueTextBox.Text;
-			}
-			set
-			{
-				ExtensionPointsPluginDirectoryPathValueTextBox.Text = value;
 			}
 		}
 
