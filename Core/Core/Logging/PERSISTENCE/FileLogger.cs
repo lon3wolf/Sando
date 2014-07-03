@@ -12,11 +12,12 @@ namespace Sando.Core.Logging.Persistence
 {
 	public class FileLogger
     {
-        public static void SetupDefaultFileLogger(string directoryPath)
+        public static string SetupDefaultFileLogger(string directoryPath)
         {
             var defaultLogPath = Path.Combine(directoryPath, "Sando " + DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss") + ".log");
             CreateDefaultLogger(defaultLogPath);
             _isDefaultLoggerInitialized = true;
+            return defaultLogPath;
         }
 
         public static ILog CreateFileLogger(string loggerName, string filePath)

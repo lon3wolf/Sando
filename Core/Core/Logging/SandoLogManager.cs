@@ -21,7 +21,7 @@ namespace Sando.Core.Logging
 
         public static void StartDefaultLogging(string logPath)
         {
-            FileLogger.SetupDefaultFileLogger(logPath);
+            DefaultLogFilePath = FileLogger.SetupDefaultFileLogger(logPath);
             DefaultLoggingOn = true;
         }
 
@@ -45,5 +45,6 @@ namespace Sando.Core.Logging
 
         public static bool DefaultLoggingOn { get; private set; }
         public static bool DataCollectionOn { get; private set; }
+        public static string DefaultLogFilePath{ get; private set; }
     }
 }
