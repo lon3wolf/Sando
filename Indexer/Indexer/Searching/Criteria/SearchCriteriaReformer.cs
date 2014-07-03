@@ -15,42 +15,47 @@ namespace Sando.Indexer.Searching.Criteria
 
         public static void ReformSearchCriteria(SimpleSearchCriteria criteria)
         {            
-
+            //try without splitting search terms
             var specialTerms = GetSpecialTerms(criteria.SearchTerms);
             var terms = criteria.SearchTerms.Where(t => !t.StartsWith("\"")||!t.EndsWith("\"")).
                 Select(t => t.NormalizeText()).Where(t => !String.IsNullOrWhiteSpace(t)).
                     Distinct().ToList();
             var originalTerms = terms.ToList();
-            var dictionarySplittedTerms = terms.SelectMany
-                    (ServiceLocator.Resolve<DictionaryBasedSplitter>().
-                        ExtractWords).Where(t => t.Length >= TERM_MINIMUM_LENGTH).ToList();
-
-            terms.AddRange(dictionarySplittedTerms.Except(terms));
-            RemoveSimilarWords(terms);
             var queries = GetReformedQuery(terms.Distinct()).ToList();
+
             if (queries.Count > 0)
             {
-                //LogEvents.AddSearchTermsToOriginal(queries.First());
-                var query = queries.First();
-                terms.AddRange(query.WordsAfterReform.Except(terms));
-                criteria.Explanation = GetExplanation(query, originalTerms);
-                criteria.Reformed = true;
-                criteria.RecommendedQueries = queries.GetRange(1, queries.Count - 1).
-                    Select(n => n.QueryString).AsQueryable();
-                if (queries.Count > 1)
-                {
-                    LogEvents.IssueRecommendedQueries(queries.GetRange(1, queries.Count - 1).
-                        ToArray());
-                }
+                PopulateRecommendations(criteria, terms, originalTerms, queries);
             }
             else
             {
                 criteria.Explanation = String.Empty;
                 criteria.Reformed = false;
-                criteria.RecommendedQueries = Enumerable.Empty<String>().AsQueryable();
+                criteria.RecommendedQueries = Enumerable.Empty<String>().AsQueryable();                
             }
             terms.AddRange(specialTerms);
             criteria.SearchTerms = ConvertToSortedSet(terms);
+        }
+
+        private static void PopulateRecommendations(SimpleSearchCriteria criteria, List<string> terms, List<string> originalTerms, List<IReformedQuery> queries)
+        {
+            //LogEvents.AddSearchTermsToOriginal(queries.First());
+            var query = queries.First();
+            var termsToAdd = query.WordsAfterReform.Except(terms);
+            foreach (var term in termsToAdd)
+                if (term.Contains(" ")&&!term.Contains("\""))
+                    terms.AddRange(term.Split(' '));
+                else
+                    terms.Add(term);
+            criteria.Explanation = GetExplanation(query, originalTerms);
+            criteria.Reformed = true;
+            criteria.RecommendedQueries = queries.GetRange(1, queries.Count - 1).
+                Select(n => n.QueryString).AsQueryable();
+            if (queries.Count > 1)
+            {
+                LogEvents.IssueRecommendedQueries(queries.GetRange(1, queries.Count - 1).
+                    ToArray());
+            }
         }
 
         //Removes words that are *very* similar, like if "open" and "openn" are both there, it removes one of them.

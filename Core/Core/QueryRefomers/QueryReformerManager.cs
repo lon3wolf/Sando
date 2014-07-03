@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Sando.Core.Tools;
+using Sando.DependencyInjection;
 
 namespace Sando.Core.QueryRefomers
 {
@@ -67,6 +68,7 @@ namespace Sando.Core.QueryRefomers
                 && !word.IsWordQuoted() && !word.IsWordFlag())
             {
                 var list = new List<ReformedWord>();
+                list.AddRange(FindSplitWords(word));
                 list.AddRange(FindShapeSimilarWordsInLocalDictionary(word));
                 list.AddRange(FindSynonymsInDictionaries(word));
                 list.AddRange(FindCoOccurredTerms(word, neigbors));
@@ -74,6 +76,13 @@ namespace Sando.Core.QueryRefomers
                 return list.Any() ? list : ToolHelpers.CreateNonChangedTerm(word);
             }
             return ToolHelpers.CreateNonChangedTerm(word);
+        }
+        private const int TERM_MINIMUM_LENGTH = 2;
+
+        private IEnumerable<ReformedWord> FindSplitWords(string word)
+        {
+            var reformer = new SplitterReformer(dictionary);
+            return reformer.GetReformedTarget(word).ToList();
         }
 
         private IEnumerable<ReformedWord> FindShapeSimilarWordsInLocalDictionary(String word)

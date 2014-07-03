@@ -37,11 +37,29 @@ namespace Sando.Core.QueryRefomers
         {
             if (IsReformingWord(target))
             {
-                return GetReformedTargetInternal(target).Where(w => this.localDictionary.
-                    DoesWordExist(w.NewTerm, DictionaryOption.IncludingStemming)).
+                return GetReformedTargetInternal(target).Where(w =>  this.localDictionary.
+                    DoesWordExist(w.NewTerm, DictionaryOption.IncludingStemming) || DoAllWordsExist(w.NewTerm)).
                         TrimIfOverlyLong(GetMaximumReformCount());
             }
             return Enumerable.Empty<ReformedWord>();
+        }
+
+        private bool DoAllWordsExist(string p)
+        {
+            if (p.Contains(" ") && !p.Contains("\""))
+            {
+                var terms = p.Split(' ');
+                foreach (var v in terms)
+                    if (!localDictionary.DoesWordExist(v, DictionaryOption.IncludingStemming))
+                        return false;
+                return true;
+            }
+            return false;
+        }
+
+        public virtual bool IgnoreExistance()
+        {
+            return false;
         }
 
       
@@ -72,7 +90,8 @@ namespace Sando.Core.QueryRefomers
         SE_SYNONYM,
         GENERAL_SYNONYM,
         COOCCUR,
-        ACRONYM_EXPAND
+        ACRONYM_EXPAND,
+        SPLITTING
     }
 
     public interface IReformedQuery : IEquatable<IReformedQuery>
@@ -92,7 +111,7 @@ namespace Sando.Core.QueryRefomers
         public TermChangeCategory Category { get; private set; }
         public string OriginalTerm { get; private set; }
         public string NewTerm { get; private set; }
-        public int DistanceFromOriginal { get; private set; }
+        public int DistanceFromOriginal { get; set; }
         public string ReformExplanation { get; private set; }
 
         public ReformedWord(TermChangeCategory category, String originalTerm,

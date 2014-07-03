@@ -144,6 +144,7 @@
     <Compile Include="QueryRefomers\ReformedQuerySorters.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="QueryRefomers\SplitterReformer.cs" />
     <Compile Include="QueryRefomers\ThesaurusBasedQueryReformer.cs">
       <SubType>Code</SubType>
     </Compile>
