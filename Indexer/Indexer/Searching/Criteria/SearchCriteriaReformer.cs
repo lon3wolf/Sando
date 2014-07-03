@@ -26,6 +26,7 @@ namespace Sando.Indexer.Searching.Criteria
                         ExtractWords).Where(t => t.Length >= TERM_MINIMUM_LENGTH).ToList();
 
             terms.AddRange(dictionarySplittedTerms.Except(terms));
+            RemoveSimilarWords(terms);
             var queries = GetReformedQuery(terms.Distinct()).ToList();
             if (queries.Count > 0)
             {
@@ -50,6 +51,18 @@ namespace Sando.Indexer.Searching.Criteria
             }
             terms.AddRange(specialTerms);
             criteria.SearchTerms = ConvertToSortedSet(terms);
+        }
+
+        //Removes words that are *very* similar, like if "open" and "openn" are both there, it removes one of them.
+        private static void RemoveSimilarWords(List<string> terms)
+        {
+            List<string> toRemove = new List<string>();
+            foreach (var term in terms)
+                foreach (var term2 in terms)
+                    if (!term2.Equals(term) && term2.Contains(term) && term2.Length - term.Length < 2)
+                        toRemove.Add(term);
+            foreach (var term in toRemove)
+                terms.Remove(term);
         }                           
 
 
