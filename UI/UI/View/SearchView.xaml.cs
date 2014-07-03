@@ -1,4 +1,8 @@
-﻿using Sando.Core.Logging.Events;
+﻿using System.Windows.Navigation;
+using EnvDTE;
+using EnvDTE80;
+using Sando.Core.Logging;
+using Sando.Core.Logging.Events;
 using Sando.Core.QueryRefomers;
 using Sando.DependencyInjection;
 using Sando.Recommender;
@@ -8,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -18,6 +21,7 @@ using Sando.UI.Actions;
 using FocusTestVC;
 using Sando.ExtensionContracts.SearchContracts;
 using ABB.SrcML.VisualStudio.SrcMLService;
+using Thread = System.Threading.Thread;
 
 namespace Sando.UI.View
 {
@@ -42,6 +46,7 @@ namespace Sando.UI.View
 
             SearchManager searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
             searchManager.RecommendedQueriesUpdated += this.UpdateRecommendedQueries;
+            searchManager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             this.DataContextChanged += SearchView_DataContextChanged;
         }
@@ -171,6 +176,45 @@ namespace Sando.UI.View
 
                 }
             }
+        }
+
+        private void UpdateMessage(string message)
+        {
+            if (Thread.CurrentThread == Dispatcher.Thread)
+            {
+                InternalUpdateMessage(message);
+            }
+            else
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    InternalUpdateMessage(message)));
+            }            
+        }
+
+        private void InternalUpdateMessage(string message)
+        {
+            if (message.Contains("log file"))
+            {
+                this.SearchStatusTextBlock.Inlines.Clear();
+                this.SearchStatusTextBlock.Inlines.Add(message.Substring(0,message.IndexOf("log file", StringComparison.Ordinal)));
+                var hyperlink = new Hyperlink(new Run("log file"));
+                hyperlink.NavigateUri = new Uri("file:///" + SandoLogManager.DefaultLogFilePath);
+                hyperlink.RequestNavigate += Hyperlink_OpenLogFile;
+                this.SearchStatusTextBlock.Inlines.Add(hyperlink);
+                var endOfLogFileInMessage = message.IndexOf("log file", StringComparison.Ordinal) + "log file".Length;
+                this.SearchStatusTextBlock.Inlines.Add(message.Substring(endOfLogFileInMessage, message.Length - endOfLogFileInMessage));
+            }
+            else
+            {
+                this.SearchStatusTextBlock.Text = message;
+            }
+        }
+
+        private void Hyperlink_OpenLogFile(object sender, RequestNavigateEventArgs e)
+        {
+            var dte = ServiceLocator.Resolve<DTE2>();
+            dte.ItemOperations.OpenFile(e.Uri.AbsoluteUri, Constants.vsViewKindTextView);
+            e.Handled = true;
         }
 
         //Since the autocomplete textbox doesn't support data binding, 
