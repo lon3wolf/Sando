@@ -1,7 +1,9 @@
 ﻿using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft.Practices.Unity;
+using Sando.Core.Logging;
 using Sando.Core.QueryRefomers;
 using Sando.Core.Tools;
 using Sando.DependencyInjection;
@@ -50,6 +52,8 @@ namespace Sando.UI.ViewModel
         public ICommand SearchCommand { get; set; }
 
         public ICommand ResetCommand { get; set; }
+
+        public ICommand OpenLogCommand { get; set; }
 
         public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
 
@@ -133,6 +137,8 @@ namespace Sando.UI.ViewModel
             this.CancelCommand = new RelayCommand(Cancel);
             this.SearchCommand = new RelayCommand(Search);
             this.ResetCommand = new RelayCommand(Reset);
+            this.OpenLogCommand = new RelayCommand(OpenLog);
+            
 
             this.IsIndexFileEnabled = false;
             this.IsBrowseButtonEnabled = false;
@@ -320,6 +326,12 @@ namespace Sando.UI.ViewModel
                 MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.",
                     "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void OpenLog(object param)
+        {
+            var dte = ServiceLocator.Resolve<DTE2>();
+            dte.ItemOperations.OpenFile(SandoLogManager.DefaultLogFilePath, Constants.vsViewKindTextView);
         }
 
         #endregion
