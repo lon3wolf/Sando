@@ -160,11 +160,11 @@
                  VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="15" IsIndeterminate="True" Visibility="{Binding ProgressBarVisibility}"/>
 
         <!-- info string -->
-        <TextBox Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
-                 Margin="4,0,0,0"
-                 BorderThickness="0" FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
-                 IsReadOnly="True"   Grid.Row="3" Width="296" HorizontalAlignment="Left"  
-                 Grid.Column="0" Height="Auto" Grid.ColumnSpan="2" Text="{Binding Path=SearchStatus}"
+        <TextBlock Margin="4,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                 Name = "SearchStatusTextBlock"
+                 FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
+                 Grid.Row="3" Width="Auto" HorizontalAlignment="Stretch"  
+                 Grid.Column="0" Height="Auto"
                  KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" />
 
         <!-- info string -->

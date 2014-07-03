@@ -36,64 +36,28 @@ namespace Sando.UI.ViewModel
         private IndexedFile _currentIndexedFile;
         private bool _isIndexFileEnabled;
         private bool _isBrowseButtonEnabled;
-        private String _searchStatus;
         private Visibility _progressBarVisibility;
         private SearchManager _searchManager;
 
-        public ICommand AddIndexFolderCommand
-        {
-            get;
-            set;
-        }
+        public ICommand AddIndexFolderCommand { get; set; }
 
-        public ICommand RemoveIndexFolderCommand
-        {
-            get;
-            set;
-        }
+        public ICommand RemoveIndexFolderCommand { get; set; }
 
-        public ICommand ApplyCommand
-        {
-            get;
-            set;
-        }
+        public ICommand ApplyCommand { get; set; }
 
-        public ICommand CancelCommand
-        {
-            get;
-            set;
-        }
+        public ICommand CancelCommand { get; set; }
 
-        public ICommand SearchCommand
-        {
-            get;
-            set;
-        }
+        public ICommand SearchCommand { get; set; }
 
-        public ICommand ResetCommand
-        {
-            get;
-            set;
-        }
+        public ICommand ResetCommand { get; set; }
 
-        public ObservableCollection<IndexedFile> IndexedFiles
-        {
-            get;
-            set;
-        }
+        public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
 
-        public List<IndexedFile> ModifiedIndexedFile
-        {
-            get;
-            set;
-        }
+        public List<IndexedFile> ModifiedIndexedFile { get; set; }
 
         public IndexedFile CurrentIndexedFile
         {
-            get
-            {
-                return this._currentIndexedFile;
-            }
+            get { return this._currentIndexedFile; }
             set
             {
                 this._currentIndexedFile = value;
@@ -103,10 +67,7 @@ namespace Sando.UI.ViewModel
 
         public IndexedFile SelectedIndexedFile
         {
-            get
-            {
-                return this._indexedFile;
-            }
+            get { return this._indexedFile; }
             set
             {
                 this._indexedFile = value;
@@ -125,10 +86,7 @@ namespace Sando.UI.ViewModel
 
         public bool IsIndexFileEnabled
         {
-            get
-            {
-                return this._isIndexFileEnabled;
-            }
+            get { return this._isIndexFileEnabled; }
             set
             {
                 this._isIndexFileEnabled = value;
@@ -138,10 +96,7 @@ namespace Sando.UI.ViewModel
 
         public bool IsBrowseButtonEnabled
         {
-            get
-            {
-                return this._isBrowseButtonEnabled;
-            }
+            get { return this._isBrowseButtonEnabled; }
             set
             {
                 this._isBrowseButtonEnabled = value;
@@ -151,10 +106,7 @@ namespace Sando.UI.ViewModel
 
         public Visibility ProgressBarVisibility
         {
-            get
-            {
-                return this._progressBarVisibility;
-            }
+            get { return this._progressBarVisibility; }
             set
             {
                 this._progressBarVisibility = value;
@@ -162,31 +114,9 @@ namespace Sando.UI.ViewModel
             }
         }
 
-        public String SearchStatus
-        {
-            get
-            {
-                return this._searchStatus;
-            }
-            set
-            {
-                this._searchStatus = value;
-                OnPropertyChanged("SearchStatus");
-            }
-        }
+        public ObservableCollection<AccessWrapper> AccessLevels { get; set; }
 
-
-        public ObservableCollection<AccessWrapper> AccessLevels
-        {
-            get;
-            set;
-        }
-
-        public ObservableCollection<ProgramElementWrapper> ProgramElements
-        {
-            get;
-            set;
-        }
+        public ObservableCollection<ProgramElementWrapper> ProgramElements { get; set; }
 
         #endregion
 
@@ -215,7 +145,6 @@ namespace Sando.UI.ViewModel
             this.RegisterSolutionEvents();
 
             this._searchManager = SearchManagerFactory.GetUserInterfaceSearchManager();
-            this._searchManager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             this.InitializeIndexedFile();
 
@@ -248,7 +177,7 @@ namespace Sando.UI.ViewModel
                 IndexedFile file = this.ModifiedIndexedFile.Find((f) => f.GUID == this.SelectedIndexedFile.GUID);
                 if (null != file)
                 {
-                    if(file.OperationStatus == IndexedFile.Status.Normal)
+                    if (file.OperationStatus == IndexedFile.Status.Normal)
                         file.OperationStatus = IndexedFile.Status.Modified;
                 }
             }
@@ -298,7 +227,7 @@ namespace Sando.UI.ViewModel
                     this.CurrentIndexedFile = null;
                 }
 
-                
+
                 this.IndexedFiles.RemoveAt(index);
             }
         }
@@ -340,7 +269,7 @@ namespace Sando.UI.ViewModel
 
 
             Synchronize();
-            
+
         }
 
         private void Cancel(object param)
@@ -381,13 +310,15 @@ namespace Sando.UI.ViewModel
             var indexer = ServiceLocator.Resolve<DocumentIndexer>();
             if (srcMlService == null)
             {
-                MessageBox.Show("Could not reset the index.", "Failed to Reset", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Could not reset the index.", "Failed to Reset", MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation);
             }
             else
             {
                 srcMlService.Reset();
                 indexer.AddDeletionFile();
-                MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.", "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Restart this Visual Studio Instance to complete the index reset.",
+                    "Restart to Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -443,7 +374,7 @@ namespace Sando.UI.ViewModel
 
         private void AddDirectoryToMonitor(ISrcMLGlobalService srcMlService, IndexedFile file)
         {
-            
+
             foreach (IndexedFile addFile in this.IndexedFiles)
             {
 
@@ -455,16 +386,18 @@ namespace Sando.UI.ViewModel
                     }
                     catch (DirectoryScanningMonitorSubDirectoryException cantAdd)
                     {
-                        MessageBox.Show("Sub-directories of existing directories cannot be added - " + cantAdd.Message, "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show("Sub-directories of existing directories cannot be added - " + cantAdd.Message,
+                            "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     catch (ForbiddenDirectoryException cantAdd)
                     {
-                        MessageBox.Show(cantAdd.Message, "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(cantAdd.Message, "Invalid Directory", MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
                     }
                 }
 
             }
-            
+
         }
 
         private bool IsPathEqual(String indexedFilePath, String eventFilePath)
@@ -475,30 +408,30 @@ namespace Sando.UI.ViewModel
         private void InitProgramElements()
         {
             ProgramElements = new ObservableCollection<ProgramElementWrapper>
-                {
-                    new ProgramElementWrapper(true, ProgramElementType.Class),
-                    new ProgramElementWrapper(false, ProgramElementType.Comment),
-                    new ProgramElementWrapper(true, ProgramElementType.Custom),
-                    new ProgramElementWrapper(true, ProgramElementType.Enum),
-                    new ProgramElementWrapper(true, ProgramElementType.Field),
-                    new ProgramElementWrapper(true, ProgramElementType.Method),
-                    new ProgramElementWrapper(true, ProgramElementType.MethodPrototype),
-                    new ProgramElementWrapper(true, ProgramElementType.Property),
-                    new ProgramElementWrapper(true, ProgramElementType.Struct),
-                    //new ProgramElementWrapper(true, ProgramElementType.XmlElement),
-                    new ProgramElementWrapper(true, ProgramElementType.TextFile)
-                };
+            {
+                new ProgramElementWrapper(true, ProgramElementType.Class),
+                new ProgramElementWrapper(false, ProgramElementType.Comment),
+                new ProgramElementWrapper(true, ProgramElementType.Custom),
+                new ProgramElementWrapper(true, ProgramElementType.Enum),
+                new ProgramElementWrapper(true, ProgramElementType.Field),
+                new ProgramElementWrapper(true, ProgramElementType.Method),
+                new ProgramElementWrapper(true, ProgramElementType.MethodPrototype),
+                new ProgramElementWrapper(true, ProgramElementType.Property),
+                new ProgramElementWrapper(true, ProgramElementType.Struct),
+                //new ProgramElementWrapper(true, ProgramElementType.XmlElement),
+                new ProgramElementWrapper(true, ProgramElementType.TextFile)
+            };
         }
 
         private void InitAccessLevels()
         {
             AccessLevels = new ObservableCollection<AccessWrapper>
-                {
-                    new AccessWrapper(true, AccessLevel.Private),
-                    new AccessWrapper(true, AccessLevel.Protected),
-                    new AccessWrapper(true, AccessLevel.Internal),
-                    new AccessWrapper(true, AccessLevel.Public)
-                };
+            {
+                new AccessWrapper(true, AccessLevel.Private),
+                new AccessWrapper(true, AccessLevel.Protected),
+                new AccessWrapper(true, AccessLevel.Internal),
+                new AccessWrapper(true, AccessLevel.Public)
+            };
         }
 
         private void RegisterSrcMLService()
@@ -517,13 +450,13 @@ namespace Sando.UI.ViewModel
                     bool equals = false;
                     foreach (IndexedFile currentFile in this.IndexedFiles)
                     {
-                        
+
                         if (IsPathEqual(currentFile.FilePath, file.FilePath))
                         {
                             equals = true;
                             break;
                         }
-                        
+
                     }
 
                     if (!equals)
@@ -567,7 +500,7 @@ namespace Sando.UI.ViewModel
                         {
                             this.CurrentIndexedFile = null;
                         }
-                            
+
                     }
 
 
@@ -601,9 +534,6 @@ namespace Sando.UI.ViewModel
                         this.ModifiedIndexedFile.Clear();
                         this.SelectedIndexedFile = null;
                         this.CurrentIndexedFile = null;
-
-                        this.SearchStatus = String.Empty;
-
                         this.IsIndexFileEnabled = false;
 
                     }));
@@ -658,7 +588,7 @@ namespace Sando.UI.ViewModel
 
                 }
             }
-            
+
         }
 
         #endregion
@@ -669,7 +599,7 @@ namespace Sando.UI.ViewModel
         {
             var searchWorker = new BackgroundWorker();
             searchWorker.DoWork += SearchWorker_DoWork;
-            var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
+            var workerSearchParams = new WorkerSearchParameters {Query = text, Criteria = searchCriteria};
             searchWorker.RunWorkerAsync(workerSearchParams);
         }
 
@@ -679,9 +609,9 @@ namespace Sando.UI.ViewModel
             public String Query { get; set; }
         }
 
-        void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            var searchParams = (WorkerSearchParameters)e.Argument;
+            var searchParams = (WorkerSearchParameters) e.Argument;
 
             var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchParams.Query, searchParams.Criteria);
 
@@ -735,10 +665,7 @@ namespace Sando.UI.ViewModel
         #endregion
 
         public event EventHandler BeforeSearch;
-        private void UpdateMessage(string message)
-        {
-            this.SearchStatus = message;
-        }
+
     }
 
     public class IndexedFile : BaseViewModel

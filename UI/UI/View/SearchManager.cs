@@ -117,8 +117,7 @@ namespace Sando.UI.View
             }
             catch (Exception e)
             {
-                var logFileLink = "<a href=\"file:///" + SandoLogManager.DefaultLogFilePath + "\">log file</a>";
-                this.UpdateMessage("Sando is experiencing difficulties. See " + logFileLink + " for details."); 
+                this.UpdateMessage("Sando is experiencing difficulties. See log file for details."); 
                 LogEvents.UISandoSearchingError(this, e);
             }
         }
