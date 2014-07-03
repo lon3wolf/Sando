@@ -12,6 +12,7 @@ namespace Sando.Indexer.Searching.Criteria
     public class SearchCriteriaReformer
     {
         private const int TERM_MINIMUM_LENGTH = 2;
+        public static string ADDED_TERMS = "Added search term(s):";
 
         public static void ReformSearchCriteria(SimpleSearchCriteria criteria)
         {            
@@ -92,7 +93,7 @@ namespace Sando.Indexer.Searching.Criteria
         {
             var appended = false;
             var sb = new StringBuilder();
-            sb.Append("Added search term(s):");
+            sb.Append(ADDED_TERMS);
             foreach (var term in query.ReformedWords.Where(term => !originalTerms.Contains(term.NewTerm)))
             {
                 appended = true;

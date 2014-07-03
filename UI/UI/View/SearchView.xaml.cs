@@ -22,6 +22,7 @@ using FocusTestVC;
 using Sando.ExtensionContracts.SearchContracts;
 using ABB.SrcML.VisualStudio.SrcMLService;
 using Thread = System.Threading.Thread;
+using Sando.Indexer.Searching.Criteria;
 
 namespace Sando.UI.View
 {
@@ -203,6 +204,17 @@ namespace Sando.UI.View
                 this.SearchStatusTextBlock.Inlines.Add(hyperlink);
                 var endOfLogFileInMessage = message.IndexOf("log file", StringComparison.Ordinal) + "log file".Length;
                 this.SearchStatusTextBlock.Inlines.Add(message.Substring(endOfLogFileInMessage, message.Length - endOfLogFileInMessage));
+            }
+            else if (message.Contains(SearchCriteriaReformer.ADDED_TERMS))
+            {
+                this.SearchStatusTextBlock.Inlines.Clear();
+                this.SearchStatusTextBlock.Inlines.Add(SearchCriteriaReformer.ADDED_TERMS+" ");
+                var query = message.Substring(SearchCriteriaReformer.ADDED_TERMS.Length, message.IndexOf('.') - SearchCriteriaReformer.ADDED_TERMS.Length);
+                var end = message.Substring(message.IndexOf('.'));
+                var hyperlink = new SandoQueryHyperLink(new Run(query), query, -1);
+                hyperlink.Click += RecommendedQueryOnClick;
+                this.SearchStatusTextBlock.Inlines.Add(hyperlink);
+                this.SearchStatusTextBlock.Inlines.Add(end);
             }
             else
             {
