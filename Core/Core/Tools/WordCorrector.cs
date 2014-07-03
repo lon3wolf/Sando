@@ -54,8 +54,8 @@ namespace Sando.Core.Tools
         private String[] RankSimilarWords(Dictionary<String, int> results, string originalWord)
         {
             var de = new Levenshtein();
-            var correctionWords = results.OrderByDescending(r => r.Value).Select(r => r.Key).TrimIfOverlyLong(10);
-            return correctionWords.OrderBy(w => de.LD(w, originalWord)).ToArray();
+            var correctionWords = results.OrderByDescending(r => r.Value).Select(r => r.Key);
+            return correctionWords.OrderBy(w => de.LD(w, originalWord)).TrimIfOverlyLong(10).ToArray();
         }
 
         private void AddWord(String word)
