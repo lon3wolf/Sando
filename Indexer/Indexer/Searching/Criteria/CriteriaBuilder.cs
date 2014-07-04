@@ -8,14 +8,20 @@ using Configuration.OptionsPages;
 
 namespace Sando.Indexer.Searching.Criteria
 {
-    public class CriteriaBuilder
+
+    public class CriteriaBuilderFactory
     {
-        SimpleSearchCriteria _searchCriteria;
 
         public static CriteriaBuilder GetBuilder()
         {
             return new CriteriaBuilder();
         }
+
+    }
+
+    public class CriteriaBuilder
+    {
+        SimpleSearchCriteria _searchCriteria;
 
         public CriteriaBuilder AddSearchString(string searchString, SimpleSearchCriteria searchCriteria = null)
         {
@@ -44,13 +50,6 @@ namespace Sando.Indexer.Searching.Criteria
             return _searchCriteria;
         }
 
-        public CriteriaBuilder NumResults(int numResults, SimpleSearchCriteria searchCriteria = null)
-        {
-            Initialze(searchCriteria);
-            _searchCriteria.NumberOfSearchResultsReturned = numResults;
-            return this;
-        }
-
         public SimpleSearchCriteria GetCriteria(string searchString, SimpleSearchCriteria searchCriteria = null)
         {
             Initialze(searchCriteria);
@@ -58,7 +57,7 @@ namespace Sando.Indexer.Searching.Criteria
             var description = new SandoQueryParser().Parse(searchString);
 
             this.AddFromDescription(description);
-            this.NumResults(sandoOptions.NumberOfSearchResultsReturned);
+            this._searchCriteria.NumberOfSearchResultsReturned = sandoOptions.NumberOfSearchResultsReturned;
             
             SearchCriteriaReformer.ReformSearchCriteria(this._searchCriteria);
             return this._searchCriteria;

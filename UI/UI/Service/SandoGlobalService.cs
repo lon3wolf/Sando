@@ -15,7 +15,6 @@ using System.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using EnvDTE;
-using Sando.ExtensionContracts.SearchContracts;
 using log4net;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.SearchEngine;
@@ -108,13 +107,11 @@ namespace Sando.UI.Service {
         public List<CodeSearchResult> GetSearchResults(string searchkeywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
-            //manager.AddListener(this);
-
             manager.SearchResultUpdated += this.Update;
             manager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             _results = null;
-            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchkeywords);
+            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(searchkeywords);
             manager.Search(searchkeywords, criteria);
             int i = 0;
             while (_results == null)

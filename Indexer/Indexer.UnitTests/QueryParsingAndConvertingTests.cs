@@ -26,7 +26,7 @@ namespace Sando.Indexer.UnitTests
         [Test]
         public void TestIfQueryParsesToEmptySearchTerm()
         {
-            var simple = CriteriaBuilder.GetBuilder().GetCriteria("g_u16ActiveFault");
+            var simple = CriteriaBuilderFactory.GetBuilder().GetCriteria("g_u16ActiveFault");
             Assert.IsFalse(simple.SearchTerms.Where(x => String.IsNullOrWhiteSpace(x)).ToList().Count >= 1);
         }
     }

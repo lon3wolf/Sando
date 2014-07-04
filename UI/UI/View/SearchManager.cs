@@ -9,7 +9,6 @@ using Sando.Core;
 using Sando.Core.Extensions;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-using Sando.ExtensionContracts.SearchContracts;
 using Sando.ExtensionContracts.SplitterContracts;
 using Sando.Indexer.Searching;
 using Sando.Recommender;
@@ -66,54 +65,55 @@ namespace Sando.UI.View
                 if (solutionKey == null)
                 {
                     this.UpdateMessage("Sando searches only the currently open Solution.  Please open a Solution and try again.");
-                    return;
-                }
 
-                searchString = ExtensionPointsRepository.Instance.GetQueryRewriterImplementation().RewriteQuery(searchString);
-
-				PreRetrievalMetrics preMetrics = new PreRetrievalMetrics(ServiceLocator.Resolve<DocumentIndexer>().Reader, ServiceLocator.Resolve<Analyzer>());
-				LogEvents.PreSearch(this, preMetrics.MaxIdf(searchString), preMetrics.AvgIdf(searchString), preMetrics.AvgSqc(searchString), preMetrics.AvgVar(searchString));
-                LogEvents.PreSearchQueryAnalysis(this, QueryMetrics.ExamineQuery(searchString).ToString(), QueryMetrics.DiceCoefficient(QueryMetrics.SavedQuery, searchString));
-                QueryMetrics.SavedQuery = searchString;
-
-				//var criteria = GetCriteria(searchString, searchCriteria);
-                var results = codeSearcher.Search(searchCriteria, true).AsQueryable();
-                var resultsReorderer = ExtensionPointsRepository.Instance.GetResultsReordererImplementation();
-                results = resultsReorderer.ReorderSearchResults(results);
-
-                var returnString = new StringBuilder();
-
-                if (searchCriteria.IsQueryReformed())
-                {
-                    returnString.Append(searchCriteria.GetQueryReformExplanation());
-                }
-
-                if (!results.Any())
-                {
-                    returnString.Append("No results found. ");
                 }
                 else
                 {
-                    returnString.Append(results.Count() + " results returned. ");
+
+                    searchString = ExtensionPointsRepository.Instance.GetQueryRewriterImplementation().RewriteQuery(searchString);
+
+                    PreRetrievalMetrics preMetrics = new PreRetrievalMetrics(ServiceLocator.Resolve<DocumentIndexer>().Reader, ServiceLocator.Resolve<Analyzer>());
+                    LogEvents.PreSearch(this, preMetrics.MaxIdf(searchString), preMetrics.AvgIdf(searchString), preMetrics.AvgSqc(searchString), preMetrics.AvgVar(searchString));
+                    LogEvents.PreSearchQueryAnalysis(this, QueryMetrics.ExamineQuery(searchString).ToString(), QueryMetrics.DiceCoefficient(QueryMetrics.SavedQuery, searchString));
+                    QueryMetrics.SavedQuery = searchString;
+
+                    var results = codeSearcher.Search(searchCriteria, true).AsQueryable();
+                    var resultsReorderer = ExtensionPointsRepository.Instance.GetResultsReordererImplementation();
+                    results = resultsReorderer.ReorderSearchResults(results);
+
+                    var returnString = new StringBuilder();
+
+                    if (searchCriteria.IsQueryReformed())
+                    {
+                        returnString.Append(searchCriteria.GetQueryReformExplanation());
+                    }
+
+                    if (!results.Any())
+                    {
+                        returnString.Append("No results found. ");
+                    }
+                    else
+                    {
+                        returnString.Append(results.Count() + " results returned. ");
+                    }
+
+                    if (null != this.SearchResultUpdated)
+                    {
+                        this.SearchResultUpdated(searchString, results);
+                    }
+
+                    this.UpdateMessage(returnString.ToString());
+
+                    if (null != this.RecommendedQueriesUpdated)
+                    {
+                        this.RecommendedQueriesUpdated(searchCriteria.GetRecommendedQueries());
+                    }
+
+                    LogEvents.PostSearch(this, results.Count(), searchCriteria.NumberOfSearchResultsReturned, 
+                        PostRetrievalMetrics.AvgScore(results.ToList()), PostRetrievalMetrics.StdDevScore(results.ToList()));
+
                 }
-
-                if (null != this.SearchResultUpdated)
-                {
-                    this.SearchResultUpdated(searchString, results);
-                }
-
-                this.UpdateMessage(returnString.ToString());
-
-                if (null != this.RecommendedQueriesUpdated)
-                {
-                    this.RecommendedQueriesUpdated(searchCriteria.GetRecommendedQueries());
-                }
-
-                //_searchResultListener.Update(searchString, results);
-                //_searchResultListener.UpdateMessage(returnString.ToString());
-                //_searchResultListener.UpdateRecommendedQueries(searchCriteria.GetRecommendedQueries());
-
-                LogEvents.PostSearch(this, results.Count(), searchCriteria.NumberOfSearchResultsReturned, PostRetrievalMetrics.AvgScore(results.ToList()), PostRetrievalMetrics.StdDevScore(results.ToList()));
+                
             }
             catch (Exception e)
             {

@@ -7,7 +7,6 @@ using Lucene.Net.Analysis.Snowball;
 using NUnit.Framework;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-using Sando.ExtensionContracts.SearchContracts;
 using Sando.Indexer;
 using Sando.Indexer.Searching;
 using Sando.SearchEngine;
@@ -292,7 +291,7 @@ namespace Sando.IntegrationTests.Search
             manager.SearchCompletedMessageUpdated += this.UpdateMessage;
 
             _results = null;
-            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(keywords);
+            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(keywords);
             manager.Search(keywords, criteria);
             int i = 0;
             while (_results == null)

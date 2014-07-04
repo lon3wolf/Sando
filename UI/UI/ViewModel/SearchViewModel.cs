@@ -8,7 +8,6 @@ using Sando.Core.QueryRefomers;
 using Sando.Core.Tools;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ProgramElementContracts;
-using Sando.ExtensionContracts.SearchContracts;
 using Sando.Indexer;
 using Sando.Indexer.Searching.Criteria;
 using Sando.Recommender;
@@ -625,7 +624,7 @@ namespace Sando.UI.ViewModel
         {
             var searchParams = (WorkerSearchParameters) e.Argument;
 
-            var criteria = CriteriaBuilder.GetBuilder().GetCriteria(searchParams.Query, searchParams.Criteria);
+            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(searchParams.Query, searchParams.Criteria);
 
             _searchManager.Search(searchParams.Query, criteria);
         }

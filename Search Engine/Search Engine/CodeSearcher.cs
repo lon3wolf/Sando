@@ -21,7 +21,7 @@ namespace Sando.SearchEngine
 		{
 			Contract.Requires(String.IsNullOrWhiteSpace(searchString), "CodeSearcher:Search - searchString cannot be null or an empty string!");
 
-            var searchCriteria = CriteriaBuilder.GetBuilder().AddSearchString(searchString).GetCriteria();
+            var searchCriteria = CriteriaBuilderFactory.GetBuilder().AddSearchString(searchString).GetCriteria();
             return Search(searchCriteria, rerunWithWildcardIfNoResults);
 		}
 

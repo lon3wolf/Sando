@@ -4,7 +4,6 @@ using Sando.Core.Tools;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-using Sando.ExtensionContracts.SearchContracts;
 using Sando.UI.Actions;
 using Sando.UI.Base;
 using Sando.UI.View;
