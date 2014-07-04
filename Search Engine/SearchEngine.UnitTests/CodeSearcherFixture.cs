@@ -14,6 +14,7 @@ using Sando.Indexer.Searching;
 using Sando.UnitTestHelpers;
 using UnitTestHelpers;
 using System.Threading;
+using Sando.Indexer.Searching.Criteria;
 
 namespace Sando.SearchEngine.UnitTests
 {
@@ -29,14 +30,13 @@ namespace Sando.SearchEngine.UnitTests
     	[Test]
         public void TestCreateCodeSearcher()
         {
-            Assert.DoesNotThrow(() => new CodeSearcher( null ));            
+            Assert.DoesNotThrow(() => new CodeSearcher());            
         }
 
         [Test]     
         public void PerformBasicSearch()
         {
-			var indexerSearcher = new IndexerSearcher();
-        	CodeSearcher cs = new CodeSearcher(indexerSearcher);            
+        	CodeSearcher cs = new CodeSearcher();            
             List<CodeSearchResult> result = cs.Search("SimpleName");
             Assert.True(result.Count > 0);                                 
         }
@@ -67,7 +67,6 @@ namespace Sando.SearchEngine.UnitTests
             history.Initialize(PathManager.Instance.GetIndexPath
                 (ServiceLocator.Resolve<SolutionKey>()));
             ServiceLocator.RegisterInstance(history);
-
 
     		ClassElement classElement = SampleProgramElementFactory.GetSampleClassElement(
 				accessLevel: AccessLevel.Public,

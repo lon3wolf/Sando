@@ -5,16 +5,17 @@ using System.Linq;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.Indexer.Searching;
 using Sando.Indexer.Searching.Criteria;
+using Sando.DependencyInjection;
 
 namespace Sando.SearchEngine
 {
     public class CodeSearcher
     {
-        private readonly IIndexerSearcher _searcher;
+        private readonly IIndexerSearcher<SimpleSearchCriteria> _simpleSearcher;
 
-        public CodeSearcher(IIndexerSearcher searcher)
+        public CodeSearcher()
         {
-            _searcher = searcher;
+            this._simpleSearcher = new SimpleIndexerSearcher();
         }
 
         public virtual List<CodeSearchResult> Search(string searchString, bool rerunWithWildcardIfNoResults = false)
@@ -25,15 +26,15 @@ namespace Sando.SearchEngine
             return Search(searchCriteria, rerunWithWildcardIfNoResults);
 		}
 
-        public virtual List<CodeSearchResult> Search(SearchCriteria searchCriteria, bool rerunWithWildcardIfNoResults = false)
-		{
+        public virtual List<CodeSearchResult> Search(SimpleSearchCriteria searchCriteria, bool rerunWithWildcardIfNoResults = false)
+        {
             Contract.Requires(searchCriteria != null, "CodeSearcher:Search - searchCriteria cannot be null!");
 
-            var searchResults = _searcher.Search(searchCriteria).ToList();
-		    if (!searchResults.Any() && rerunWithWildcardIfNoResults && !QuotesInQuery(searchCriteria))
-		        searchResults = RerunQueryWithWildcardAtTheEnd(searchCriteria, searchResults);
-			return searchResults;
-		}
+            var searchResults = _simpleSearcher.Search(searchCriteria).ToList();
+            if (!searchResults.Any() && rerunWithWildcardIfNoResults && !QuotesInQuery(searchCriteria))
+                searchResults = RerunQueryWithWildcardAtTheEnd(searchCriteria, searchResults);
+            return searchResults;
+        }
 
         private bool QuotesInQuery(SearchCriteria searchCriteria)
         {
@@ -59,7 +60,7 @@ namespace Sando.SearchEngine
                     var term = simple.SearchTerms.First();
                     simple.SearchTerms.Clear();
                     simple.SearchTerms.Add(term + "*");
-                    searchResults = _searcher.Search(searchCriteria).ToList();
+                    searchResults = _simpleSearcher.Search(simple).ToList();
                 }
             }
             return searchResults;

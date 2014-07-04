@@ -8,4 +8,9 @@ namespace Sando.Indexer.Searching
 	{
         IEnumerable<CodeSearchResult> Search(SearchCriteria searchCriteria);
     }
+
+    public interface IIndexerSearcher<T> where T:SearchCriteria
+    {
+        IEnumerable<CodeSearchResult> Search(T searchCriteria);
+    }
 }

@@ -197,7 +197,7 @@ namespace Sando.IntegrationTests.Search
             string keywords = "-test sando search";
             var expectedLowestRank = 10;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Class && (el.ProgramElement.Name == "SelfSearchTest");
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
             List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
             var methodSearchResult = codeSearchResults.Find(predicate);
             if (methodSearchResult != null)

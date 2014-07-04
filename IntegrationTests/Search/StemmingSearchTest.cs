@@ -26,7 +26,7 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void SearchIsUsingStemming()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "name";
 			List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
 			Assert.AreEqual(codeSearchResults.Count, 8, "Invalid results number");

@@ -190,6 +190,7 @@ namespace Sando.IntegrationTests.Search
                 (ServiceLocator.Resolve<SolutionKey>()));
             ServiceLocator.RegisterInstance(history);
 
+            ServiceLocator.RegisterType<IIndexerSearcher<SimpleSearchCriteria>, SimpleIndexerSearcher>();
         }
 
 

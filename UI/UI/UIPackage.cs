@@ -47,6 +47,7 @@ using ABB.VisualStudio.Interfaces;
 using System.Threading;
 using Sando.Indexer.Splitter;
 using Sando.ExtensionContracts.IndexerContracts;
+using Sando.Indexer.Searching.Criteria;
 
 
 
@@ -683,7 +684,6 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(new ViewManager(this));
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());            
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
-            ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
         }
 
     }

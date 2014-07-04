@@ -57,7 +57,7 @@ namespace Sando.UI.View
                         
             try
             {
-                var codeSearcher = new CodeSearcher(new IndexerSearcher());
+                var codeSearcher = new CodeSearcher();
                 if (String.IsNullOrEmpty(searchString))
                     return;
                 

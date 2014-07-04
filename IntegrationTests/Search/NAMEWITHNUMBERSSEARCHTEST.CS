@@ -23,7 +23,7 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void SearchReturnsElementsWithNumbersInNames()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "problem";
 			List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
 			Assert.AreEqual(codeSearchResults.Count, 4, "Invalid results number");

@@ -29,7 +29,7 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void MethodElementReturnedFromSearchContainsAllFields()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "fetch output stream";
 			List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
 			Assert.AreEqual(codeSearchResults.Count, 5, "Invalid results number");
@@ -55,9 +55,9 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void MethodSearchRespectsAccessLevelCriteria()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "to string";
-			SearchCriteria searchCriteria = new SimpleSearchCriteria()
+            SimpleSearchCriteria searchCriteria = new SimpleSearchCriteria()
 			{ 
 				AccessLevels = new SortedSet<AccessLevel>() { AccessLevel.Public },
 				SearchByAccessLevel = true,
@@ -87,7 +87,7 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void MethodSearchRespectsFileExtensionsCriteria()
         {
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
             var keywords = "main";
             var searchCriteria = new SimpleSearchCriteria()
                 {
