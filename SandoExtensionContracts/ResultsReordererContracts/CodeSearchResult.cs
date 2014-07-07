@@ -45,14 +45,14 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
             get 
             {                
                 //NOTE: shortening is happening in this UI class instead of in the xaml because of xaml's limitations around controling column width inside of a listviewitem                
-                var myFileName = Directory.GetFiles(Path.GetDirectoryName(ProgramElement.FullFilePath), Path.GetFileName(ProgramElement.FullFilePath)).FirstOrDefault();
+                var myFileName = GetProperFilePathCapitalization(ProgramElement.FullFilePath);
                 var parentOrFile = "";
                 if (string.IsNullOrEmpty(Parent))
                     parentOrFile = Path.GetFileName(myFileName);
                 else
                 {
                     var fileName = Path.GetFileName(myFileName);
-                    if (fileName.StartsWith(Parent))
+                    if (fileName != null && fileName.StartsWith(Parent))
                     {
                         parentOrFile = fileName;
                     }
@@ -81,14 +81,16 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
 
         private const int MAX_PARENT_LENGTH = 33;
 
+        private const int MAX_FILEPATH_IN_POPUP_LENGTH = 80;
+
         public string TrimmedFilePath
         {
             get
             {
-                var filepath = ProgramElement.FullFilePath;
-                if (filepath.Length > MAX_PARENT_LENGTH)
+                var filepath = GetProperFilePathCapitalization(ProgramElement.FullFilePath);
+                if (filepath.Length > MAX_FILEPATH_IN_POPUP_LENGTH)
                 {
-                    var trimmedPath = filepath.Substring(filepath.Length - MAX_PARENT_LENGTH, MAX_PARENT_LENGTH);
+                    var trimmedPath = filepath.Substring(filepath.Length - MAX_FILEPATH_IN_POPUP_LENGTH, MAX_FILEPATH_IN_POPUP_LENGTH);
                     var firstSlashIndex = trimmedPath.IndexOf("\\");
                     trimmedPath = trimmedPath.Substring(firstSlashIndex, trimmedPath.Length - firstSlashIndex);
                     return "..." + trimmedPath;
@@ -98,6 +100,21 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
                     return filepath;
                 }
             }
+        }
+
+        private string GetProperDirectoryCapitalization(DirectoryInfo dirInfo)
+        {
+            DirectoryInfo parentDirInfo = dirInfo.Parent;
+            if (null == parentDirInfo)
+                return dirInfo.Name;
+            return Path.Combine(GetProperDirectoryCapitalization(parentDirInfo), parentDirInfo.GetDirectories(dirInfo.Name)[0].Name);
+        }
+
+        private string GetProperFilePathCapitalization(string filename)
+        {
+            FileInfo fileInfo = new FileInfo(filename);
+            DirectoryInfo dirInfo = fileInfo.Directory;
+            return Path.Combine(GetProperDirectoryCapitalization(dirInfo), dirInfo.GetFiles(fileInfo.Name)[0].Name);
         }
 
         public ProgramElementType ProgramElementType
