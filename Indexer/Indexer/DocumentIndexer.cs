@@ -226,8 +226,15 @@ namespace Sando.Indexer
 		    }
             catch (AlreadyClosedException)
 		    {
-                Reader = IndexWriter.GetReader();
-                _indexSearcher = new IndexSearcher(Reader);
+                try
+                {
+                    Reader = IndexWriter.GetReader();
+                    _indexSearcher = new IndexSearcher(Reader);
+                }
+                catch (AlreadyClosedException)
+                {
+                    //solution has been closed, ignore exception
+                }
 		    }
 		}
 
