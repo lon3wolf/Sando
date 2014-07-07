@@ -81,6 +81,25 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
 
         private const int MAX_PARENT_LENGTH = 33;
 
+        public string TrimmedFilePath
+        {
+            get
+            {
+                var filepath = ProgramElement.FullFilePath;
+                if (filepath.Length > MAX_PARENT_LENGTH)
+                {
+                    var trimmedPath = filepath.Substring(filepath.Length - MAX_PARENT_LENGTH, MAX_PARENT_LENGTH);
+                    var firstSlashIndex = trimmedPath.IndexOf("\\");
+                    trimmedPath = trimmedPath.Substring(firstSlashIndex, trimmedPath.Length - firstSlashIndex);
+                    return "..." + trimmedPath;
+                }
+                else
+                {
+                    return filepath;
+                }
+            }
+        }
+
         public ProgramElementType ProgramElementType
         {
             get { return ProgramElement.ProgramElementType; }
