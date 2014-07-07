@@ -231,11 +231,7 @@ namespace Sando.UI.Monitoring
 
         public void MonitoringStopped(object sender, EventArgs args)
         {
-            lock (tasksTrackerLock)
-            {
-                foreach (var cancelToken in cancellers)
-                    cancelToken.Cancel();
-            }
+            ClearTasks();
 
             LogEvents.UIMonitoringStopped(this);
             var currentIndexer = ServiceLocator.ResolveOptional<DocumentIndexer>();
@@ -246,6 +242,15 @@ namespace Sando.UI.Monitoring
             if (SwumManager.Instance != null)
             {
                 SwumManager.Instance.PrintSwumCache();
+            }
+        }
+
+        public void ClearTasks()
+        {
+            lock (tasksTrackerLock)
+            {
+                foreach (var cancelToken in cancellers)
+                    cancelToken.Cancel();
             }
         }
 

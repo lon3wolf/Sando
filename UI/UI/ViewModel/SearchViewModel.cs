@@ -534,7 +534,8 @@ namespace Sando.UI.ViewModel
             var dte = ServiceLocator.Resolve<DTE2>();
             if (dte != null)
             {
-                dte.Events.SolutionEvents.BeforeClosing += () =>
+                _solutionEvents = dte.Events.SolutionEvents;
+                _solutionEvents.BeforeClosing += () =>
                 {
 
                     Application.Current.Dispatcher.Invoke(new Action(delegate()
@@ -551,7 +552,7 @@ namespace Sando.UI.ViewModel
 
                 };
 
-                dte.Events.SolutionEvents.Opened += () =>
+                _solutionEvents.Opened += () =>
                 {
                     Application.Current.Dispatcher.Invoke(new Action(delegate()
                     {
@@ -676,6 +677,7 @@ namespace Sando.UI.ViewModel
         #endregion
 
         public event EventHandler BeforeSearch;
+        private SolutionEvents _solutionEvents;
 
     }
 
