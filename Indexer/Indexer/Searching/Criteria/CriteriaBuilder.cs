@@ -23,15 +23,6 @@ namespace Sando.Indexer.Searching.Criteria
     {
         SimpleSearchCriteria _searchCriteria;
 
-        public CriteriaBuilder AddSearchString(string searchString, SimpleSearchCriteria searchCriteria = null)
-        {
-            Initialze(searchCriteria);
-            var terms = WordSplitter.ExtractSearchTerms(searchString).ToList();
-            SearchCriteriaReformer.ReformSearchCriteria(_searchCriteria);
-            _searchCriteria.SearchTerms = new SortedSet<string>(terms);
-            return this;
-        }
-
         private void Initialze(SimpleSearchCriteria searchCriteria)
         {
             if (_searchCriteria == null)
@@ -40,27 +31,17 @@ namespace Sando.Indexer.Searching.Criteria
             }
         }
 
-        public SimpleSearchCriteria GetCriteria()
-        {
-            _searchCriteria.SearchByAccessLevel = _searchCriteria.AccessLevels.Any();
-            _searchCriteria.SearchByLocation = _searchCriteria.Locations.Any();
-            _searchCriteria.SearchByProgramElementType = _searchCriteria.ProgramElementTypes.Any();
-            _searchCriteria.SearchByUsageType = _searchCriteria.UsageTypes.Any();
-            _searchCriteria.SearchByFileExtension = _searchCriteria.FileExtensions.Any();
-            return _searchCriteria;
-        }
-
         public SimpleSearchCriteria GetCriteria(string searchString, SimpleSearchCriteria searchCriteria = null)
         {
             Initialze(searchCriteria);
             var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
             var description = new SandoQueryParser().Parse(searchString);
 
-            this.AddFromDescription(description);
-            this._searchCriteria.NumberOfSearchResultsReturned = sandoOptions.NumberOfSearchResultsReturned;
+            AddFromDescription(description);
+            _searchCriteria.NumberOfSearchResultsReturned = sandoOptions.NumberOfSearchResultsReturned;
             
-            SearchCriteriaReformer.ReformSearchCriteria(this._searchCriteria);
-            return this._searchCriteria;
+            SearchCriteriaReformer.ReformSearchCriteria(_searchCriteria);
+            return _searchCriteria;
         }
 
         private void AddFromDescription(SandoQueryDescription description)
@@ -81,7 +62,13 @@ namespace Sando.Indexer.Searching.Criteria
                 _searchCriteria.AddProgramElementTypes(description.ProgramElementTypes);
             }
 
-            _searchCriteria.SearchTerms.UnionWith(description.SearchTerms);         
+            _searchCriteria.SearchTerms.UnionWith(description.SearchTerms);
+
+            _searchCriteria.SearchByAccessLevel = _searchCriteria.AccessLevels.Any();
+            _searchCriteria.SearchByLocation = _searchCriteria.Locations.Any();
+            _searchCriteria.SearchByProgramElementType = _searchCriteria.ProgramElementTypes.Any();
+            _searchCriteria.SearchByUsageType = _searchCriteria.UsageTypes.Any();
+            _searchCriteria.SearchByFileExtension = _searchCriteria.FileExtensions.Any();
         }
         
     }
