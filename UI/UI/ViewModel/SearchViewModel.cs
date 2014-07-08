@@ -257,6 +257,8 @@ namespace Sando.UI.ViewModel
                     if (file.OperationStatus == IndexedFile.Status.Remove)
                     {
                         srcMlService.RemoveDirectoryFromMonitor(file.FilePath);
+                        ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>().ClearTasks();
+                        ServiceLocator.Resolve<UIPackage>().EnsureNoMissingFilesAndNoDeletedFiles();
                     }
                     else if (file.OperationStatus == IndexedFile.Status.Add)
                     {
@@ -264,10 +266,10 @@ namespace Sando.UI.ViewModel
                     }
                     else if (file.OperationStatus == IndexedFile.Status.Modified)
                     {
-
                         srcMlService.RemoveDirectoryFromMonitor(file.FilePath);
-
+                        ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>().ClearTasks();                        
                         AddDirectoryToMonitor(srcMlService, file);
+                        ServiceLocator.Resolve<UIPackage>().EnsureNoMissingFilesAndNoDeletedFiles();
                     }
                 }
             }

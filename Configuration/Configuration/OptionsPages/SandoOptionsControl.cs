@@ -373,7 +373,7 @@ namespace Configuration.OptionsPages
                     customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
 
                     var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
-                    missingFilesIncluder.CheckIndexForMissingFiles();
+                    missingFilesIncluder.EnsureNoMissingFilesAndNoDeletedFiles();
                 }
             }
         }
@@ -398,7 +398,7 @@ namespace Configuration.OptionsPages
             customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
 
             var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
-            missingFilesIncluder.CheckIndexForMissingFiles();
+            missingFilesIncluder.EnsureNoMissingFilesAndNoDeletedFiles();
         }
 
         private void buttonDefault_Click(object sender, EventArgs e)
@@ -409,7 +409,7 @@ namespace Configuration.OptionsPages
             customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
 
             var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
-            missingFilesIncluder.CheckIndexForMissingFiles();
+            missingFilesIncluder.EnsureNoMissingFilesAndNoDeletedFiles();
         }
 	} 
 }

@@ -7,6 +7,6 @@ namespace Sando.ExtensionContracts.IndexerContracts
 {
     public interface IMissingFilesIncluder
     {
-        void CheckIndexForMissingFiles();
+        void EnsureNoMissingFilesAndNoDeletedFiles();
     }
 }

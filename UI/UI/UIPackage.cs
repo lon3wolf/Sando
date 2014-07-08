@@ -472,7 +472,7 @@ namespace Sando.UI
                 }
                 else
                 {
-                    CheckIndexForMissingFiles();
+                    EnsureNoMissingFilesAndNoDeletedFiles();
                 }
 
                 RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
@@ -502,7 +502,7 @@ namespace Sando.UI
         }
 
         // from IMissingFilesIncluder
-        public void CheckIndexForMissingFiles()
+        public void EnsureNoMissingFilesAndNoDeletedFiles()
         {
             //make sure you're not missing any files 
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
@@ -529,6 +529,21 @@ namespace Sando.UI
                 }
                 //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
+            
+            indexingTask.ContinueWith( (t) => 
+                {
+                    var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                    var files = srcMLService.GetSrcMLArchive().GetFiles();
+                    HashSet<string> fileSet = new HashSet<string>();
+                    foreach (var file in files)
+                        fileSet.Add(file);
+                    //go through all files and delete necessary ones
+                    var filesInLucene = ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList();
+                    foreach(var file in filesInLucene)
+                        if(!files.Contains(file))
+                            srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
+                }, 
+            new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
         }
 
         private void RecreateEntireIndex()

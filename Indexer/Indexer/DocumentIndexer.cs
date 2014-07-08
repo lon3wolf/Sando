@@ -352,5 +352,15 @@ namespace Sando.Indexer
                 IndexWriter.Flush();
             }
         }
+
+        public IEnumerable<string> GetDocumentList()
+        {                         
+            for (int i=0; i<Reader.MaxDoc(); i++) {
+                if (Reader.IsDeleted(i))
+                continue;
+            Document doc = Reader.Document(i);
+                yield return doc.GetField(SandoField.FullFilePath.ToString()).StringValue();
+            }
+        }
     }
 }
