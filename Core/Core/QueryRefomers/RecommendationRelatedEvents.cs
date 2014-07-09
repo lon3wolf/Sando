@@ -14,8 +14,6 @@ namespace Sando.Core.Logging.Events
             {
                 var sb = new StringBuilder();
                 sb.Append("Created links.");
-                sb.Append(allQueries.Select(CreateReformedQueryMessage).Aggregate
-                    ((n1, n2) => n1 + n2));
                 DataCollectionLogEventHandlers.WriteInfoLogMessage("Post-search recommendation",
                     sb.ToString());
             }
@@ -27,17 +25,8 @@ namespace Sando.Core.Logging.Events
             {
                 var sb = new StringBuilder();
                 sb.Append("Add search terms automatically.");
-                sb.Append(CreateReformedQueryMessage(query));
                 DataCollectionLogEventHandlers.WriteInfoLogMessage("Post-search recommendation", sb.ToString());
             }
-        }
-
-
-        private static string CreateReformedQueryMessage(IReformedQuery query)
-        {
-            var sb = new StringBuilder();
-            sb.Append(query.ReformExplanation + " ");
-            return sb.ToString();
         }
 
         public static void SelectRecommendedQuery(String query, int index)
