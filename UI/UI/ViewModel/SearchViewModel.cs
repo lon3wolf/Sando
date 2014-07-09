@@ -625,11 +625,13 @@ namespace Sando.UI.ViewModel
 
         private void SearchWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            var searchParams = (WorkerSearchParameters) e.Argument;
-
-            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(searchParams.Query, searchParams.Criteria);
-
-            _searchManager.Search(searchParams.Query, criteria);
+            if (_searchManager.EnsureSolutionOpen())
+            {
+                var searchParams = (WorkerSearchParameters) e.Argument;
+                var criteria = CriteriaBuilderFactory.GetBuilder()
+                    .GetCriteria(searchParams.Query, searchParams.Criteria);
+                _searchManager.Search(searchParams.Query, criteria);
+            }
         }
 
         private void BeginSearch(string searchString)

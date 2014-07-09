@@ -122,7 +122,7 @@ namespace Sando.UI.View
             }
         }
 
-        private bool EnsureSolutionOpen()
+        public bool EnsureSolutionOpen()
         {
             DocumentIndexer indexer = null;
             var isOpen = true;
