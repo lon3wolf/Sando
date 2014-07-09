@@ -15,6 +15,7 @@ using Sando.UnitTestHelpers;
 using UnitTestHelpers;
 using System.Threading;
 using Sando.Indexer.Searching.Criteria;
+using Configuration.OptionsPages;
 
 namespace Sando.SearchEngine.UnitTests
 {
@@ -53,6 +54,7 @@ namespace Sando.SearchEngine.UnitTests
             ServiceLocator.RegisterInstance<Analyzer>(new SimpleAnalyzer());
             _indexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
             ServiceLocator.RegisterInstance(_indexer);
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new LocalFakeOptions());
 
             // xige
             var dictionary = new DictionaryBasedSplitter();
@@ -89,6 +91,14 @@ namespace Sando.SearchEngine.UnitTests
     		_indexer.AddDocument(sandoDocument);
             Thread.Sleep(2000);
     	}
+
+        private class LocalFakeOptions : ISandoOptionsProvider
+        {
+            public SandoOptions GetSandoOptions()
+            {
+                return new SandoOptions(String.Empty, 20, false, new List<string>());
+            }
+        }
 
 		[TestFixtureTearDown]
     	public void ShutdownIndexer()

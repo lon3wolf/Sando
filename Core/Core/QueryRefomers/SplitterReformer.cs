@@ -21,8 +21,8 @@ namespace Sando.Core.QueryRefomers
 
         protected override IEnumerable<ReformedWord> GetReformedTargetInternal(string word)
         {
-            var dictionarySplittedTerms = ServiceLocator.Resolve<DictionaryBasedSplitter>().
-                ExtractWords(word).Where(t => t.Length >= 2).ToList();
+            var dictionarySplittedTerms = localDictionary.ExtractWords(word).
+                Where(t => t.Length >= 2).ToList();
             if (dictionarySplittedTerms.Count > 1)
             { 
                 var correctItem = new ReformedWord
