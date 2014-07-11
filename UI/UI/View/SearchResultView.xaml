@@ -84,7 +84,7 @@
                                         <TextBlock Name="TypeHeaderText" Text="{Binding Header}" Margin="0,0,3,0">
 
                                         </TextBlock>
-                                        <Image Source="..\Resources\filter.png" Width="13" Height="15"></Image>
+                                        <Image Source="..\Resources\bluefilter.png" Width="11" Height="13"></Image>
                                     </StackPanel>
                                     
                                 </Grid>

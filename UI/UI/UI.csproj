@@ -362,6 +362,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\filter.png" />
+    <Resource Include="Resources\bluefilter.png" />
     <Content Include="S3Credentials">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
