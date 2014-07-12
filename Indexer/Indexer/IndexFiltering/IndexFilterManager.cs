@@ -12,6 +12,7 @@ using System.Linq;
 using log4net;
 using Sando.Core.Tools;
 using Sando.Core.Logging.Persistence;
+using Configuration.OptionsPages;
 
 namespace Sando.Indexer.IndexFiltering
 {
@@ -108,6 +109,12 @@ namespace Sando.Indexer.IndexFiltering
                     {
                         Logger.WarnFormat("Invalid path regular expression: {0}", ignoredPathRegularExpression);
                     }
+                }
+
+                var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+                if(!sandoOptions.FileExtensionsToIndex.Any( ext => fullFilePath.EndsWith(ext)))
+                {
+                    return false;
                 }
             }
             return true;
