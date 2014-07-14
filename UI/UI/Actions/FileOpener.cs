@@ -32,11 +32,14 @@ namespace Sando.UI.Actions
                 var selection = (TextSelection)_dte.ActiveDocument.Selection;
                 selection.GotoLine(lineNumber);
 
-                FileOpened(null, new EventArgs());
+                if (FileOpened != null)
+                {
+                    FileOpened(null, new EventArgs());
+                }
             }
             catch (Exception e)
             {
-                    LogEvents.UIOpenFileError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, e);
+                LogEvents.UIOpenFileError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, e);
                 //ignore, we don't want this feature ever causing a crash
             }
         }

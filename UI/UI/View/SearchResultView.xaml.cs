@@ -78,7 +78,8 @@ namespace Sando.UI.View
         /// <param name="wrapper"></param>
         private void OpenFile(CodeSearchResultWrapper wrapper)
         {
-            FileOpener.OpenFile(wrapper.CodeSearchResult.HighlightInfo.FullFilePath, 1);
+            FileOpener.OpenFile(wrapper.CodeSearchResult.HighlightInfo.FullFilePath, 
+                                wrapper.CodeSearchResult.HighlightInfo.StartLineNumber);
         }
     
     }
