@@ -178,11 +178,17 @@ namespace Sando.UI.ViewModel
             
         }
 
+        private static int MINIMUM_KEY_LENGTH_FOR_HIGHLIGHTING = 2;
+
         public int[] GenerateHighlight(string raw, string searchKey, out string highlight_out,
             out string highlightRaw_out)
         {
             try
             {
+                if (searchKey != null && searchKey.Length < MINIMUM_KEY_LENGTH_FOR_HIGHLIGHTING)
+                {
+                    searchKey = "";
+                }
                 StringBuilder highlight = new StringBuilder();
                 StringBuilder highlight_Raw = new StringBuilder();
 
