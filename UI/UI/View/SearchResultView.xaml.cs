@@ -1,4 +1,5 @@
-﻿using Sando.UI.Actions;
+﻿using System.Web.UI.Design.WebControls;
+using Sando.UI.Actions;
 using Sando.UI.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace Sando.UI.View
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
             {
-                this.searchResultListbox.Focus();
+                this.SearchResultListView.Focus();
             }
         }
 
@@ -81,6 +82,20 @@ namespace Sando.UI.View
             FileOpener.OpenFile(wrapper.CodeSearchResult.HighlightInfo.FullFilePath, 
                                 wrapper.CodeSearchResult.HighlightInfo.StartLineNumber);
         }
-    
+
+        private void SearchResultListbox_OnLostFocus(object sender, RoutedEventArgs e)
+        {   
+            var ctrl = FocusManager.GetFocusedElement(SearchResultListView) as Control;
+            if (ctrl == null)
+            {
+                object o = SearchResultListView.SelectedItem;
+                var lvi = (ListViewItem)SearchResultListView.ItemContainerGenerator.ContainerFromItem(o);
+                if (lvi != null)
+                {
+                    lvi.IsSelected = false;
+                }
+            }
+             
+        }
     }
 }
