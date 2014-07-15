@@ -23,11 +23,11 @@
     <DockPanel Grid.Row="6" Grid.ColumnSpan="2" 
                        HorizontalAlignment="Stretch"  Height="Auto"
                        VerticalAlignment="Stretch" >
-        <ListView Name="searchResultListbox"  ItemsSource="{Binding Path=SearchResults}" ScrollViewer.VerticalScrollBarVisibility="Auto"
+        <ListView Name="SearchResultListView"  ItemsSource="{Binding Path=SearchResults}" ScrollViewer.VerticalScrollBarVisibility="Auto"
                 Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Height="Auto"
                 VerticalAlignment="Stretch" MinWidth="270" MinHeight="100" HorizontalContentAlignment="Stretch"
                 Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" SelectedItem="{Binding SelectedSearchResult}"
-                Validation.ErrorTemplate="{x:Null}" >
+                Validation.ErrorTemplate="{x:Null}" LostFocus="SearchResultListbox_OnLostFocus" x:FieldModifier="public">
 
             <ListView.ContextMenu>
                 <ContextMenu Name="SearchResultMenu" StaysOpen="true">
