@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using Sando.Core.Logging.Events;
 using Sando.ExtensionContracts.ParserContracts;
 using Sando.ExtensionContracts.ProgramElementContracts;
+using System.Text;
 
 namespace Sando.Parser
 {
@@ -22,13 +23,13 @@ namespace Sando.Parser
                 int numberOfTermsRead = 0;
                 using (var sr = new StreamReader(filename))
                 {
-                    string fileText = string.Empty;
+                    StringBuilder fileText = new StringBuilder();
                     string line = string.Empty;
                     while ((line = sr.ReadLine()) != null)
                     {
                         if (!String.IsNullOrWhiteSpace(line))
                         {
-                            fileText += line + Environment.NewLine;
+                            fileText.Append(line + Environment.NewLine);
                             numberOfTermsRead +=
                                 line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;
                         }
@@ -38,9 +39,9 @@ namespace Sando.Parser
                         }
                     }
 
-                    if (!String.IsNullOrEmpty(fileText))
+                    if (fileText.Length!=0)
                     {
-                        var element = new TextFileElement(filename, fileText, fileText);
+                        var element = new TextFileElement(filename, fileText.ToString(), fileText.ToString());
                         list.Add(element);
                     }
                 }
