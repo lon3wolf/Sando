@@ -360,7 +360,7 @@ namespace Sando.IntegrationTests.Search
                 _myIndex = index;
                 _myResultsNumber = num;
 				_myAllowLogs = allowLogs;
-                _myFileExtensions = fileExtensions;
+                _myFileExtensions = SandoOptionsControl.DefaultFileExtensionsList;
             }
 
             public SandoOptions GetSandoOptions()
