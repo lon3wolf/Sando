@@ -527,7 +527,11 @@ namespace Sando.UI.ViewModel
 
             srcMLService.UpdateArchivesCompleted += (sender, args) =>
             {
-                this.ProgressBarVisibility = Visibility.Collapsed;
+                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                if (!srcMLArchiveEventsHandlers.HaveTasks)
+                {
+                    this.ProgressBarVisibility = Visibility.Collapsed;
+                }
             };
         }
 

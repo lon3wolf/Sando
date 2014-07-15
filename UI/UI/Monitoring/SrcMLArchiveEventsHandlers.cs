@@ -37,6 +37,7 @@ namespace Sando.UI.Monitoring
         public static SrcMLArchiveEventsHandlers Instance;
         public Action WhenDoneWithTasks = null;
         public Action WhenStartedFirstTask = null;
+        public bool HaveTasks = false;
 
         public static int MAX_PARALLELISM = 2;
 
@@ -85,6 +86,7 @@ namespace Sando.UI.Monitoring
                     {
                         factory.StartNew(WhenStartedFirstTask);
                     }
+                    HaveTasks = true;
                 }
 
                 tasks.Add(task);
@@ -220,6 +222,7 @@ namespace Sando.UI.Monitoring
                     {
                         factory.StartNew(WhenDoneWithTasks);
                     }
+                    HaveTasks = false;
                 }
             }
         }

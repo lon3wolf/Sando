@@ -27,7 +27,7 @@
                 Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Height="Auto"
                 VerticalAlignment="Stretch" MinWidth="270" MinHeight="100" HorizontalContentAlignment="Stretch"
                 Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" SelectedItem="{Binding SelectedSearchResult}"
-                 >
+                Validation.ErrorTemplate="{x:Null}" >
 
             <ListView.ContextMenu>
                 <ContextMenu Name="SearchResultMenu" StaysOpen="true">
