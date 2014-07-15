@@ -29,7 +29,7 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Margin="5,0,5,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="90">
+                <ColumnDefinition Width="83">
                 </ColumnDefinition>
                 <ColumnDefinition Width="*">
                 </ColumnDefinition>
@@ -38,7 +38,7 @@
 
             <TextBox Margin="-3,0,0,0"  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" BorderThickness="0" FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" IsReadOnly="True"   Grid.Row="0"  HorizontalAlignment="Left" 
                      Width="127"  Grid.Column="0" Height="Auto"  
-                     KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" Text="Currently Indexing:" Grid.ColumnSpan="2"/>
+                     KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" Text="Indexed Folders:" Grid.ColumnSpan="2"/>
 
 
             <TextBox KeyboardNavigation.IsTabStop="False"   BorderThickness="0" IsReadOnly="True" Grid.Column="1" Name="IndexingList" Margin="2,0,5,1" FontSize="11" FontStyle="Italic" HorizontalAlignment="Stretch" Text="{Binding Path=CurrentIndexedFile.FilePath}"
