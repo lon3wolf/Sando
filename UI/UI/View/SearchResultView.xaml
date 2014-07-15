@@ -136,9 +136,7 @@
                                         </Grid.RowDefinitions>
                                         <Border Grid.Row="0" Grid.ColumnSpan="4" Grid.RowSpan="3" >
                                         </Border>
-                                        <Canvas Width="Auto" Height="0" Margin="-7,-2,0,0" Grid.Row="0" Grid.Column="0">
-                                            <Line X1="0" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource StrokeConverter}, Mode=OneWay}"></Line>
-                                        </Canvas>
+
 
                                         <Popup Name="Details" Placement="Left" StaysOpen="False" Width="Auto" AllowsTransparency="true"                                            
                                                 PlacementTarget="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ListViewItem}}" 
@@ -201,15 +199,7 @@
                                         <TextBlock Name="Name" MaxWidth="210" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Text="{Binding Mode=OneWay, Path=CodeSearchResult.Name}" Margin="1,0,0,0" TextTrimming="CharacterEllipsis" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
                                         <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontStyle="Italic" FontWeight="Light" Margin="5,0,5,0">in</TextBlock>
                                         <TextBlock Name="Parent" Text="{Binding Mode=OneWay, Path=CodeSearchResult.ParentOrFile}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" TextTrimming="WordEllipsis" Grid.Row="1" Grid.Column="2" FontWeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource FontConverter}, Mode=OneWay}" />
-                                        <Canvas Width="Auto" Height="0" Margin="-7,0,0,0" Grid.Row="2" Grid.Column="0">
-                                            <Line X1="0" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource StrokeConverter}, Mode=OneWay}"></Line>
-                                        </Canvas>
                                     </Grid>
-                                    <TextBlock Name="Snippet" Margin="5,2,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontFamily="Consolas" MinWidth="200" FontSize="10" TextAlignment="Left" VerticalAlignment="Top" Width="Auto" Height="60" 
-                                               Text="{Binding Mode=OneWay, Path=CodeSearchResult.Snippet}" Grid.Row="1" Grid.Column="0" TextTrimming="CharacterEllipsis"/>
-                                    <Canvas Width="Auto" Height="0" Margin="-7,0,0,0" Grid.Row="2" Grid.Column="0">
-                                        <Line X1="1" X2="5000" Y1="0" Y2="0" Stroke="LightSlateGray" StrokeThickness="2"></Line>
-                                    </Canvas>
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
