@@ -179,6 +179,7 @@ namespace Sando.UI.ViewModel
         }
 
         private static int MINIMUM_KEY_LENGTH_FOR_HIGHLIGHTING = 2;
+        private static int MAXIMUM_LINES_IN_RAW_HIGHLIGHT = 100;
 
         public int[] GenerateHighlight(string raw, string searchKey, out string highlight_out,
             out string highlightRaw_out)
@@ -198,12 +199,11 @@ namespace Sando.UI.ViewModel
                 string[] searchKeys = GetKeys(searchKey);
                 string[] containedKeys;
 
-
                 var highlightOffsets = new List<int>();
-                int offest = 0;
+                int fileOffset = 0;
+
                 foreach (string line in lines)
                 {
-
                     containedKeys = GetContainedSearchKeys(searchKeys, line);
 
                     if (containedKeys.Length != 0)
@@ -228,15 +228,24 @@ namespace Sando.UI.ViewModel
                             temp_line = newLine.ToString();
 
                         }
-                        highlightOffsets.Add(offest);
+                        
+                        highlightOffsets.Add(fileOffset);
                         highlight.Append(newLine + Environment.NewLine);
-                        highlight_Raw.Append(newLine + Environment.NewLine);
+
+                        if (fileOffset <= MAXIMUM_LINES_IN_RAW_HIGHLIGHT)
+                        {
+                            highlight_Raw.Append(newLine + Environment.NewLine);
+                        }
                     }
                     else
                     {
-                        highlight_Raw.Append(line + Environment.NewLine);
+                        if (fileOffset <= MAXIMUM_LINES_IN_RAW_HIGHLIGHT)
+                        {
+                            highlight_Raw.Append(line + Environment.NewLine);
+                        }
                     }
-                    offest++;
+
+                    fileOffset++;
                 }
 
                 highlight_out = highlight.ToString().Replace("\t", "    ");
