@@ -89,7 +89,7 @@ namespace Sando.Core.Logging.Persistence
 						<appendToFile value='false' />
 						<lockingModel type='log4net.Appender.FileAppender+MinimalLock' />
 						<layout type='log4net.Layout.PatternLayout'>
-							<conversionPattern value='%date %-5level %logger - %message%newline' />
+							<conversionPattern value='%utcdate %-5level %logger - %message%newline' />
 						</layout>
 					</appender>
 
