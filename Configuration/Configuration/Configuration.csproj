@@ -97,6 +97,7 @@
     <Compile Include="OptionsPages\AddFileExtensionForm.Designer.cs">
       <DependentUpon>AddFileExtensionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OptionsPages\FakeOptionsProvider.cs" />
     <Compile Include="OptionsPages\ISandoOptionsProvider.cs" />
     <Compile Include="OptionsPages\SandoOptions.cs" />
     <Compile Include="OptionsPages\SandoOptionsControl.cs">
