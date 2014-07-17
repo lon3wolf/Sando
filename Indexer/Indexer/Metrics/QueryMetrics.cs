@@ -112,7 +112,7 @@ namespace Sando.Indexer.Searching.Metrics
         public static string SavedQuery { get; set; }
 
         private static Regex _patternChars = new Regex("([a-zA-Z])", RegexOptions.Compiled);
-        private static Regex _patternCamel = new Regex("([A-Z][a-z]+)", RegexOptions.Compiled);
+        private static Regex _patternCamel = new Regex("([a-z]+[A-Z]+[a-z]+)", RegexOptions.Compiled);
         private static Regex _patternAcronym = new Regex("([A-Z]{3})", RegexOptions.Compiled);
     }
 }

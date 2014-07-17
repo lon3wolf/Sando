@@ -54,7 +54,7 @@ namespace Sando.SearchEngine.UnitTests
             ServiceLocator.RegisterInstance<Analyzer>(new SimpleAnalyzer());
             _indexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
             ServiceLocator.RegisterInstance(_indexer);
-            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new LocalFakeOptions());
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(String.Empty, 20, false, new List<string>()));
 
             // xige
             var dictionary = new DictionaryBasedSplitter();
@@ -91,14 +91,6 @@ namespace Sando.SearchEngine.UnitTests
     		_indexer.AddDocument(sandoDocument);
             Thread.Sleep(2000);
     	}
-
-        private class LocalFakeOptions : ISandoOptionsProvider
-        {
-            public SandoOptions GetSandoOptions()
-            {
-                return new SandoOptions(String.Empty, 20, false, new List<string>());
-            }
-        }
 
 		[TestFixtureTearDown]
     	public void ShutdownIndexer()
