@@ -37,6 +37,7 @@ namespace Sando.UI.ViewModel
         private IndexedFile _currentIndexedFile;
         private bool _isIndexFileEnabled;
         private bool _isBrowseButtonEnabled;
+        private bool _isSearchingEnabled;
         private Visibility _progressBarVisibility;
         private SearchManager _searchManager;
 
@@ -141,6 +142,7 @@ namespace Sando.UI.ViewModel
 
             this.IsIndexFileEnabled = false;
             this.IsBrowseButtonEnabled = false;
+            this._isSearchingEnabled = true;
             this.ProgressBarVisibility = Visibility.Collapsed;
 
             InitAccessLevels();
@@ -615,10 +617,20 @@ namespace Sando.UI.ViewModel
 
         private void SearchAsync(String text, SimpleSearchCriteria searchCriteria)
         {
-            var searchWorker = new BackgroundWorker();
-            searchWorker.DoWork += SearchWorker_DoWork;
-            var workerSearchParams = new WorkerSearchParameters {Query = text, Criteria = searchCriteria};
-            searchWorker.RunWorkerAsync(workerSearchParams);
+            if (_isSearchingEnabled)
+            {
+                var searchWorker = new BackgroundWorker();
+                searchWorker.DoWork += SearchWorker_DoWork;
+                searchWorker.RunWorkerCompleted += SearchWorker_Completed;
+                var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
+                this._isSearchingEnabled = false;
+                searchWorker.RunWorkerAsync(workerSearchParams);
+            }
+        }
+
+        private void SearchWorker_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this._isSearchingEnabled = true;
         }
 
         private class WorkerSearchParameters
