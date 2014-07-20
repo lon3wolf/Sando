@@ -627,13 +627,13 @@ namespace Sando.UI.ViewModel
                 {
                     _isSearchingDisabled = true;
                 }
-            }
 
-            var searchWorker = new BackgroundWorker();
-            searchWorker.DoWork += SearchWorker_DoWork;
-            searchWorker.RunWorkerCompleted += SearchWorker_Completed;
-            var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
-            searchWorker.RunWorkerAsync(workerSearchParams);           
+                var searchWorker = new BackgroundWorker();
+                searchWorker.DoWork += SearchWorker_DoWork;
+                searchWorker.RunWorkerCompleted += SearchWorker_Completed;
+                var workerSearchParams = new WorkerSearchParameters { Query = text, Criteria = searchCriteria };
+                searchWorker.RunWorkerAsync(workerSearchParams);
+            }
         }
 
         private void SearchWorker_Completed(object sender, RunWorkerCompletedEventArgs e)
