@@ -168,7 +168,7 @@
                                                                        Grid.Column="1"  Margin="2" Text="{Binding Mode=OneWay, Path=CodeSearchResult.Name}" />
                                                         <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource 
                                                                 {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Margin="2" 
-                                                                       Text="{Binding IsAsync=True, FallbackValue=False, Mode=OneWay, Path=CodeSearchResult.TrimmedFilePath}"/>
+                                                                       Text="{Binding Mode=OneWay, Path=CodeSearchResult.TrimmedFilePath}"/>
                                                         <Image Source="{Binding Mode=OneWay, Path=CodeSearchResult.ProgramElement, 
                                                                 Converter={StaticResource ElementToIcon}}" Width="16" Height="16" Margin="2" 
                                                                    Grid.Row="0" Grid.Column="0" >
@@ -181,7 +181,7 @@
                                                         <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                                             <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
                                                                            Margin="2" 
-                                                                           local:TextBlockEx.FormattedText="{Binding IsAsync=True, FallbackValue=False, Mode=OneWay, 
+                                                                           local:TextBlockEx.FormattedText="{Binding Mode=OneWay, 
                                                                             Path=CodeSearchResult.HighlightInfo, 
                                                                             Converter={StaticResource HighlightSearchKey}}"/>
                                                         </ScrollViewer>
@@ -189,7 +189,7 @@
                                                         <ScrollViewer Grid.Row="3" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                                             <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
                                                                     Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"  
-                                                                        Margin="4" local:TextBlockEx.FormattedText="{Binding IsAsync=True, FallbackValue=False, Mode=OneWay, 
+                                                                        Margin="4" local:TextBlockEx.FormattedText="{Binding Mode=OneWay, 
                                                                             Path=CodeSearchResult.RawHighlightInfo, Converter={StaticResource HighlightSearchKey}}"/>
                                                         </ScrollViewer>
                                                     </Grid>
