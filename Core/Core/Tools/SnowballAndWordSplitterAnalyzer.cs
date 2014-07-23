@@ -84,19 +84,20 @@ namespace Sando.Indexer.Splitter
             {
                 var snowball = new SnowballAndWordSplittingAnalyzer("English");
                 PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(snowball);
-                SandoField[] fields = new SandoField[]{ 
-                SandoField.ClassId,
-                SandoField.Source,
-                SandoField.AccessLevel,
-                SandoField.ProgramElementType,
-                SandoField.DefinitionLineNumber,
-                SandoField.FileExtension,
-                SandoField.FullFilePath,
-                SandoField.Id,
-                SandoField.IsConstructor,
-                SandoField.Modifiers,
-                SandoField.DefinitionColumnNumber
-            };
+                SandoField[] fields = new SandoField[]
+                {
+                    SandoField.ClassId,
+                    SandoField.Source,
+                    SandoField.AccessLevel,
+                    SandoField.ProgramElementType,
+                    SandoField.DefinitionLineNumber,
+                    SandoField.FileExtension,
+                    SandoField.FullFilePath,
+                    SandoField.Id,
+                    SandoField.IsConstructor,
+                    SandoField.Modifiers,
+                    SandoField.DefinitionColumnNumber
+                };
                 foreach (var field in fields)
                     analyzer.AddAnalyzer(field.ToString(), new KeywordAnalyzer());
                 return analyzer;

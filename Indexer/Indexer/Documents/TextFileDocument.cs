@@ -21,13 +21,13 @@ namespace Sando.Indexer.Documents
 		{
             var fields = new List<Field>();
 			var textLineElement = (TextFileElement) programElement;
-            AddBodyField(fields, new Field(SandoField.Body.ToString(), textLineElement.Body, Field.Store.NO, Field.Index.ANALYZED));
+            AddBodyField(fields, new Field(SandoField.Body.ToString(), textLineElement.Body, Field.Store.YES, Field.Index.ANALYZED));
             return fields;
 		}
 
         public override object[] GetParametersForConstructor(string name, ProgramElementType programElementType, string fullFilePath, int definitionLineNumber, int definitionColumnNumber, string snippet, Document document)
 		{
-            string body = "not stored in index";//document.GetField(SandoField.Body.ToString()).StringValue();
+            string body = document.GetField(SandoField.Body.ToString()).StringValue();
             return new object[] { name, definitionLineNumber, definitionColumnNumber, fullFilePath, snippet, body };
 		}
 	}
