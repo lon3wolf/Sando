@@ -26,6 +26,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Thread = System.Threading.Thread;
 
 namespace Sando.UI.ViewModel
 {
@@ -114,7 +115,15 @@ namespace Sando.UI.ViewModel
             set
             {
                 this._progressBarVisibility = value;
-                OnPropertyChanged("ProgressBarVisibility");
+
+                if (_progressBarVisibility == Visibility.Visible)
+                {                    
+                    NotifyProgressBarVisibilityWithDelay();
+                }
+                else
+                {
+                    OnPropertyChanged("ProgressBarVisibility");
+                }                
             }
         }
 
@@ -340,6 +349,20 @@ namespace Sando.UI.ViewModel
         #endregion
 
         #region Private Methods
+
+        private void NotifyProgressBarVisibilityWithDelay()
+        {
+            var pgBarDisplayer = new BackgroundWorker();
+            pgBarDisplayer.DoWork += delegate
+            {
+                Thread.Sleep(1000);
+                if (this._progressBarVisibility == Visibility.Visible)
+                {
+                    OnPropertyChanged("ProgressBarVisibility");
+                }
+            };
+            pgBarDisplayer.RunWorkerAsync();
+        }
 
         private void AddIndexFolder(IndexedFile file)
         {
