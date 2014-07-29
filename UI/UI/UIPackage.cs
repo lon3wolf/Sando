@@ -504,6 +504,8 @@ namespace Sando.UI
         // from IMissingFilesIncluder
         public void EnsureNoMissingFilesAndNoDeletedFiles()
         {
+            var fileNames = new List<string>();
+
             //make sure you're not missing any files 
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
@@ -519,7 +521,7 @@ namespace Sando.UI
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                var fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
+                fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
                 var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
                 fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
                 var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
@@ -529,18 +531,14 @@ namespace Sando.UI
                 }
                 //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
-            
+             
             indexingTask.ContinueWith( (t) => 
                 {
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                    var files = srcMLService.GetSrcMLArchive().GetFiles();
-                    HashSet<string> fileSet = new HashSet<string>();
-                    foreach (var file in files)
-                        fileSet.Add(file);
                     //go through all files and delete necessary ones
                     var filesInLucene = ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList();
                     foreach(var file in filesInLucene)
-                        if(!files.Contains(file))
+                        if (!fileNames.Contains(file, StringComparer.OrdinalIgnoreCase))
                             srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
                 }, 
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());

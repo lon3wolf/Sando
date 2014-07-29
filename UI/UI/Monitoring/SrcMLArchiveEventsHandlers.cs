@@ -245,6 +245,7 @@ namespace Sando.UI.Monitoring
             if (SwumManager.Instance != null)
             {
                 SwumManager.Instance.PrintSwumCache();
+                SwumManager.Instance.Clear();
             }
         }
 
