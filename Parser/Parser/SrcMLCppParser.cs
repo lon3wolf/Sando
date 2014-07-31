@@ -181,10 +181,13 @@ namespace Sando.Parser
 
                 foreach (XElement include in includeStatements)
                 {
-                    string filename = include.Element(CPP.File).Value;
-                    if (filename.Substring(0, 1) == "<") continue; //ignore includes of system files -> they start with a bracket
-                    filename = filename.Substring(1, filename.Length - 2);	//remove quotes	
-                    includeFileNames.Add(filename);
+                    if (include.Element(CPP.File) != null)
+                    {
+                        string filename = include.Element(CPP.File).Value;
+                        if (filename.Substring(0, 1) == "<") continue; //ignore includes of system files -> they start with a bracket
+                        filename = filename.Substring(1, filename.Length - 2);	//remove quotes	
+                        includeFileNames.Add(filename);
+                    }
                 }
             }
             catch (Exception error)
