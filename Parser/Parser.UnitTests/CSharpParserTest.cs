@@ -92,7 +92,7 @@ namespace Sando.Parser.UnitTests
                     {
                         seenSetLanguageMethod = true;
                         Assert.AreEqual(method.Body.Trim(),
-                                        "{\n\t\t\t//check whether filename exists\n\t\t\tif(!System.IO.File.Exists(filename))\n\t\t\t{\n\t\t\t\tthrow new ParserException(\"parser input file name does not exist: \" + filename);\n\t\t\t}\n\n\t\t\treturn LaunchSrcML(filename);\n\t\t}");
+                                        "// another one\r\n // run srcML and return the generated sourceXML as a string\r\n // a comment\r\n{\n\t\t\t//check whether filename exists\n\t\t\tif(!System.IO.File.Exists(filename))\n\t\t\t{\n\t\t\t\tthrow new ParserException(\"parser input file name does not exist: \" + filename);\n\t\t\t}\n\n\t\t\treturn LaunchSrcML(filename);\n\t\t}");
                         Assert.AreNotEqual(method.ClassId, System.Guid.Empty);
                     }
 

@@ -141,11 +141,24 @@ namespace Sando.Parser
                     {
                         var definitionLineNumber = Int32.Parse(lastComment.Attribute(POS.Line).Value);
                         programElement =
-                            programElements.Find(element => element.DefinitionLineNumber == definitionLineNumber + 1);
+                            programElements.Find(element => element.DefinitionLineNumber == definitionLineNumber + 1 && 
+                                                    (element is MethodElement || element is ClassElement));
                     }
                     if (programElement != null)
                     {
-                        programElements.Add(new CommentElement(commentName, commentLine, definitionColumnNumber, programElement.FullFilePath, RetrieveSource(commentText), commentText));
+                        //add this type of comment to the body of the methodelement or classelement
+                        if (programElement is MethodElement)
+                        {
+                            var methodElement = programElement as MethodElement;
+                            methodElement.Body = String.Concat(commentText, Environment.NewLine, methodElement.Body);
+                        }
+                        else if (programElement is ClassElement)
+                        {
+                            var classElement = programElement as ClassElement;
+                            classElement.Body = String.Concat(commentText, Environment.NewLine, classElement.Body);
+                        }
+
+                        programElements.Add(new CommentElement(commentName, commentLine, definitionColumnNumber, programElement.FullFilePath, RetrieveSource(commentText), commentText));                        
                         continue;
                     }
 
