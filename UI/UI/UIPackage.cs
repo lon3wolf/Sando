@@ -452,7 +452,7 @@ namespace Sando.UI
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
                 ServiceLocator.RegisterInstance<Analyzer>(SnowballAndWordSplittingAnalyzer.GetAnalyzer());                
                 var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+                var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
                 ServiceLocator.RegisterInstance(currentIndexer);
                 ServiceLocator.RegisterInstance(new IndexUpdateManager());
 
