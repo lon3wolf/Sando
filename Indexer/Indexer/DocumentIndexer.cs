@@ -96,28 +96,28 @@ namespace Sando.Indexer
 
         private void PeriodicallyCommitChangesIfNeeded(object sender, ElapsedEventArgs e)
         {
-            _scheduler.StartNew(() =>
+            //_scheduler.StartNew(() =>
+            //{
+            lock (_lock)
             {
-                lock (_lock)
-                {
-                    if (_hasIndexChanged)
-                        CommitChanges();
-                }
-            }, new CancellationTokenSource());
+                if (_hasIndexChanged)
+                    CommitChanges();
+            }
+            //}, new CancellationTokenSource());
         }
 
         private void PeriodicallyRefreshIndexSearcherIfNeeded(object sender, ElapsedEventArgs e)
         {     
-            _scheduler.StartNew(() =>
+            //_scheduler.StartNew(() =>
+            //{
+            lock (_lock)
             {
-                lock (_lock)
+                if (!IsUsable())
                 {
-                    if (!IsUsable())
-                    {
-                        UpdateSearcher();
-                    }
+                    UpdateSearcher();
                 }
-            }, new CancellationTokenSource());
+            }
+            //}, new CancellationTokenSource());
         }
 
 
