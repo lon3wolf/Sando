@@ -116,6 +116,20 @@ namespace Sando.IntegrationTests.Search
             //Assert.False(String.IsNullOrWhiteSpace(method.RawSource), "Method snippet is invalid!");
         }
 
+        [Test]
+        public void MethodIncludesDocCommentsInSearch()
+        {
+            var codeSearcher = new CodeSearcher();
+            var keywords = "Retrieves a stream for saving an image";
+            var codeSearchResults = codeSearcher.Search(keywords);
+            Assert.Greater(codeSearchResults.Count, 1, "Invalid results number");
+            var methodSearchResult = codeSearchResults.Find(el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && el.ProgramElement.Name == "FetchOutputStream");
+            if (methodSearchResult == null)
+            {
+                Assert.Fail("Failed to find relevant search result for search: " + keywords);
+            }
+        }
+
         public override string GetIndexDirName()
         {            
             return "MethodElementSearchTest";
