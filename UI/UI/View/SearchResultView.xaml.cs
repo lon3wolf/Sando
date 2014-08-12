@@ -1,4 +1,5 @@
 ﻿using System.Web.UI.Design.WebControls;
+using System.Windows.Forms;
 using Sando.UI.Actions;
 using Sando.UI.ViewModel;
 using System;
@@ -14,6 +15,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Control = System.Windows.Controls.Control;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListViewItem = System.Windows.Controls.ListViewItem;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace Sando.UI.View
 {
@@ -84,9 +89,12 @@ namespace Sando.UI.View
         }
 
         private void SearchResultListbox_OnLostFocus(object sender, RoutedEventArgs e)
-        {   
-            var ctrl = FocusManager.GetFocusedElement(SearchResultListView) as Control;
-            if (ctrl == null)
+        {
+            DependencyObject focusScope = FocusManager.GetFocusScope(SearchResultListView);
+            var lastFocus = FocusManager.GetFocusedElement(focusScope);
+
+            // if not focused on a sando result (ListViewItem) or the popup (ScrollViewer) 
+            if (!(lastFocus is ListViewItem) && !(lastFocus is ScrollViewer))
             {
                 object o = SearchResultListView.SelectedItem;
                 var lvi = (ListViewItem)SearchResultListView.ItemContainerGenerator.ContainerFromItem(o);
