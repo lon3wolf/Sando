@@ -504,41 +504,37 @@ namespace Sando.UI
         // from IMissingFilesIncluder
         public void EnsureNoMissingFilesAndNoDeletedFiles()
         {
-            var fileNames = new List<string>();
-
             //make sure you're not missing any files 
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                Collection<string> files = null;
-                while (files == null)
+            {                
+                while (true)
                 {
                     try
                     {
-                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                        SrcMLArchiveEventsHandlers handlers = null;
+                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        {
+                            if(handlers == null)
+                                handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                            handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
+                        }
+                        break;
                     }
                     catch (NullReferenceException ne)
                     {
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                fileNames = srcMLService.GetSrcMLArchive().GetFiles().ToList();
-                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
-                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                foreach (var fileName in fileNames)
-                {
-                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
-                }
+ 
                 //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
              
             indexingTask.ContinueWith( (t) => 
                 {
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                    //go through all files and delete necessary ones
-                    var filesInLucene = ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList();
-                    foreach(var file in filesInLucene)
-                        if (!fileNames.Contains(file, StringComparer.OrdinalIgnoreCase))
+                    //go through all files and delete necessary ones                    
+                    foreach(var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
+                        if (!srcMLService.GetSrcMLArchive().ContainsFile(file))
                             srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
                 }, 
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
@@ -549,27 +545,24 @@ namespace Sando.UI
             //just recreate the whole index
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                Collection<string> files = null;
-                while (files == null)
+                while (true)
                 {
                     try
                     {
-                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                        SrcMLArchiveEventsHandlers handlers = null;
+                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        {
+                            if (handlers == null)
+                                handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                            handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
+                        }
+                        break;
                     }
                     catch (NullReferenceException ne)
                     {
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                var fileNames = srcMLService.GetSrcMLArchive().FileUnits.Select(ABB.SrcML.SrcMLElement.GetFileNameForUnit).ToList();
-                var sourceExtensions = fileNames.Select(Path.GetExtension).Distinct().ToList();
-                fileNames.AddRange(GetNonSourceFileNamesToIndex(sourceExtensions));
-                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                foreach (var fileName in fileNames)
-                {
-                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
-                }
-                //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
