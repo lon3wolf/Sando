@@ -71,6 +71,7 @@
     <Compile Include="Tools\CoOccurrenceBasedReformerTests.cs" />
     <Compile Include="Tools\BigMatrixTest.cs" />
     <Compile Include="Tools\DictionaryBasedQueryReformerTests.cs" />
+    <Compile Include="Tools\DictionaryHelperTest.cs" />
     <Compile Include="Tools\GeneralEnglishThesaurusTests.cs" />
     <Compile Include="Tools\InFileCoOccurrenceMatrixTests.cs" />
     <Compile Include="Tools\LevenshteinTest.cs" />

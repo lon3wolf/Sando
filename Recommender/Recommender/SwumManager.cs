@@ -281,7 +281,7 @@ namespace Sando.Recommender {
                     }
                     try
                     {
-                        string sig = fields[0].Trim();
+                        int sig = int.Parse( fields[0].Trim());
                         string data = fields[1].Trim();
                         var swumRecord = SwumDataRecord.Parse(data);
                         SwumDataStore.AddRecord(sig, swumRecord);
@@ -296,7 +296,7 @@ namespace Sando.Recommender {
             }
         }
 
-        public Dictionary<string, SwumDataRecord> GetAllSwumBySignature()
+        public Dictionary<int, SwumDataRecord> GetAllSwumBySignature()
         {
             return SwumDataStore.GetAllSwumDataBySignature();
         }
@@ -337,9 +337,10 @@ namespace Sando.Recommender {
                     FieldDeclarationNode fdn = new FieldDeclarationNode(fieldName, ContextBuilder.BuildFieldContext(fieldDecl));
                     _builder.ApplyRules(fdn);
                     //var signature = string.Format("{0}:{1}:{2}", fileName, fieldDecl.Value, declPos);
-                    var signature = nameElement.GetXPath(false);
+                    //TODOMemory - change to hash or something
+                    var signature = nameElement.GetXPath(false).GetHashCode();
                     var swumRecord = ProcessSwumNode(fdn);
-                    swumRecord.FileNames.Add(fileName);
+                    swumRecord.FileNameHashes.Add(fileName.GetHashCode());
                     SwumDataStore.AddRecord(signature, swumRecord);
                 }
             }
@@ -369,19 +370,20 @@ namespace Sando.Recommender {
             foreach (XElement func in functions)
             {
                 //construct SWUM on the function (if necessary)
-                string sig = SrcMLElement.GetMethodSignature(func);
+                int sig = 
+                    SrcMLElement.GetMethodSignature(func).GetHashCode();
                 var swumRecord = SwumDataStore.GetSwumForSignature(sig);
                 if (swumRecord != null)
                 {
                     //update the SwumDataRecord with the filename of the duplicate method
-                    swumRecord.FileNames.Add(filePath);
+                    swumRecord.FileNameHashes.Add(filePath.GetHashCode());
                     SwumDataStore.AddRecord(sig, swumRecord);
                 }
                 else
                 {
                     MethodDeclarationNode mdn = ConstructSwumFromMethodElement(func);
                     swumRecord = ProcessSwumNode(mdn);
-                    swumRecord.FileNames.Add(filePath);
+                    swumRecord.FileNameHashes.Add(filePath.GetHashCode());
                     SwumDataStore.AddRecord(sig, swumRecord);
                 }
 

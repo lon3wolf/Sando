@@ -30,7 +30,7 @@ namespace Sando.Recommender.UnitTests {
         {
             manager.ReadSwumCache(@"..\..\Recommender\Recommender.UnitTests\TestFiles\swum-cache.txt");
             var datas = manager.GetAllSwumBySignature();
-            Assert.IsTrue(datas.Count > 400);
+            Assert.IsTrue(datas.Count > 13000);
             foreach (var data in datas)
                 Assert.IsFalse(string.IsNullOrEmpty(data.Value.SwumNodeName));
         }
@@ -112,7 +112,7 @@ namespace Sando.Recommender.UnitTests {
             Thread addThread = new Thread(AddSourceFiles);
             addThread.Start();
             foreach(var sig in manager.GetAllSwumBySignature()) {
-                Console.WriteLine("From file {0}, found sig: {1}", sig.Value.FileNames.FirstOrDefault(), sig.Key);
+                Console.WriteLine("From file {0}, found sig: {1}", sig.Value.FileNameHashes.FirstOrDefault(), sig.Key);
             }
             addThread.Join(5000);
         }

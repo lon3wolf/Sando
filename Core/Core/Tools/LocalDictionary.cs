@@ -142,7 +142,8 @@ namespace Sando.Core.Tools
 
             private IEnumerable<String> SelectingWordsAddToDictionary(IEnumerable<String> words)
             {
-                return words.Select(w => w.Trim().ToLower()).Distinct().Where(w => !String.IsNullOrEmpty(w)
+                //TODOMemory - use case-insensitive comparison
+                return words.Select(w => w.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase).Where(w => !String.IsNullOrEmpty(w)
                     && w.Length > TERM_MINIMUM_LENGTH);
             }
 

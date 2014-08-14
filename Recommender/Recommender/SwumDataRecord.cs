@@ -16,8 +16,8 @@ namespace Sando.Recommender {
         public PhraseNode ParsedTheme { get; set; }
         public string IndirectObject { get; set; }
         public PhraseNode ParsedIndirectObject { get; set; }
-        public ISet<string> FileNames { get; private set; }
-        public string Signature { get; set; }
+        public ISet<int> FileNameHashes { get; private set; }
+        public int Signature { get; set; }
 
         /// <summary>
         /// Creates a new empty SwumDataRecord.
@@ -30,15 +30,15 @@ namespace Sando.Recommender {
             ParsedTheme = null;
             IndirectObject = string.Empty;
             ParsedIndirectObject = null;
-            FileNames = new HashSet<string>();
-            Signature = string.Empty;
+            FileNameHashes = new HashSet<int>();
+            Signature = -1;
         }
 
         /// <summary>
         /// Returns a string representation of the object.
         /// </summary>
         public override string ToString() {
-            return string.Format("{0}|{1}|{2}|{3}|{4}", ParsedAction, ParsedTheme, ParsedIndirectObject, string.Join(";", FileNames), SwumNodeName);
+            return string.Format("{0}|{1}|{2}|{3}|{4}", ParsedAction, ParsedTheme, ParsedIndirectObject, string.Join(";", FileNameHashes), SwumNodeName);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Sando.Recommender {
             }
             if(!string.IsNullOrWhiteSpace(fields[3])) {
                 foreach(var file in fields[3].Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) {
-                    sdr.FileNames.Add(file);
+                        sdr.FileNameHashes.Add(int.Parse(file));
                 }
             }
             if (!string.IsNullOrWhiteSpace(fields[4]))

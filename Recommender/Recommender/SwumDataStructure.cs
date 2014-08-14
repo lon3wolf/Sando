@@ -10,22 +10,22 @@ namespace Sando.Recommender
 {
     public class SwumDataStructure
     {
-        private Dictionary<string, SwumDataRecord> signaturesToSwum;
+        private Dictionary<int, SwumDataRecord> hashOfSignaturesToSwumRecord;
         private ITrie<SwumDataRecord> trie;
 
         public SwumDataStructure()
         {
-            signaturesToSwum = new Dictionary<string, SwumDataRecord>();
+            hashOfSignaturesToSwumRecord = new Dictionary<int, SwumDataRecord>();
             trie = new PatriciaTrie<SwumDataRecord>();
         }
 
-        public void AddRecord(string signature, SwumDataRecord record)
+        public void AddRecord(int signature, SwumDataRecord record)
         {
             record.Signature = signature;
 
-            lock (signaturesToSwum)
+            lock (hashOfSignaturesToSwumRecord)
             {
-                signaturesToSwum[signature] = record;
+                hashOfSignaturesToSwumRecord[signature] = record;
             }
             
             lock (trie)
@@ -61,11 +61,26 @@ namespace Sando.Recommender
             Contract.Requires(methodSignature != null, "SwumDataRecord:GetSwumForSignature - signature cannot be null!");
 
             SwumDataRecord result = null;
-            lock (signaturesToSwum)
+            lock (hashOfSignaturesToSwumRecord)
             {
-                if (signaturesToSwum.ContainsKey(methodSignature))
+                if (hashOfSignaturesToSwumRecord.ContainsKey(methodSignature.GetHashCode()))
                 {
-                    result = signaturesToSwum[methodSignature];
+                    result = hashOfSignaturesToSwumRecord[methodSignature.GetHashCode()];
+                }
+            }
+            return result;
+        }
+
+        public SwumDataRecord GetSwumForSignature(int methodSignature)
+        {
+            Contract.Requires(methodSignature != null, "SwumDataRecord:GetSwumForSignature - signature cannot be null!");
+
+            SwumDataRecord result = null;
+            lock (hashOfSignaturesToSwumRecord)
+            {
+                if (hashOfSignaturesToSwumRecord.ContainsKey(methodSignature))
+                {
+                    result = hashOfSignaturesToSwumRecord[methodSignature];
                 }
             }
             return result;
@@ -74,16 +89,16 @@ namespace Sando.Recommender
         public void RemoveSourceFile(string sourcePath)
         {
             var fullPath = Path.GetFullPath(sourcePath);
-            var recordsToRemove = new HashSet<string>();
-            lock (signaturesToSwum)
+            var recordsToRemove = new HashSet<int>();
+            lock (hashOfSignaturesToSwumRecord)
             {
-                foreach (var signature in signaturesToSwum.Keys)
+                foreach (var signature in hashOfSignaturesToSwumRecord.Keys)
                 {
-                    var sdr = signaturesToSwum[signature];
-                    if (sdr.FileNames.Contains(fullPath))
+                    var sdr = hashOfSignaturesToSwumRecord[signature];
+                    if (sdr.FileNameHashes.Contains(fullPath.GetHashCode()))
                     {
-                        sdr.FileNames.Remove(fullPath);
-                        if (!sdr.FileNames.Any())
+                        sdr.FileNameHashes.Remove(fullPath.GetHashCode());
+                        if (!sdr.FileNameHashes.Any())
                         {
                             recordsToRemove.Add(signature);
                         }
@@ -94,16 +109,16 @@ namespace Sando.Recommender
                 //(This is separate from the above loop because you can't delete keys while you're enumerating them.)
                 foreach (var signature in recordsToRemove)
                 {
-                    signaturesToSwum.Remove(signature);
+                    hashOfSignaturesToSwumRecord.Remove(signature);
                 }
             }
         }
 
         public void Clear()
         {
-            lock (signaturesToSwum)
+            lock (hashOfSignaturesToSwumRecord)
             {
-                signaturesToSwum.Clear();
+                hashOfSignaturesToSwumRecord.Clear();
             }
 
             lock (trie)
@@ -116,19 +131,19 @@ namespace Sando.Recommender
         public List<SwumDataRecord> GetAllSwumData()
         {
             var currentSwum = new List<SwumDataRecord>();
-            lock (signaturesToSwum)
+            lock (hashOfSignaturesToSwumRecord)
             {
-                currentSwum.AddRange(signaturesToSwum.Select(entry => entry.Value));
+                currentSwum.AddRange(hashOfSignaturesToSwumRecord.Select(entry => entry.Value));
             }
             return currentSwum;
         }
 
-        public Dictionary<string, SwumDataRecord> GetAllSwumDataBySignature()
+        public Dictionary<int, SwumDataRecord> GetAllSwumDataBySignature()
         {
-            var currentSwum = new Dictionary<string, SwumDataRecord>();
-            lock (signaturesToSwum)
+            var currentSwum = new Dictionary<int, SwumDataRecord>();
+            lock (hashOfSignaturesToSwumRecord)
             {
-                foreach (var sigToSwum in signaturesToSwum)
+                foreach (var sigToSwum in hashOfSignaturesToSwumRecord)
                 {
                     currentSwum[sigToSwum.Key] = sigToSwum.Value;                    
                 }
@@ -145,9 +160,9 @@ namespace Sando.Recommender
                 trieRecs = trie.Retrieve(term).ToList();
 
                 //ensure that these records haven't been removed from signaturesToSwum
-                lock (signaturesToSwum)
+                lock (hashOfSignaturesToSwumRecord)
                 {
-                    finalRecs.AddRange(trieRecs.Where(trieRec => signaturesToSwum.ContainsKey(trieRec.Signature)));
+                    finalRecs.AddRange(trieRecs.Where(trieRec => hashOfSignaturesToSwumRecord.ContainsKey(trieRec.Signature)));
                 }
             }
             return finalRecs;
@@ -156,9 +171,9 @@ namespace Sando.Recommender
         public bool ContainsFile(string sourcePath)
         {
             var fullPath = Path.GetFullPath(sourcePath);
-            lock (signaturesToSwum)
+            lock (hashOfSignaturesToSwumRecord)
             {
-                if (signaturesToSwum.Keys.Select(sig => signaturesToSwum[sig]).Any(sdr => sdr.FileNames.Contains(fullPath)))
+                if (hashOfSignaturesToSwumRecord.Keys.Select(sig => hashOfSignaturesToSwumRecord[sig]).Any(sdr => sdr.FileNameHashes.Contains(fullPath.GetHashCode())))
                 {
                     return true;
                 }
