@@ -495,7 +495,8 @@ namespace Sando.UI.ViewModel
 
         public void SearchResultOpenFile(object param)
         {
-            FileOpener.OpenFile(this.CodeSearchResult.HighlightInfo.FullFilePath, 1);
+            FileOpener.OpenFile(this.CodeSearchResult.HighlightInfo.FullFilePath, 
+                                this.CodeSearchResult.HighlightInfo.StartLineNumber);
         }
     }
 }
