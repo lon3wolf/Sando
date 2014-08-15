@@ -12,7 +12,7 @@ namespace Sando.Core.Tools
     {
         private static readonly Regex _quotesPattern = new Regex("-{0,1}\"[^\"]+\"", RegexOptions.Compiled);
         private static readonly Regex _uppercase = new Regex(@"([A-Z])", RegexOptions.Compiled);
-        private static readonly Regex _nonLetters = new Regex(@"[^A-Za-z0-9]", RegexOptions.Compiled);
+        private static readonly Regex _nonLetters = new Regex(@"[^A-Za-z]", RegexOptions.Compiled);
 
         public static IEnumerable<String> ExtractElementWords(ProgramElement element)
         {
