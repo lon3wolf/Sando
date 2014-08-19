@@ -23,6 +23,7 @@ using Sando.UI.View;
 using System.Threading;
 using Sando.ExtensionContracts.ServiceContracts;
 using Sando.Indexer.Searching.Criteria;
+using Sando.ExtensionContracts.SearchContracts;
 
 
 namespace Sando.UI.Service {
@@ -122,6 +123,11 @@ namespace Sando.UI.Service {
                     break;
             }
             return _results;
+        }
+
+        public void AddUISearchResultsListener(ISearchResultListener s)
+        {
+            //TODO - Delete
         }
 
         #endregion        

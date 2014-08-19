@@ -78,6 +78,7 @@
     <Compile Include="QueryContracts\IQueryWeightsSupplier.cs" />
     <Compile Include="ResultsReordererContracts\CodeSearchResult.cs" />
     <Compile Include="ResultsReordererContracts\IResultsReorderer.cs" />
+    <Compile Include="SearchContracts\ISearchResultListener.cs" />
     <Compile Include="ServiceContracts\ISandoGlobalService.cs" />
     <Compile Include="ServiceContracts\ISandoLocalService.cs" />
     <Compile Include="SplitterContracts\IWordSplitter.cs" />
@@ -86,9 +87,7 @@
   <ItemGroup>
     <None Include="sandoKey.snk" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SearchContracts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
