@@ -117,12 +117,12 @@ namespace Sando.UI.ViewModel
                 this._progressBarVisibility = value;
 
                 if (_progressBarVisibility == Visibility.Visible)
-                {                    
-                    NotifyProgressBarVisibilityWithDelay();
+                {
+                    OnPropertyChanged("ProgressBarVisibility");                    
                 }
                 else
                 {
-                    OnPropertyChanged("ProgressBarVisibility");
+                    NotifyProgressBarVisibilityWithDelay();
                 }                
             }
         }
@@ -355,8 +355,8 @@ namespace Sando.UI.ViewModel
             var pgBarDisplayer = new BackgroundWorker();
             pgBarDisplayer.DoWork += delegate
             {
-                Thread.Sleep(1000);
-                if (this._progressBarVisibility == Visibility.Visible)
+                Thread.Sleep(500);
+                if (this._progressBarVisibility == Visibility.Hidden)
                 {
                     OnPropertyChanged("ProgressBarVisibility");
                 }
