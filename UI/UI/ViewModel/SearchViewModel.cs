@@ -356,7 +356,7 @@ namespace Sando.UI.ViewModel
             pgBarDisplayer.DoWork += delegate
             {
                 Thread.Sleep(500);
-                if (this._progressBarVisibility == Visibility.Hidden)
+                if (this._progressBarVisibility != Visibility.Visible)
                 {
                     OnPropertyChanged("ProgressBarVisibility");
                 }
