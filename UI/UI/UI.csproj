@@ -104,17 +104,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML.Core, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Core, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Core.3.0.20.18\lib\net40\ABB.SrcML.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Core.3.1.8.22\lib\net40\ABB.SrcML.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Data.Core, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data.Core, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Data.Core.3.0.20.18\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Data.Core.3.1.8.22\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.3.0.20.18\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.3.1.8.22\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Accessibility" />
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -273,32 +273,46 @@
     </Compile>
     <Compile Include="Actions\FileOpener.cs" />
     <Compile Include="Actions\FileRemover.cs" />
-    <Compile Include="Model\SearchResultUIItem.cs" />
+    <Compile Include="Base\BaseViewModel.cs" />
     <Compile Include="Monitoring\ConcurrentIndexingMonitor.cs" />
     <Compile Include="Monitoring\IndexUpdateManager.cs" />
     <Compile Include="Monitoring\InitialIndexingWatcher.cs" />
     <Compile Include="Monitoring\ISolution.cs" />
     <Compile Include="Monitoring\SolutionReloadEventListener.cs" />
     <Compile Include="Monitoring\SrcMLArchiveEventsHandlers.cs" />
+    <Compile Include="Options\KeyBindingsManager.cs" />
     <Compile Include="Options\SandoOptionsProvider.cs" />
     <Compile Include="SandoHighLighter.cs" />
+    <Compile Include="View\ColorGenerator.cs" />
+    <Compile Include="View\Converters\MyFontConverter.cs" />
+    <Compile Include="View\Converters\MyStrokeConverter.cs" />
+    <Compile Include="View\SearchResultView.xaml.cs">
+      <DependentUpon>SearchResultView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SearchView.xaml.cs">
+      <DependentUpon>SearchView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Service\HelperFunctions.cs" />
     <Compile Include="Service\SandoGlobalService.cs" />
     <Compile Include="Service\SandoLocalService.cs" />
     <Compile Include="TextBlockEx.cs" />
+    <Compile Include="ViewModel\MenuViewModel.cs" />
+    <Compile Include="ViewModel\SandoMainViewModel.cs" />
+    <Compile Include="ViewModel\SearchResultViewModel.cs" />
+    <Compile Include="ViewModel\SearchViewModel.cs" />
+    <Compile Include="View\MenuView.xaml.cs">
+      <DependentUpon>MenuView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SandoMainView.xaml.cs">
+      <DependentUpon>SandoMainView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Search\Converters\BackgroundConverter.cs" />
-    <Compile Include="View\RecommendedQueryView.cs" />
     <Compile Include="View\Search\Converters\HighlightSearchKey.cs" />
-    <Compile Include="View\Converters\MyFontConverter.cs" />
-    <Compile Include="View\Converters\MyStrokeConverter.cs" />
     <Compile Include="View\FirstTimeIntroduction.cs" />
     <Compile Include="View\IntroToSando.xaml.cs">
       <DependentUpon>IntroToSando.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\SearchManager.cs" />
-    <Compile Include="View\SearchViewControl.xaml.cs">
-      <DependentUpon>SearchViewControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\SearchToolWindow.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -347,6 +361,8 @@
     <Resource Include="Resources\cloud.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\filter.png" />
+    <Resource Include="Resources\bluefilter.png" />
     <Content Include="S3Credentials">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -555,6 +571,14 @@
     <Resource Include="Resources\VS2010Icons\VSObject_ValueType.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Base\DataTemplateDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Base\StyleDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -563,19 +587,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="View\SearchResultView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\SearchView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\IntroToSando.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\SearchViewControl.xaml">
+    <Page Include="View\MenuView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\SandoMainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

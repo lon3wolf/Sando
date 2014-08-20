@@ -67,6 +67,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Configuration\Configuration\Configuration.csproj">
+      <Project>{483a35bf-139d-46c1-a6e3-87defae90470}</Project>
+      <Name>Configuration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Core\Core\Core.csproj">
       <Project>{DB482A0E-4294-4008-BC79-D22505B5B661}</Project>
       <Name>Core</Name>

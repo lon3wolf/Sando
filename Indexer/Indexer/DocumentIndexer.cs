@@ -47,6 +47,7 @@ namespace Sando.Indexer
 				_indexSearcher = new IndexSearcher(Reader);
                 QueryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Configuration.Configuration.GetValue("DefaultSearchFieldName"), Analyzer);
                 SetupTimedUpdates(refreshIndexSearcherThreadInterval, commitChangesThreadInterval);
+                IndexWriter.SetRAMBufferSizeMB(128);
 			}
 			catch(CorruptIndexException corruptIndexEx)
 			{
@@ -95,28 +96,28 @@ namespace Sando.Indexer
 
         private void PeriodicallyCommitChangesIfNeeded(object sender, ElapsedEventArgs e)
         {
-            _scheduler.StartNew(() =>
+            //_scheduler.StartNew(() =>
+            //{
+            lock (_lock)
             {
-                lock (_lock)
-                {
-                    if (_hasIndexChanged)
-                        CommitChanges();
-                }
-            }, new CancellationTokenSource());
+                if (_hasIndexChanged)
+                    CommitChanges();
+            }
+            //}, new CancellationTokenSource());
         }
 
         private void PeriodicallyRefreshIndexSearcherIfNeeded(object sender, ElapsedEventArgs e)
         {     
-            _scheduler.StartNew(() =>
+            //_scheduler.StartNew(() =>
+            //{
+            lock (_lock)
             {
-                lock (_lock)
+                if (!IsUsable())
                 {
-                    if (!IsUsable())
-                    {
-                        UpdateSearcher();
-                    }
+                    UpdateSearcher();
                 }
-            }, new CancellationTokenSource());
+            }
+            //}, new CancellationTokenSource());
         }
 
 
@@ -225,8 +226,15 @@ namespace Sando.Indexer
 		    }
             catch (AlreadyClosedException)
 		    {
-                Reader = IndexWriter.GetReader();
-                _indexSearcher = new IndexSearcher(Reader);
+                try
+                {
+                    Reader = IndexWriter.GetReader();
+                    _indexSearcher = new IndexSearcher(Reader);
+                }
+                catch (AlreadyClosedException)
+                {
+                    //solution has been closed, ignore exception
+                }
 		    }
 		}
 
@@ -334,6 +342,24 @@ namespace Sando.Indexer
             if (directoryInfo != null)
             {
                 File.Create(directoryInfo.FullName + "\\" + DELETE_INIDACTOR);
+            }
+        }
+
+        public void ForceFlush()
+        {
+            lock (_lock)
+            {
+                IndexWriter.Flush();
+            }
+        }
+
+        public IEnumerable<string> GetDocumentList()
+        {                         
+            for (int i=0; i<Reader.MaxDoc(); i++) {
+                if (Reader.IsDeleted(i))
+                continue;
+            Document doc = Reader.Document(i);
+                yield return doc.GetField(SandoField.FullFilePath.ToString()).StringValue();
             }
         }
     }

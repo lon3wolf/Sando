@@ -91,6 +91,13 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="OptionsPages\AddFileExtensionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\AddFileExtensionForm.Designer.cs">
+      <DependentUpon>AddFileExtensionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OptionsPages\FakeOptionsProvider.cs" />
     <Compile Include="OptionsPages\ISandoOptionsProvider.cs" />
     <Compile Include="OptionsPages\SandoOptions.cs" />
     <Compile Include="OptionsPages\SandoOptionsControl.cs">
@@ -108,9 +115,22 @@
     <None Include="sandoKey.snk" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OptionsPages\AddFileExtensionForm.resx">
+      <DependentUpon>AddFileExtensionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="OptionsPages\SandoOptionsControl.resx">
       <DependentUpon>SandoOptionsControl.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\DependencyInjection\DependencyInjection\DependencyInjection.csproj">
+      <Project>{c4332491-cd26-408e-8e80-7d1c7a5c6abe}</Project>
+      <Name>DependencyInjection</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SandoExtensionContracts\SandoExtensionContracts.csproj">
+      <Project>{17aa2b71-c4f9-4397-9d05-6119763d07a5}</Project>
+      <Name>SandoExtensionContracts</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

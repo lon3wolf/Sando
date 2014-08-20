@@ -5,6 +5,9 @@ using System.Text;
 using NUnit.Framework;
 using Sando.Core.Tools;
 using Sando.Indexer.Searching.Criteria;
+using Sando.DependencyInjection;
+using Configuration.OptionsPages;
+using UnitTestHelpers;
 
 namespace Sando.Indexer.UnitTests
 {
@@ -12,12 +15,18 @@ namespace Sando.Indexer.UnitTests
     public class QueryParsingAndConvertingTests
     {
 
+
+
+        [SetUp]
+        public void Setup()
+        {
+            IndexerTestUtils.IntializeFrameworkForUnitTests();
+        }
+
         [Test]
         public void TestIfQueryParsesToEmptySearchTerm()
         {
-            var description = new SandoQueryParser().Parse("g_u16ActiveFault");
-            var builder = CriteriaBuilder.GetBuilder().AddFromDescription(description);
-            var simple = builder.GetCriteria() as SimpleSearchCriteria;
+            var simple = CriteriaBuilderFactory.GetBuilder().GetCriteria("g_u16ActiveFault");
             Assert.IsFalse(simple.SearchTerms.Where(x => String.IsNullOrWhiteSpace(x)).ToList().Count >= 1);
         }
     }

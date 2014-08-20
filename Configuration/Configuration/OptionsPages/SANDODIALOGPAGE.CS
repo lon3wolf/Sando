@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
+using System.Linq;
 
 namespace Configuration.OptionsPages
 {
@@ -30,7 +32,6 @@ namespace Configuration.OptionsPages
 				SandoOptionsControl optionsControl = new SandoOptionsControl();
 				optionsControl.Location = new Point(0, 0);
 				optionsControl.OptionsPage = this;
-				optionsControl.ExtensionPointsPluginDirectoryPath = this.ExtensionPointsPluginDirectoryPath;
 				optionsControl.NumberOfSearchResultsReturned = this.NumberOfSearchResultsReturned;
                 bool allowCollection = true;
                 if (!string.IsNullOrEmpty(this.AllowDataCollectionLogging) && bool.TryParse(this.AllowDataCollectionLogging, out allowCollection))
@@ -40,19 +41,47 @@ namespace Configuration.OptionsPages
                 else
                 {
                     optionsControl.AllowDataCollectionLogging = true;
-                }
+                }                
+                optionsControl.FileExtensionsList = FileExtensionsToIndexList;
 				return optionsControl;
 			}
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string NumberOfSearchResultsReturned { get; set; }
-		
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-		public string ExtensionPointsPluginDirectoryPath { get; set; }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 		public string AllowDataCollectionLogging { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public string _serializedFileExtensions { get; set; }
+        public List<string> FileExtensionsToIndexList {
+            get
+            {
+                if (!String.IsNullOrEmpty(_serializedFileExtensions))
+                {
+                    var splitExtensions = _serializedFileExtensions.Split(new char[] { ';' },
+                                                                StringSplitOptions.RemoveEmptyEntries);
+                    return splitExtensions.ToList();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                var combinedExtensions = string.Empty;
+                if (value != null && value.Any())
+                {
+                    foreach (var extension in value)
+                    {
+                        combinedExtensions += extension + ";";
+                    }
+                }
+                _serializedFileExtensions = combinedExtensions;
+            }
+        }
 
 		#endregion Properties 
 	}

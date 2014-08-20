@@ -11,11 +11,36 @@ namespace Sando.Core.UnitTests.Tools
     public class SparseCoOccurrenceMatrixTests : RandomStringBasedTests
     {
 
+        Random random = new Random();
+
+        [Test]
+        public void SaveToDisk()
+        {            
+            var matrix = new SparseMatrixForWordPairs();
+            matrix.Initialize(Environment.CurrentDirectory);
+            var words = this.GenerateRandomWordList(5000);
+            words.Add("sando");
+            words.Add("dog");
+            words.Add("cat");
+            words.Add("bird");
+            words.Add("yowser");
+            foreach (var word in words)
+            {
+                List<string> wordList = new List<string>();
+                wordList.Add(word);
+                for (int i = 0; i < random.Next(100); i++)
+                    wordList.Add(words.ElementAt(random.Next(5000)));
+                matrix.HandleCoOcurrentWordsSync(wordList);
+            }
+
+            matrix.Dispose();
+        }
+
 
         [Test]
         public void AddMultipleWords()
         {
-            var matrix = new SparseCoOccurrenceMatrix();
+            var matrix = new SparseMatrixForWordPairs();
             var words = this.GenerateRandomWordList(30);
             matrix.HandleCoOcurrentWordsSync(words);
             for (int i = 0; i < words.Count - 1; i ++ )
@@ -38,7 +63,7 @@ namespace Sando.Core.UnitTests.Tools
         [Test]
         public void AddMultipleWordsMultipleTimes()
         {
-            var matrix = new SparseCoOccurrenceMatrix();
+            var matrix = new SparseMatrixForWordPairs();
             var words = this.GenerateRandomWordList(30);
             matrix.HandleCoOcurrentWordsSync(words);
             var words2 = this.GenerateRandomWordList(30);
@@ -69,7 +94,7 @@ namespace Sando.Core.UnitTests.Tools
         [Test]
         public void GetAllEntriesFast()
         {
-            var matrix = new SparseCoOccurrenceMatrix();
+            var matrix = new SparseMatrixForWordPairs();
             var words = GenerateRandomWordList(30);
             matrix.HandleCoOcurrentWordsSync(words);
             var entries = matrix.GetEntries(n => true);

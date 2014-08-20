@@ -102,6 +102,7 @@
 
   </Commands>
 	<KeyBindings>
+    <!-- no longer valid... keybinding will be dynamically set in UIPackage -->
 		<KeyBinding guid="guidIDEToolbarCmdSet" id="sandoSearch" mod1="Alt Shift" key1="S" editor="guidVSStd97" />
 	</KeyBindings>
 

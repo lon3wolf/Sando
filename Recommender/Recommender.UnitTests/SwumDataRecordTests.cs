@@ -53,9 +53,9 @@ namespace Sando.Recommender.UnitTests {
             sdr.Action = sdr.ParsedAction.ToPlainString();
             sdr.ParsedTheme = new PhraseNode(new[] { t1, t2, t3 }, Location.None, false);
             sdr.Theme = sdr.ParsedTheme.ToPlainString();
-            sdr.FileNames.Add(f1);
-            sdr.FileNames.Add(f2);
-            sdr.FileNames.Add(f3);
+            sdr.FileNameHashes.Add(f1.GetHashCode());
+            sdr.FileNameHashes.Add(f2.GetHashCode());
+            sdr.FileNameHashes.Add(f3.GetHashCode());
 
             var actual = SwumDataRecord.Parse(sdr.ToString());
             Assert.IsTrue(SwumDataRecordsAreEqual(sdr, actual));
@@ -110,11 +110,11 @@ namespace Sando.Recommender.UnitTests {
                             && sdr1.Action == sdr2.Action
                             && sdr1.Theme == sdr2.Theme
                             && sdr1.IndirectObject == sdr2.IndirectObject
-                            && sdr1.FileNames.Count == sdr2.FileNames.Count;
+                            && sdr1.FileNameHashes.Count == sdr2.FileNameHashes.Count;
             if(areEqual) {
                 //both FileNames are the same size
-                foreach(var file in sdr1.FileNames) {
-                    areEqual = areEqual && sdr2.FileNames.Contains(file);
+                foreach(var file in sdr1.FileNameHashes) {
+                    areEqual = areEqual && sdr2.FileNameHashes.Contains(file);
                 }
             }
             return areEqual;

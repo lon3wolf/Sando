@@ -18,7 +18,7 @@ namespace Sando.UI.View
         private readonly IToolWindowFinder _toolWindowFinder;
         private const string Introducesandoflag = "IntroduceSandoFlag";
 
-
+        private FlagManager flagManager = new FlagManager(Introducesandoflag);
 
         /// <summary>
         /// This function is called when the user clicks the menu item that shows the 
@@ -45,7 +45,6 @@ namespace Sando.UI.View
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            _toolWindowFinder.UpdateIndexingFilesList();
             return windowFrame;
         }
 
@@ -72,13 +71,10 @@ namespace Sando.UI.View
             // Dock Sando to the bottom of Visual Studio.
             windowFrame.SetFramePos(VSSETFRAMEPOS.SFP_fDockRight, Guid.Empty, 0, 0, 0, 0);            
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
-            File.Create(GetFullIntroduceSandoFlagPath());                       
+            flagManager.CreateFlag();
         }
 
-        public bool ShouldShow()
-        {
-            return !File.Exists(GetFullIntroduceSandoFlagPath());
-        }
+ 
 
         public void ShowToolbar()
         {
@@ -88,16 +84,48 @@ namespace Sando.UI.View
             cb.Visible = true;
         }
 
-        private string GetFullIntroduceSandoFlagPath()
+        public bool ShouldShow()
+        {
+            return flagManager.DoesFlagExist();
+        }
+
+  
+    }
+
+    public class FlagManager{
+
+        private string flagName;
+
+        public FlagManager(string Introducesandoflag)
         {            
-            return Path.Combine(PathManager.Instance.GetExtensionRoot(), Introducesandoflag);
+            this.flagName = Introducesandoflag;
+        }
+
+        public void CreateFlag()
+        {
+            try
+            {
+                File.Create(GetFullPathForFlag());
+            }
+            catch (IOException ioe)
+            {
+                //ignore if two people are writing to this
+            }
+        }
+        
+        public bool DoesFlagExist()
+        {
+            return !File.Exists(GetFullPathForFlag());
+        }
+
+        private string GetFullPathForFlag()
+        {
+            return Path.Combine(PathManager.Instance.GetExtensionRoot(), flagName);
         }
     }
 
     public  interface IToolWindowFinder
     {
         ToolWindowPane FindToolWindow(Type type, int i, bool b);
-
-        void UpdateIndexingFilesList();
     }
 }

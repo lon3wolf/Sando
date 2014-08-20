@@ -15,7 +15,6 @@ using System.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using EnvDTE;
-using Sando.ExtensionContracts.SearchContracts;
 using log4net;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.SearchEngine;
@@ -23,6 +22,8 @@ using System.Collections.Generic;
 using Sando.UI.View;
 using System.Threading;
 using Sando.ExtensionContracts.ServiceContracts;
+using Sando.Indexer.Searching.Criteria;
+using Sando.ExtensionContracts.SearchContracts;
 
 
 namespace Sando.UI.Service {
@@ -33,7 +34,7 @@ namespace Sando.UI.Service {
     /// This class also needs to implement the SSandoGlobalService interface in order to notify the 
     /// package that it is actually implementing this service.
     /// </summary>
-    public class SandoGlobalService : ISandoGlobalService, SSandoGlobalService, ISearchResultListener
+    public class SandoGlobalService : ISandoGlobalService, SSandoGlobalService
     {
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace Sando.UI.Service {
             return localService.LocalServiceFunction();
         }
 
-        public void Update(string searchString, IQueryable<CodeSearchResult> results)
+        private void Update(string searchString, IQueryable<CodeSearchResult> results)
         {
             var newResults = new List<CodeSearchResult>();
             foreach (var result in results)
@@ -99,21 +100,20 @@ namespace Sando.UI.Service {
             _results = newResults;
         }
 
-        public void UpdateMessage(string message)
+        private void UpdateMessage(string message)
         {
             _myMessage = message;
-        }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
         }
 
         public List<CodeSearchResult> GetSearchResults(string searchkeywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
-            manager.AddListener(this);
+            manager.SearchResultUpdated += this.Update;
+            manager.SearchCompletedMessageUpdated += this.UpdateMessage;
+
             _results = null;
-            manager.Search(searchkeywords);
+            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(searchkeywords);
+            manager.Search(searchkeywords, criteria);
             int i = 0;
             while (_results == null)
             {
@@ -125,9 +125,9 @@ namespace Sando.UI.Service {
             return _results;
         }
 
-        public void AddUISearchResultsListener(ISearchResultListener listener)
+        public void AddUISearchResultsListener(ISearchResultListener s)
         {
-            SearchManagerFactory.GetUserInterfaceSearchManager().AddListener(listener);
+            //TODO - Delete
         }
 
         #endregion        

@@ -16,6 +16,8 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
 
     public interface IHighlightRawInfo
     {
+        string FullFilePath { get; }
+
         string Text { get; }
         int StartLineNumber { get; }
         int[] Offsets { get; }
@@ -43,14 +45,14 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
             get 
             {                
                 //NOTE: shortening is happening in this UI class instead of in the xaml because of xaml's limitations around controling column width inside of a listviewitem                
-                var myFileName = Directory.GetFiles(Path.GetDirectoryName(ProgramElement.FullFilePath), Path.GetFileName(ProgramElement.FullFilePath)).FirstOrDefault();
+                var myFileName = GetProperFilePathCapitalization(ProgramElement.FullFilePath);
                 var parentOrFile = "";
                 if (string.IsNullOrEmpty(Parent))
                     parentOrFile = Path.GetFileName(myFileName);
                 else
                 {
                     var fileName = Path.GetFileName(myFileName);
-                    if (fileName.StartsWith(Parent))
+                    if (fileName != null && fileName.StartsWith(Parent))
                     {
                         parentOrFile = fileName;
                     }
@@ -78,6 +80,42 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
         }
 
         private const int MAX_PARENT_LENGTH = 33;
+
+        private const int MAX_FILEPATH_IN_POPUP_LENGTH = 80;
+
+        public string TrimmedFilePath
+        {
+            get
+            {
+                var filepath = GetProperFilePathCapitalization(ProgramElement.FullFilePath);
+                if (filepath.Length > MAX_FILEPATH_IN_POPUP_LENGTH)
+                {
+                    var trimmedPath = filepath.Substring(filepath.Length - MAX_FILEPATH_IN_POPUP_LENGTH, MAX_FILEPATH_IN_POPUP_LENGTH);
+                    var firstSlashIndex = trimmedPath.IndexOf("\\");
+                    trimmedPath = trimmedPath.Substring(firstSlashIndex, trimmedPath.Length - firstSlashIndex);
+                    return "..." + trimmedPath;
+                }
+                else
+                {
+                    return filepath;
+                }
+            }
+        }
+
+        private string GetProperDirectoryCapitalization(DirectoryInfo dirInfo)
+        {
+            DirectoryInfo parentDirInfo = dirInfo.Parent;
+            if (null == parentDirInfo)
+                return dirInfo.Name;
+            return Path.Combine(GetProperDirectoryCapitalization(parentDirInfo), parentDirInfo.GetDirectories(dirInfo.Name)[0].Name);
+        }
+
+        private string GetProperFilePathCapitalization(string filename)
+        {
+            FileInfo fileInfo = new FileInfo(filename);
+            DirectoryInfo dirInfo = fileInfo.Directory;
+            return Path.Combine(GetProperDirectoryCapitalization(dirInfo), dirInfo.GetFiles(fileInfo.Name)[0].Name);
+        }
 
         public ProgramElementType ProgramElementType
         {
@@ -135,7 +173,7 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
         {
             get
             {
-                return new InternalHighlightRawInfo(highlight, ProgramElement.
+                return new InternalHighlightRawInfo(ProgramElement.FullFilePath, highlight, ProgramElement.
                     DefinitionLineNumber, IndentionOption.NoIndention, HighlightOffsets);
             }
         }
@@ -144,7 +182,7 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
         {
             get
             {
-                return new InternalHighlightRawInfo(highlightRaw, ProgramElement.
+                return new InternalHighlightRawInfo(ProgramElement.FullFilePath, highlightRaw, ProgramElement.
                     DefinitionLineNumber, IndentionOption.KeepIndention);
             }
         }
@@ -156,13 +194,20 @@ namespace Sando.ExtensionContracts.ResultsReordererContracts
             public int[] Offsets { get; private set; }
             public IndentionOption IndOption { get; private set; }
 
-            internal InternalHighlightRawInfo(String Text, int StartLineNumber, 
+            internal InternalHighlightRawInfo(String fullFilePath, String Text, int StartLineNumber, 
                 IndentionOption IndOption, int[] Offsets = null)
             {
+                this.FullFilePath = fullFilePath;
                 this.Text = Text;
                 this.StartLineNumber = StartLineNumber;
                 this.Offsets = Offsets;
                 this.IndOption = IndOption;
+            }
+
+            public string FullFilePath
+            {
+                get;
+                private set;
             }
         }
 

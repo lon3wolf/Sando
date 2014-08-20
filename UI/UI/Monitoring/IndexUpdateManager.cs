@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Xml.Linq;
@@ -10,6 +11,7 @@ using Sando.Indexer;
 using Sando.Indexer.Documents;
 using Sando.Indexer.IndexState;
 using Sando.Core.Logging.Events;
+using Sando.Parser;
 
 
 namespace Sando.UI.Monitoring
@@ -31,7 +33,18 @@ namespace Sando.UI.Monitoring
             var fileInfo = new FileInfo(filePath);            
             try
             {
-                var parsed = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension).Parse(filePath, xElement);
+                var parsed = new List<ProgramElement>();
+                var codeParser = ExtensionPointsRepository.Instance.GetParserImplementation(fileInfo.Extension);
+                if (codeParser != null)
+                {
+                    parsed.AddRange(codeParser.Parse(filePath, xElement));
+                }
+                else
+                {
+                    //TODO: parse everything with the TextFileParser (double parsing things that were parsed with SrcML)
+                    var textFileParser = new TextFileParser();
+                    parsed.AddRange(textFileParser.Parse(filePath, xElement));
+                }
 
                 var unresolvedElements = parsed.FindAll(pe => pe is CppUnresolvedMethodElement);
                 if (unresolvedElements.Count > 0)
@@ -71,6 +84,7 @@ namespace Sando.UI.Monitoring
                 LogEvents.UIIndexUpdateError(this, e);
             }
         }
+
 	}
 
    

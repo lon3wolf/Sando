@@ -29,7 +29,7 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void MethodElementReturnedFromSearchContainsAllFields()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "fetch output stream";
 			List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
 			Assert.AreEqual(codeSearchResults.Count, 5, "Invalid results number");
@@ -55,9 +55,9 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void MethodSearchRespectsAccessLevelCriteria()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "to string";
-			SearchCriteria searchCriteria = new SimpleSearchCriteria()
+            SimpleSearchCriteria searchCriteria = new SimpleSearchCriteria()
 			{ 
 				AccessLevels = new SortedSet<AccessLevel>() { AccessLevel.Public },
 				SearchByAccessLevel = true,
@@ -87,13 +87,13 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void MethodSearchRespectsFileExtensionsCriteria()
         {
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
             var keywords = "main";
             var searchCriteria = new SimpleSearchCriteria()
                 {
                     SearchTerms = new SortedSet<string>(keywords.Split(' ')),
                     SearchByFileExtension = true,
-                    FileExtensions = new SortedSet<string> {".cpp"}
+                    FileExtensions = new SortedSet<string> {"cpp"}
                 };
             var codeSearchResults = codeSearcher.Search(searchCriteria);
             Assert.AreEqual(1, codeSearchResults.Count, "Invalid results number");
@@ -114,6 +114,20 @@ namespace Sando.IntegrationTests.Search
             //Assert.AreEqual(method.ProgramElementType, ProgramElementType.Method, "Program element type differs!");
             //Assert.AreEqual(method.ReturnType, "void", "Method return type differs!");
             //Assert.False(String.IsNullOrWhiteSpace(method.RawSource), "Method snippet is invalid!");
+        }
+
+        [Test]
+        public void MethodIncludesDocCommentsInSearch()
+        {
+            var codeSearcher = new CodeSearcher();
+            var keywords = "Retrieves a stream for saving an image";
+            var codeSearchResults = codeSearcher.Search(keywords);
+            Assert.Greater(codeSearchResults.Count, 1, "Invalid results number");
+            var methodSearchResult = codeSearchResults.Find(el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && el.ProgramElement.Name == "FetchOutputStream");
+            if (methodSearchResult == null)
+            {
+                Assert.Fail("Failed to find relevant search result for search: " + keywords);
+            }
         }
 
         public override string GetIndexDirName()

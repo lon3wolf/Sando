@@ -72,7 +72,7 @@
     <Compile Include="Documents\CommentDocument.cs" />
     <Compile Include="Documents\Converters\ConverterFromHitToProgramElement.cs" />
     <Compile Include="Documents\Converters\ConverterFromProgramElementToDocument.cs" />
-    <Compile Include="Documents\TextLineDocument.cs" />
+    <Compile Include="Documents\TextFileDocument.cs" />
     <Compile Include="Documents\MethodPrototypeDocument.cs" />
     <Compile Include="Documents\DocumentFactory.cs" />
     <Compile Include="Documents\EnumDocument.cs" />
@@ -81,8 +81,6 @@
     <Compile Include="Documents\MethodDocument.cs" />
     <Compile Include="DocumentIndexer.cs" />
     <Compile Include="Documents\SandoDocument.cs" />
-    <Compile Include="Documents\SandoDocumentStringExtension.cs" />
-    <Compile Include="Documents\SandoField.cs" />
     <Compile Include="Documents\StructDocument.cs" />
     <Compile Include="Exceptions\IndexerException.cs" />
     <Compile Include="IndexFiltering\IndexFilterManager.cs" />

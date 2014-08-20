@@ -20,7 +20,7 @@ namespace Sando.Indexer.UnitTests
             Assert.AreEqual(QueryMetrics.ExamineQuery("a\" \"b").ToString(), "Plain,Plain");
             Assert.AreEqual(QueryMetrics.ExamineQuery("a\" B_b_b_B \"c").ToString(), "Plain,QuotedUnderscore,Plain");
 			Assert.AreEqual(QueryMetrics.ExamineQuery("\"a\" BBB_b").ToString(), "Quoted,AcronymUnderscore");
-			Assert.AreEqual(QueryMetrics.ExamineQuery("-Abb aAAAc").ToString(), "MinusCamelcase,CamelcaseAcronym");
+			Assert.AreEqual(QueryMetrics.ExamineQuery("-Abb aAAAc").ToString(), "Minus,CamelcaseAcronym");
         }
 
         [Test]

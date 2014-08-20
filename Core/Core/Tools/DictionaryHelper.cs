@@ -11,8 +11,8 @@ namespace Sando.Core.Tools
     public static class DictionaryHelper
     {
         private static readonly Regex _quotesPattern = new Regex("-{0,1}\"[^\"]+\"", RegexOptions.Compiled);
-        private static readonly Regex _patternChars = new Regex(@"([A-Z][a-z]+)", RegexOptions.Compiled);
-        private static readonly Regex _patternCharsLowerCase = new Regex(@"([^a-zA-Z][a-z]+)", RegexOptions.Compiled);
+        private static readonly Regex _uppercase = new Regex(@"([A-Z])", RegexOptions.Compiled);
+        private static readonly Regex _nonLetters = new Regex(@"[^A-Za-z]", RegexOptions.Compiled);
 
         public static IEnumerable<String> ExtractElementWords(ProgramElement element)
         {
@@ -58,9 +58,9 @@ namespace Sando.Core.Tools
                 list.AddRange(ExtractStructWords(element as StructElement));
                 return list;
             }
-            if (element as TextLineElement != null)
+            if (element as TextFileElement != null)
             {
-                list.AddRange(ExtractTextLineElement(element as TextLineElement));
+                list.AddRange(ExtractTextLineElement(element as TextFileElement));
                 return list;
             }
             if (element as XmlXElement != null)
@@ -131,7 +131,7 @@ namespace Sando.Core.Tools
             return GetDefaultLetterWords(new []{element.Arguments, element.Name});
         }
 
-        private static IEnumerable<string> ExtractTextLineElement(TextLineElement element)
+        private static IEnumerable<string> ExtractTextLineElement(TextFileElement element)
         {
             return GetDefaultLetterWords(element.Body);
         }
@@ -155,16 +155,30 @@ namespace Sando.Core.Tools
         private static IEnumerable<String> GetDefaultLetterWords(String code)
         {
             var words = new List<String>();
-            words.AddRange(GetMatchedWords(_patternChars, code));
-            words.AddRange(GetMatchedWords(_patternCharsLowerCase, code).Select
-                (TrimNonLetterPrefix));
+            words.AddRange(GetMatchedWords( code));
+            //words.AddRange(GetMatchedWords( code).Select
+            //    (TrimNonLetterPrefix));
             return words;
         }
 
-        private static String TrimNonLetterPrefix(String word)
+        public static String TrimNonLetterPrefix(String word)
         {
             var firstLetter = word.First(Char.IsLetter);
-            return word.Substring(word.IndexOf(firstLetter));
+            if (word.IndexOf(firstLetter) != 0)
+                return word.Substring(word.IndexOf(firstLetter));
+            else
+                return word;
+        }
+
+        static char[] separator = new char[]{' '};
+
+        public static IEnumerable<string> GetMatchedWords(String code)
+        {
+            //replace weird stuff with space
+            var one = _nonLetters.Replace(code, " ");
+            //add space before uppercase
+            var two = _uppercase.Replace(one, " $1");
+            return two.ToLower().Split(separator, StringSplitOptions.RemoveEmptyEntries).Distinct();
         }
 
         private static IEnumerable<string> GetMatchedWords(Regex pattern, String code)

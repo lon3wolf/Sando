@@ -8,6 +8,8 @@ using Sando.ExtensionContracts.IndexerContracts;
 using Sando.Indexer.IndexFiltering;
 using log4net;
 using log4net.Config;
+using Configuration.OptionsPages;
+using Sando.DependencyInjection;
 
 namespace Sando.Indexer.UnitTests.IndexFiltering
 {
@@ -272,6 +274,8 @@ namespace Sando.Indexer.UnitTests.IndexFiltering
                 e.SetUnwind();
                 contractFailed = true;
             };
+
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(String.Empty, 20, false, new List<string>()));
         }
 
         private static ILog CreateLog()

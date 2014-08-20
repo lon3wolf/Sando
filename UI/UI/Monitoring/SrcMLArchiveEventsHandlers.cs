@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Xml;
 using System.Reflection;
 using Sando.Core.Logging.Persistence;
+using Lucene.Net.Store;
 
 
 namespace Sando.UI.Monitoring
@@ -34,8 +35,10 @@ namespace Sando.UI.Monitoring
         private TaskScheduler scheduler;
         public TaskFactory factory;
         public static SrcMLArchiveEventsHandlers Instance;
-        private Action whenDoneWithTasks = null;
-        
+        public Action WhenDoneWithTasks = null;
+        public Action WhenStartedFirstTask = null;
+        public bool HaveTasks = false;
+
         public static int MAX_PARALLELISM = 2;
 
 
@@ -77,6 +80,15 @@ namespace Sando.UI.Monitoring
             var task = factory.StartNew(a, c.Token);
             lock (tasksTrackerLock)
             {
+                if (tasks.Count() == 0)
+                {
+                    if (WhenStartedFirstTask != null)
+                    {
+                        factory.StartNew(WhenStartedFirstTask);
+                    }
+                    HaveTasks = true;
+                }
+
                 tasks.Add(task);
                 cancellers.Add(c);
             }
@@ -98,8 +110,10 @@ namespace Sando.UI.Monitoring
             var cancelToken = cancelTokenSource.Token;            
             Action action =  () =>
             {
-                cancelToken.ThrowIfCancellationRequested();
-
+                if (cancelToken.IsCancellationRequested)
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+                }
                 var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
 
                 if(CanBeIndexed(args.FilePath)) {
@@ -111,69 +125,75 @@ namespace Sando.UI.Monitoring
                 } else {
                     documentIndexer.DeleteDocuments(args.FilePath, commitImmediately);
                 }
-            };
-            CommitEveryOneHundredFiles(cancelTokenSource, action);
+            };            
             StartNew(action, cancelTokenSource);
         }
 
-        //Note: if you don't commit every so often then Lucene will take up a lot of RAM, causing performance issues on most machines.
-        private void CommitEveryOneHundredFiles(CancellationTokenSource cancelTokenSource, Action action)
-        {
-            if (counter % 100 == 0)
-            {
-                counter = 1;
-                Action commitAction = () =>
-                {
-                    var documentIndexer = ServiceLocator.Resolve<DocumentIndexer>();
-                    //only public API that forces a commit
-                    documentIndexer.ForceReaderRefresh();
-                };
-                StartNew(action, cancelTokenSource);
-            }
-            else
-            {
-                counter++;
-            }
-        }
 
-        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args, bool commitImmediately, DocumentIndexer documentIndexer) {                        
+
+        private static void ProcessFileEvent(ISrcMLGlobalService srcMLService, FileEventRaisedArgs args,
+            bool commitImmediately, DocumentIndexer documentIndexer)
+        {
             string sourceFilePath = args.FilePath;
             var fileExtension = Path.GetExtension(sourceFilePath);
-            if(ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null) {
-                if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath))
-                    return;
-                var xelement = GetXElement(args, srcMLService);
-                if (xelement == null)
-                    return;
-                var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
-                switch(args.EventType) {
+            var parsableToXml = (ExtensionPointsRepository.Instance.GetParserImplementation(fileExtension) != null);
+            if (ConcurrentIndexingMonitor.TryToLock(sourceFilePath)) return;
+            XElement xelement = null;
+            if (parsableToXml)
+            {
+                xelement = GetXElement(args, srcMLService);
+                if (xelement == null) return;
+            }
+            var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
+            try
+            {
+                switch (args.EventType)
+                {
                     case FileEventType.FileAdded:
-                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());    //"just to be safe!"
+                        documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant()); //"just to be safe!"
                         indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
-                        SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                        if (parsableToXml)
+                        {
+                            SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                        }
                         break;
                     case FileEventType.FileChanged:
                         documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());
                         indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
-                        SwumManager.Instance.UpdateSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                        if (parsableToXml)
+                        {
+                            SwumManager.Instance.UpdateSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                        }
                         break;
                     case FileEventType.FileDeleted:
                         documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant(), commitImmediately);
-                        SwumManager.Instance.RemoveSourceFile(sourceFilePath.ToLowerInvariant());
+                        if (parsableToXml)
+                        {
+                            SwumManager.Instance.RemoveSourceFile(sourceFilePath.ToLowerInvariant());
+                        }
                         break;
-                    case FileEventType.FileRenamed: // FileRenamed is repurposed. Now means you may already know about it, so check and only parse if not existing
-                        if(!SwumManager.Instance.ContainsFile(sourceFilePath.ToLowerInvariant())) {
-                            documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant());    //"just to be safe!"
+                    case FileEventType.FileRenamed:
+                        // FileRenamed is repurposed. Now means you may already know about it, so check and only parse if not existing
+                        if (!SwumManager.Instance.ContainsFile(sourceFilePath.ToLowerInvariant()))
+                        {
+                            documentIndexer.DeleteDocuments(sourceFilePath.ToLowerInvariant()); //"just to be safe!"
                             indexUpdateManager.Update(sourceFilePath.ToLowerInvariant(), xelement);
-                            SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                            if (parsableToXml)
+                            {
+                                SwumManager.Instance.AddSourceFile(sourceFilePath.ToLowerInvariant(), xelement);
+                            }
                         }
                         break;
                     default:
                         // if we get here, a new event was probably added. for now, no-op
                         break;
                 }
-                ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
             }
+            catch (AlreadyClosedException ace)
+            {
+                //ignore, index closed
+            }
+            ConcurrentIndexingMonitor.ReleaseLock(sourceFilePath);
         }
 
         private static XElement GetXElement(FileEventRaisedArgs args, ISrcMLGlobalService srcMLService)
@@ -198,11 +218,11 @@ namespace Sando.UI.Monitoring
                 cancellers.TryTake(out cancelToken);
                 if (tasks.Count() == 0)
                 {
-                    if (whenDoneWithTasks != null)
+                    if (WhenDoneWithTasks != null)
                     {
-                        factory.StartNew(whenDoneWithTasks);
-                        whenDoneWithTasks = null;
+                        factory.StartNew(WhenDoneWithTasks);
                     }
+                    HaveTasks = false;
                 }
             }
         }
@@ -210,17 +230,11 @@ namespace Sando.UI.Monitoring
         private object tasksTrackerLock = new object();        
         private int counter=0;
         private UIPackage package;
-        
-
    
 
         public void MonitoringStopped(object sender, EventArgs args)
         {
-            lock (tasksTrackerLock)
-            {
-                foreach (var cancelToken in cancellers)
-                    cancelToken.Cancel();
-            }
+            ClearTasks();
 
             LogEvents.UIMonitoringStopped(this);
             var currentIndexer = ServiceLocator.ResolveOptional<DocumentIndexer>();
@@ -231,27 +245,20 @@ namespace Sando.UI.Monitoring
             if (SwumManager.Instance != null)
             {
                 SwumManager.Instance.PrintSwumCache();
+                SwumManager.Instance.Clear();
+            }
+        }
+
+        public void ClearTasks()
+        {
+            lock (tasksTrackerLock)
+            {
+                foreach (var cancelToken in cancellers)
+                    cancelToken.Cancel();
             }
         }
 
 
-
-        public void UpdateStarted(object sender, EventArgs e) {
-            GetPackage().ShowProgressBar(true);
-        }
-
-        public void UpdateCompleted(object sender, EventArgs e) {            
-            //hide progress bar when all *current* tasks are complete
-            whenDoneWithTasks = () =>
-            {
-                GetPackage().ShowProgressBar(false);
-            };
-            if (TaskCount() == 0)
-            {
-                factory.StartNew(whenDoneWithTasks);
-                whenDoneWithTasks = null;
-            }
-        }
 
     }
 }

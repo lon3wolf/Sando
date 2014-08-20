@@ -23,18 +23,19 @@ namespace Sando.Recommender {
     /// Builds SWUM for the methods and method calls in a srcML file.
     /// </summary>
     public class SwumManager {
-        private static SwumManager instance;
+        private static SwumManager _instance;
         private const string DefaultCacheFile = "swum-cache.txt";
-        private readonly XName[] functionTypes = new XName[] { SRC.Function, SRC.Constructor, SRC.Destructor };
-        private SwumBuilder builder;
-        private Dictionary<string, SwumDataRecord> signaturesToSwum;
+        private readonly XName[] _functionTypes = new XName[] { SRC.Function, SRC.Constructor, SRC.Destructor };
+        private SwumBuilder _builder;
+
+        public SwumDataStructure SwumDataStore { get; private set; }
 
         /// <summary>
         /// Private constructor for a new SwumManager.
         /// </summary>
         private SwumManager() {
-            builder = new UnigramSwumBuilder { Splitter = new CamelIdSplitter() };
-            signaturesToSwum = new Dictionary<string, SwumDataRecord>();
+            _builder = new UnigramSwumBuilder { Splitter = new CamelIdSplitter() };
+            SwumDataStore = new SwumDataStructure();
             CacheLoaded = false;
             Timer printer = new Timer();
             printer.Interval = 1000 * 60 * 10;
@@ -71,10 +72,10 @@ namespace Sando.Recommender {
         /// </summary>
         public static SwumManager Instance { 
             get {
-                if(instance == null) {
-                    instance = new SwumManager();
+                if(_instance == null) {
+                    _instance = new SwumManager();
                 }
-                return instance;
+                return _instance;
             }
         }
 
@@ -82,8 +83,8 @@ namespace Sando.Recommender {
         /// Gets or sets the SwumBuilder used to construct SWUM.
         /// </summary>
         public SwumBuilder Builder {
-            get { return builder; }
-            set { builder = value; }
+            get { return _builder; }
+            set { _builder = value; }
         }
 
         /// <summary>
@@ -123,7 +124,7 @@ namespace Sando.Recommender {
         /// <param name="cacheDirectory">The path for the directory containing the SWUM cache file.</param>
         /// <param name="useCache">True to use the existing cache file, if any. False to not load any cache file.</param>
         public void Initialize(string cacheDirectory, bool useCache) {
-            Clear();
+            SwumDataStore.Clear();
             CachePath = Path.Combine(cacheDirectory, DefaultCacheFile);
 
             if(useCache) {
@@ -212,7 +213,7 @@ namespace Sando.Recommender {
         /// </summary>
         /// <param name="sourcePath">The path of the file to update.</param>
         public void UpdateSourceFile(string sourcePath) {
-            RemoveSourceFile(sourcePath);
+            SwumDataStore.RemoveSourceFile(sourcePath);
             AddSourceFile(sourcePath);
         }
 
@@ -222,43 +223,8 @@ namespace Sando.Recommender {
         /// <param name="sourcePath">The path of the file to update.</param>
         /// <param name="sourceXml">The SrcML for the new version of the file.</param>
         public void UpdateSourceFile(string sourcePath, XElement sourceXml) {
-            RemoveSourceFile(sourcePath);
+            SwumDataStore.RemoveSourceFile(sourcePath);
             AddSourceFile(sourcePath, sourceXml);
-        }
-
-        /// <summary>
-        /// Removes any SWUMs that were generated from the given source file.
-        /// </summary>
-        /// <param name="sourcePath">The path of the file to remove.</param>
-        public void RemoveSourceFile(string sourcePath) {
-            var fullPath = Path.GetFullPath(sourcePath);
-            var sigsToRemove = new HashSet<string>();
-            lock(signaturesToSwum) {
-                foreach(var sig in signaturesToSwum.Keys) {
-                    var sdr = signaturesToSwum[sig];
-                    if(sdr.FileNames.Contains(fullPath)) {
-                        sdr.FileNames.Remove(fullPath);
-                        if(!sdr.FileNames.Any()) {
-                            sigsToRemove.Add(sig);
-                        }
-                    }
-                }
-
-                //remove signatures that no longer have any file names
-                //(This is separate from the above loop because you can't delete keys while you're enumerating them.)
-                foreach(var sig in sigsToRemove) {
-                    signaturesToSwum.Remove(sig);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Clears any constructed SWUMs.
-        /// </summary>
-        public void Clear() {
-            lock(signaturesToSwum) {
-                signaturesToSwum.Clear();
-            }
         }
 
         /// <summary>
@@ -285,14 +251,11 @@ namespace Sando.Recommender {
         /// Prints the SWUM cache to the specified output stream.
         /// </summary>
         /// <param name="output">A TextWriter to print the SWUM cache to.</param>
-        public void PrintSwumCache(TextWriter output) {
-            if(output == null) {
-                throw new ArgumentNullException("output");
-            }
-            lock(signaturesToSwum) {
-                foreach(var kvp in signaturesToSwum) {
-                    output.WriteLine("{0}|{1}", kvp.Key, kvp.Value.ToString());
-                }
+        public void PrintSwumCache(TextWriter output)
+        {
+            var allSwumData = SwumDataStore.GetAllSwumDataBySignature();
+            foreach(var kvp in allSwumData) {
+                output.WriteLine("{0}|{1}", kvp.Key, kvp.Value.ToString());
             }
         }
 
@@ -301,63 +264,62 @@ namespace Sando.Recommender {
         /// </summary>
         /// <param name="path">The path to the SWUM cache file.</param>
         public void ReadSwumCache(string path) {
-            using(var cacheFile = new StreamReader(path)) {
-                lock(signaturesToSwum) {
-                    //clear any existing SWUMs
-                    signaturesToSwum.Clear();
+            using (var cacheFile = new StreamReader(path))
+            {
+                SwumDataStore.Clear();
 
-                    //read each SWUM entry from the cache file
-                    string entry;
-                    while((entry = cacheFile.ReadLine()) != null) {
-                        //the expected format is <signature>|<SwumDataRecord.ToString()>
-                        string[] fields = entry.Split(new[] {'|'}, 2);
-                        if(fields.Length != 2) {
-                            Debug.WriteLine(string.Format("Too few fields in SWUM cache entry: {0}", entry));
-                            continue;
-                        }
-                        try {
-                            string sig = fields[0].Trim();
-                            string data = fields[1].Trim();
-                            signaturesToSwum[sig] = SwumDataRecord.Parse(data);
-                        } catch(FormatException fe) {
-                            Debug.WriteLine(string.Format("Improperly formatted SwumDataRecord in Swum cache entry: {0}", entry));
-                            Debug.WriteLine(fe.Message);
-                        }
+                //read each SWUM entry from the cache file
+                string entry;
+                while ((entry = cacheFile.ReadLine()) != null)
+                {
+                    //the expected format is <signature>|<SwumDataRecord.ToString()>
+                    string[] fields = entry.Split(new[] {'|'}, 2);
+                    if (fields.Length != 2)
+                    {
+                        Debug.WriteLine(string.Format("Too few fields in SWUM cache entry: {0}", entry));
+                        continue;
+                    }
+                    try
+                    {
+                        int sig = int.Parse( fields[0].Trim());
+                        string data = fields[1].Trim();
+                        var swumRecord = SwumDataRecord.Parse(data);
+                        SwumDataStore.AddRecord(sig, swumRecord);
+                    }
+                    catch (FormatException fe)
+                    {
+                        Debug.WriteLine(string.Format("Improperly formatted SwumDataRecord in Swum cache entry: {0}",
+                            entry));
+                        Debug.WriteLine(fe.Message);
                     }
                 }
             }
         }
 
-
-        /// <summary>
-        /// Returns the SWUM data for the given method signature.
-        /// </summary>
-        /// <param name="methodSignature">The method signature to get SWUM data about.</param>
-        /// <returns>A SwumDataRecord containing the SWUM data about the given method, or null if no data is found.</returns>
-        public SwumDataRecord GetSwumForSignature(string methodSignature) {
-            if(methodSignature == null) { throw new ArgumentNullException("methodSignature"); }
-
-            SwumDataRecord result = null;
-            lock(signaturesToSwum) {
-                if(signaturesToSwum.ContainsKey(methodSignature)) {
-                    result = signaturesToSwum[methodSignature];
-                } 
-            }
-            return result;
+        public Dictionary<int, SwumDataRecord> GetAllSwumBySignature()
+        {
+            return SwumDataStore.GetAllSwumDataBySignature();
         }
 
-        /// <summary>
-        /// Returns a dictionary mapping method signatures to their SWUM data.
-        /// </summary>
-        public Dictionary<string,SwumDataRecord> GetSwumData() {
-            var currentSwum = new Dictionary<string, SwumDataRecord>();
-            lock(signaturesToSwum) {
-                foreach(var entry in signaturesToSwum) {
-                    currentSwum[entry.Key] = entry.Value;
-                }
-            }
-            return currentSwum;
-        } 
+        public List<SwumDataRecord> GetSwumForTerm(string term)
+        {
+            return SwumDataStore.GetSwumDataForTerm(term);
+        }
+
+        public bool ContainsFile(string sourcePath)
+        {
+            return SwumDataStore.ContainsFile(sourcePath);
+        }
+
+        public void RemoveSourceFile(string sourcePath)
+        {
+            SwumDataStore.RemoveSourceFile(sourcePath);
+        }
+
+        public void Clear()
+        {
+            SwumDataStore.Clear();
+        }
 
         #region Protected methods
 
@@ -365,25 +327,21 @@ namespace Sando.Recommender {
         {
             //compute SWUM on each field
             foreach (var fieldDecl in (from declStmt in file.Descendants(SRC.DeclarationStatement)
-                                       where !declStmt.Ancestors().Any(n => functionTypes.Contains(n.Name))
+                                       where !declStmt.Ancestors().Any(n => _functionTypes.Contains(n.Name))
                                        select declStmt.Element(SRC.Declaration)))
             {
-                int declPos = 1;
                 foreach (var nameElement in fieldDecl.Elements(SRC.Name))
                 {
                     string fieldName = nameElement.Elements(SRC.Name).Any() ? nameElement.Elements(SRC.Name).Last().Value : nameElement.Value;
 
                     FieldDeclarationNode fdn = new FieldDeclarationNode(fieldName, ContextBuilder.BuildFieldContext(fieldDecl));
-                    builder.ApplyRules(fdn);
+                    _builder.ApplyRules(fdn);
                     //var signature = string.Format("{0}:{1}:{2}", fileName, fieldDecl.Value, declPos);
-                    var signature = nameElement.GetXPath(false);
-                    var swumData = ProcessSwumNode(fdn);
-                    swumData.FileNames.Add(fileName);
-                    lock (signaturesToSwum)
-                    {
-                        signaturesToSwum[signature] = swumData;
-                    }
-                    declPos++;
+                    //TODOMemory - change to hash or something
+                    var signature = nameElement.GetXPath(false).GetHashCode();
+                    var swumRecord = ProcessSwumNode(fdn);
+                    swumRecord.FileNameHashes.Add(fileName.GetHashCode());
+                    SwumDataStore.AddRecord(signature, swumRecord);
                 }
             }
         }
@@ -407,22 +365,28 @@ namespace Sando.Recommender {
                 filePath = fileAttribute.Value;
             }
             var functions = from func in unitElement.Descendants()
-                            where functionTypes.Contains(func.Name) && !func.Ancestors(SRC.Declaration).Any()
+                            where _functionTypes.Contains(func.Name) && !func.Ancestors(SRC.Declaration).Any()
                             select func;
-            foreach(XElement func in functions) {
+            foreach (XElement func in functions)
+            {
                 //construct SWUM on the function (if necessary)
-                string sig = SrcMLElement.GetMethodSignature(func);
-                lock(signaturesToSwum) {
-                    if(signaturesToSwum.ContainsKey(sig)) {
-                        //update the SwumDataRecord with the filename of the duplicate method
-                        signaturesToSwum[sig].FileNames.Add(filePath);
-                    } else {
-                        MethodDeclarationNode mdn = ConstructSwumFromMethodElement(func);
-                        var swumData = ProcessSwumNode(mdn);
-                        swumData.FileNames.Add(filePath);
-                        signaturesToSwum[sig] = swumData;
-                    }
+                int sig = 
+                    SrcMLElement.GetMethodSignature(func).GetHashCode();
+                var swumRecord = SwumDataStore.GetSwumForSignature(sig);
+                if (swumRecord != null)
+                {
+                    //update the SwumDataRecord with the filename of the duplicate method
+                    swumRecord.FileNameHashes.Add(filePath.GetHashCode());
+                    SwumDataStore.AddRecord(sig, swumRecord);
                 }
+                else
+                {
+                    MethodDeclarationNode mdn = ConstructSwumFromMethodElement(func);
+                    swumRecord = ProcessSwumNode(mdn);
+                    swumRecord.FileNameHashes.Add(filePath.GetHashCode());
+                    SwumDataStore.AddRecord(sig, swumRecord);
+                }
+
             }
         }
 
@@ -442,7 +406,7 @@ namespace Sando.Recommender {
         /// <param name="className">The class on which this method is declared.</param>
         /// <returns>A MethodDeclarationNode with SWUM rules applied to it.</returns>
         protected MethodDeclarationNode ConstructSwumFromMethodElement(XElement methodElement, string className) {
-            if(!functionTypes.Contains(methodElement.Name)) {
+            if(!_functionTypes.Contains(methodElement.Name)) {
                 throw new ArgumentException("Element not a valid method type.", "methodElement");
             }
 
@@ -455,7 +419,7 @@ namespace Sando.Recommender {
             }
 
             MethodDeclarationNode mdn = new MethodDeclarationNode(funcName, mc);
-            builder.ApplyRules(mdn);
+            _builder.ApplyRules(mdn);
             return mdn;
         }
 
@@ -494,11 +458,11 @@ namespace Sando.Recommender {
             return sig.ToString().TrimStart(' ');
         }
 
-                /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
+        /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
         protected SwumDataRecord ProcessSwumNode(FieldDeclarationNode swumNode)
         {
             var record = new SwumDataRecord();
-            record.SwumNode = swumNode;
+            record.SwumNodeName = swumNode.Name;
             return record;
         }
 
@@ -510,7 +474,7 @@ namespace Sando.Recommender {
         /// <returns>A SwumDataRecord containing <paramref name="swumNode"/> and various data extracted from it.</returns>
         protected SwumDataRecord ProcessSwumNode(MethodDeclarationNode swumNode) {
             var record = new SwumDataRecord();
-            record.SwumNode = swumNode;
+            record.SwumNodeName = swumNode.Name;
             //set Action
             if(swumNode.Action != null) {
                 record.Action = swumNode.Action.ToPlainString();
@@ -553,20 +517,5 @@ namespace Sando.Recommender {
         }
 
         #endregion Protected methods
-
-        public bool ContainsFile(string sourcePath)
-        {
-            var fullPath = Path.GetFullPath(sourcePath);
-            lock (signaturesToSwum)
-            {
-                foreach (var sig in signaturesToSwum.Keys)
-                {
-                    var sdr = signaturesToSwum[sig];
-                    if (sdr.FileNames.Contains(fullPath))
-                        return true;
-                }
-            }
-            return false;
-        }
     }
 }

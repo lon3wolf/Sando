@@ -82,7 +82,7 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
 
         private IEnumerable<CodeSearchResult> GetResults(string searchString)
         {
-            var searcher = new IndexerSearcher();
+            var searcher = new SimpleIndexerSearcher();
             var criteria = new SimpleSearchCriteria
                 {
                     SearchTerms = new SortedSet<string>(searchString.Split(' ').ToList())

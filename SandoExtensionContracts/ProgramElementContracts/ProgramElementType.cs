@@ -10,7 +10,7 @@
         Struct,
         Class,        
 		Comment,							
-		TextLine,
+		TextFile,
         XmlElement,
 		Custom
 	}

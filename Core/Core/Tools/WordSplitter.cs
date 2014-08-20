@@ -4,6 +4,10 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sando.ExtensionContracts.SplitterContracts;
+using System.IO;
+using Sando.Indexer.Splitter;
+using System.Text;
+using Lucene.Net.Analysis;
 
 namespace Sando.Core.Tools
 {
@@ -11,46 +15,19 @@ namespace Sando.Core.Tools
     {
         public string[] ExtractWords(string word)
         {
-            //Zhao, for compiled regular expression
-            //word = Regex.Replace(word, @"([A-Z][a-z]+)", "_$1");
-            word = _patternChars.Replace(word, "_$1");
-            word = AddUnderscoreBeforeWordsStartingWithLowerCase(word);
-            //word = Regex.Replace(word, @"([A-Z]+|[0-9]+)", "_$1");
-            word = _patternCharDigit.Replace(word, "_$1");
-            word = word.Replace(" _", "_");
-            var delimiters = new[] { '_', ':' };
-            return word.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-
-        /// <summary>
-        /// For those variables that start with lower case, this method extracts them, such
-        /// as matches and offset in the method.
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        private String AddUnderscoreBeforeWordsStartingWithLowerCase(String word)
-        {
-            var matches = _patternCharsLowerCase.Matches(word);
-            int offset = 0;
-            foreach(Match match in matches)
+            StringReader r = new StringReader(word);
+            var filter = SnowballAndWordSplittingAnalyzer.GetStandardFilterSet(r);
+            StringBuilder splitter = new StringBuilder();
+            Token token = filter.Next();
+            HashSet<string> foundSplits = new HashSet<string>() ;
+            while (token != null && !String.IsNullOrEmpty(token.ToString()))
             {
-                int start = match.Groups[0].Index + offset + 1;
-                if (start == 0 || !word.ToCharArray()[start - 1].Equals('-'))
-                {
-                    word = word.Insert(start, "_");
-                    offset++;
-                }
-                else
-                {
-                    word = word.Insert(start-1, "_");
-                    offset++;
-                }
+                splitter.Append(" " + token.Term());
+                token = filter.Next();
             }
-            return word;
-        }
-
-
+            var delimiters = new[] { ' ' };
+            return splitter.ToString().Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+        }      
 
         public static List<string> ExtractSearchTerms(string searchTerms)
         {

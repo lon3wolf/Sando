@@ -23,20 +23,20 @@ namespace Sando.Indexer.Documents
         {
             List<Field> fields = new List<Field>();
             StructElement structElement = (StructElement)programElement;
-            fields.Add(new Field(SandoField.Namespace.ToString(), structElement.Namespace.ToSandoSearchable(), Field.Store.YES, Field.Index.ANALYZED));
-            AddBodyField(fields, new Field(SandoField.Body.ToString(), structElement.Body.ToSandoSearchable(), Field.Store.NO, Field.Index.ANALYZED));
+            fields.Add(new Field(SandoField.Namespace.ToString(), structElement.Namespace, Field.Store.YES, Field.Index.ANALYZED));
+            AddBodyField(fields, new Field(SandoField.Body.ToString(), structElement.Body, Field.Store.NO, Field.Index.ANALYZED));
             fields.Add(new Field(SandoField.AccessLevel.ToString(), structElement.AccessLevel.ToString().ToLower(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            fields.Add(new Field(SandoField.ExtendedClasses.ToString(), structElement.ExtendedStructs.ToSandoSearchable(), Field.Store.YES, Field.Index.ANALYZED));
+            fields.Add(new Field(SandoField.ExtendedClasses.ToString(), structElement.ExtendedStructs, Field.Store.YES, Field.Index.ANALYZED));
             fields.Add(new Field(SandoField.Modifiers.ToString(), structElement.Modifiers, Field.Store.YES, Field.Index.ANALYZED));
             return fields;
         }
 
         public override object[] GetParametersForConstructor(string name, ProgramElementType programElementType, string fullFilePath, int definitionLineNumber, int definitionColumnNumber, string snippet, Document document)
         {
-            string namespaceName = document.GetField(SandoField.Namespace.ToString()).StringValue().ToSandoDisplayable();
+            string namespaceName = document.GetField(SandoField.Namespace.ToString()).StringValue();
 			AccessLevel accessLevel = (AccessLevel)Enum.Parse(typeof(AccessLevel), document.GetField(SandoField.AccessLevel.ToString()).StringValue(), true);
-            string body = "not stored in index";//document.GetField(SandoField.Body.ToString()).StringValue().ToSandoDisplayable();
-            string extendedClasses = document.GetField(SandoField.ExtendedClasses.ToString()).StringValue().ToSandoDisplayable();            
+            string body = "not stored in index";//document.GetField(SandoField.Body.ToString()).StringValue();
+            string extendedClasses = document.GetField(SandoField.ExtendedClasses.ToString()).StringValue();            
             string modifiers = document.GetField(SandoField.Modifiers.ToString()).StringValue();
             return new object[] { name, definitionLineNumber, definitionColumnNumber, fullFilePath, snippet, accessLevel, namespaceName, body, extendedClasses, modifiers };
         }

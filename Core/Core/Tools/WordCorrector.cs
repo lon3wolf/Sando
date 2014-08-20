@@ -8,12 +8,12 @@ namespace Sando.Core.Tools
     public class WordCorrector
     {
         public const int GramNumber = 2;
-        private readonly Dictionary<String, List<String>> indexedWords;
+        private readonly Dictionary<String, HashSet<String>> indexedWords;
         private readonly object locker = new object();
 
         public WordCorrector()
         {
-            indexedWords = new Dictionary<string, List<string>>();
+            indexedWords = new Dictionary<string, HashSet<string>>();
         }
 
         public void AddWords(IEnumerable<String> words)
@@ -54,8 +54,8 @@ namespace Sando.Core.Tools
         private String[] RankSimilarWords(Dictionary<String, int> results, string originalWord)
         {
             var de = new Levenshtein();
-            var correctionWords = results.OrderByDescending(r => r.Value).Select(r => r.Key).TrimIfOverlyLong(10);
-            return correctionWords.OrderBy(w => de.LD(w, originalWord)).ToArray();
+            var correctionWords = results.OrderByDescending(r => r.Value).Select(r => r.Key);
+            return correctionWords.OrderBy(w => de.LD(w, originalWord)).TrimIfOverlyLong(10).ToArray();
         }
 
         private void AddWord(String word)
@@ -64,9 +64,7 @@ namespace Sando.Core.Tools
             foreach (var key in keys)
             {
                 if(!indexedWords.ContainsKey(key))
-                    indexedWords.Add(key, new List<string>());
-                if(indexedWords[key].Contains(word))
-                    return;
+                    indexedWords.Add(key, new HashSet<string>());
                 indexedWords[key].Add(word);
             }
         }

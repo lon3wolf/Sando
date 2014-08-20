@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 using ABB.SrcML;
 using ABB.SrcML.VisualStudio.SrcMLService;
 using Configuration.OptionsPages;
@@ -44,6 +45,9 @@ using System.Windows.Threading;
 using System.Collections.ObjectModel;
 using ABB.VisualStudio.Interfaces;
 using System.Threading;
+using Sando.Indexer.Splitter;
+using Sando.ExtensionContracts.IndexerContracts;
+using Sando.Indexer.Searching.Criteria;
 
 
 
@@ -85,7 +89,7 @@ namespace Sando.UI
     /// </summary>
     [ProvideService(typeof(SSandoGlobalService))]
 
-    public sealed class UIPackage : Package, IToolWindowFinder
+    public sealed class UIPackage : Package, IToolWindowFinder, IMissingFilesIncluder
     {
         // JZ: SrcMLService Integration
         //private ABB.SrcML.VisualStudio.SolutionMonitor.SolutionMonitor _currentMonitor;
@@ -98,7 +102,7 @@ namespace Sando.UI
         private DTEEvents _dteEvents;
         private ViewManager _viewManager;		
         private WindowEvents _windowEvents;
-        private bool SetupHandlers = false;
+        private bool _setupHandlers = false;
         private bool WindowActivated = false;
 
         /// <summary>
@@ -213,9 +217,9 @@ namespace Sando.UI
                 SetUpLifeCycleEvents();
 
                 //load srml package first?
-                var taskScheduler = GetTaskSchedulerService();
+                taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
-                RegisterSrcMLService(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());                
+                RegisterSrcMLService();
             }
             catch(Exception e)
             {
@@ -231,37 +235,39 @@ namespace Sando.UI
             _dteEvents.OnBeginShutdown += DteEventsOnOnBeginShutdown;
             _dteEvents.OnStartupComplete += StartupCompleted;
             _windowEvents = dte.Events.WindowEvents;
-            _windowEvents.WindowActivated += SandoWindowActivated;
+            
+            //_windowEvents.WindowActivated += SandoWindowActivated;
             
         }
 
-        private void SandoWindowActivated(Window gotFocus, Window lostFocus)
-        {
-            try
-            {
-                if (gotFocus.ObjectKind.Equals("{AC71D0B7-7613-4EDD-95CC-9BE31C0A993A}"))
-                {
-                    var window = FindToolWindow(typeof(SearchToolWindow), 0, true);
-                    if ((null == window) || (null == window.Frame))
-                    {
-                        throw new NotSupportedException(Resources.CanNotCreateWindow);
-                    }
-                    var stw = window as SearchToolWindow;
-                    if (stw != null)
-                    {
-                        WindowActivated = true;    
-                        stw.GetSearchViewControl().FocusOnText();                        
-                        ShowProgressBar(lastShowValue);
-                        UpdateIndexingFilesList();                    
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                LogEvents.UISandoWindowActivationError(this, e);
-            }
+        //If this is needed, then it should be done in SearchView.xaml.cs
+        //private void SandoWindowActivated(Window gotFocus, Window lostFocus)
+        //{
+        //    try
+        //    {
+        //        if (gotFocus.ObjectKind.Equals("{AC71D0B7-7613-4EDD-95CC-9BE31C0A993A}"))
+        //        {
+        //            var window = FindToolWindow(typeof(SearchToolWindow), 0, true);
+        //            if ((null == window) || (null == window.Frame))
+        //            {
+        //                throw new NotSupportedException(Resources.CanNotCreateWindow);
+        //            }
+        //            var stw = window as SearchToolWindow;
+        //            if (stw != null)
+        //            {
+        //                WindowActivated = true;    
+        //                //TODO:Check this later
+        //                //stw.GetSearchViewControl().FocusOnText();                        
+                                         
+        //            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        LogEvents.UISandoWindowActivationError(this, e);
+        //    }
             
-        }
+        //}
 
         private void AddCommand()
         {
@@ -271,10 +277,13 @@ namespace Sando.UI
             {
                 // Create the command for the tool window
                 var toolwndCommandID = new CommandID(GuidList.guidUICmdSet, (int) PkgCmdIDList.sandoSearch);
-                var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);
+                var menuToolWin = new MenuCommand(_viewManager.ShowToolWindow, toolwndCommandID);                
                 mcs.AddCommand(menuToolWin);
             }
+            KeyBindingsManager.RebindOnceOnly();
         }
+
+        
         
         public void StartupCompleted()
         {
@@ -351,7 +360,7 @@ namespace Sando.UI
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".cs" }, new SrcMLCSharpParser(_srcMLArchive));
             ////extensionPointsRepository.RegisterParserImplementation(new List<string> { ".h", ".cpp", ".cxx", ".c" }, new SrcMLCppParser(_srcMLArchive));
             // JZ: End of code changes
-            extensionPointsRepository.RegisterParserImplementation(new List<string> { ".xaml" }, new XAMLFileParser());
+            //extensionPointsRepository.RegisterParserImplementation(new List<string> { ".xaml" }, new XAMLFileParser());
 			//extensionPointsRepository.RegisterParserImplementation(new List<string> { ".txt" },
 																  // new TextFileParser());
 
@@ -410,8 +419,6 @@ namespace Sando.UI
                 // XiGe: dispose the dictionary.
                 ServiceLocator.Resolve<DictionaryBasedSplitter>().Dispose();
                 ServiceLocator.Resolve<SearchHistory>().Dispose();
-                var control = ServiceLocator.Resolve<SearchViewControl>();
-                control.Dispatcher.Invoke((Action)(() => UpdateDirectory(SearchViewControl.DefaultOpenSolutionMessage, control)));                                                                    
             }
             catch (Exception e)
             {
@@ -426,53 +433,7 @@ namespace Sando.UI
 		    bw.RunWorkerAsync();
 		}
 
-
-    
-
-        public void UpdateIndexingFilesList(String directory, bool emptyDirectorySpecified=false)
-        {
-            var window = FindToolWindow(typeof(SearchToolWindow), 0, false);
-            if(null != window && null != window.Frame) {
-                var path = directory;
-                try {
-                    var control = ServiceLocator.Resolve<SearchViewControl>();
-                    control.Dispatcher.Invoke((Action) (() => UpdateDirectory(path, control)));
-                    if(!emptyDirectorySpecified)
-                        updatedForThisSolution = true;
-                } catch(InvalidOperationException notInited) {
-                    //OK, window not inited so can't update it
-                }
-            }
-        }
-
-
-
-        private void UpdateDirectory(string path, SearchViewControl control)
-        {
-            if (control != null)
-            { 
-                control.OpenSolutionPaths = path;
-            }
-        }
-
         private bool lastShowValue = false;
-
-        public void ShowProgressBar(bool show)
-        {
-            if(WindowActivated)
-            {
-                try {
-                    var control = ServiceLocator.Resolve<SearchViewControl>();
-                    if (null != control)
-                    {
-                        control.Dispatcher.BeginInvoke((Action)(() => control.ShowProgressBar(show)));
-                    }                                            
-                } catch(TargetInvocationException e) {
-                    FileLogger.DefaultLogger.Error(e);
-                }
-            }
-            lastShowValue = show;
-        }
 
         /// <summary>
         /// Respond to solution opening.
@@ -482,9 +443,6 @@ namespace Sando.UI
         {
             try
             {
-                if(srcMLService==null || srcMLService.MonitoredDirectories==null || srcMLService.MonitoredDirectories.Count()==0)
-                    UpdateIndexingFilesList(SearchViewControl.PleaseAddDirectoriesMessage, true);
-
                 SolutionKey key = SetupSolutionKey();
 
                 bool isIndexRecreationRequired = IndexStateManager.IsIndexRecreationRequired();
@@ -492,9 +450,9 @@ namespace Sando.UI
                 
                 //Setup indexers
                 ServiceLocator.RegisterInstance(new IndexFilterManager());                
-                ServiceLocator.RegisterInstance<Analyzer>(GetAnalyzer());                
-                SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+                ServiceLocator.RegisterInstance<Analyzer>(SnowballAndWordSplittingAnalyzer.GetAnalyzer());                
+                var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                var currentIndexer = new DocumentIndexer(srcMLArchiveEventsHandlers, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
                 ServiceLocator.RegisterInstance(currentIndexer);
                 ServiceLocator.RegisterInstance(new IndexUpdateManager());
 
@@ -510,12 +468,14 @@ namespace Sando.UI
 
                 if (isIndexRecreationRequired)
                 {
-                    RecreateEntireIndex(srcMLArchiveEventsHandlers);
+                    RecreateEntireIndex();
                 }
                 else
                 {
-                    CheckIndexForMissingFiles(srcMLArchiveEventsHandlers);
-                }                
+                    EnsureNoMissingFilesAndNoDeletedFiles();
+                }
+
+                RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
             }
             catch (Exception e)
             {
@@ -541,55 +501,82 @@ namespace Sando.UI
             return taskSchedulerService.GlobalScheduler;          
         }
 
-        private void CheckIndexForMissingFiles(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        // from IMissingFilesIncluder
+        public void EnsureNoMissingFilesAndNoDeletedFiles()
         {
             //make sure you're not missing any files 
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
-            {
-                Collection<string> files = null;
-                while (files == null)
+            {                
+                while (true)
                 {
                     try
                     {
-                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                        SrcMLArchiveEventsHandlers handlers = null;
+                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        {
+                            if(handlers == null)
+                                handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                            handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
+                        }
+                        break;
                     }
                     catch (NullReferenceException ne)
                     {
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
-                {
-                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
-                }
+ 
                 //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
+             
+            indexingTask.ContinueWith( (t) => 
+                {
+                    var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                    //go through all files and delete necessary ones                    
+                    foreach(var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
+                        if (!srcMLService.GetSrcMLArchive().ContainsFile(file))
+                            srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
+                }, 
+            new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
         }
 
-        private void RecreateEntireIndex(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        private void RecreateEntireIndex()
         {
             //just recreate the whole index
             var indexingTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                Collection<string> files = null;
-                while (files == null)
+                while (true)
                 {
                     try
                     {
-                        files = srcMLService.GetSrcMLArchive().GetFiles();
+                        SrcMLArchiveEventsHandlers handlers = null;
+                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        {
+                            if (handlers == null)
+                                handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
+                            handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
+                        }
+                        break;
                     }
                     catch (NullReferenceException ne)
                     {
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                foreach (var file in srcMLService.GetSrcMLArchive().FileUnits)
-                {
-                    var fileName = ABB.SrcML.SrcMLElement.GetFileNameForUnit(file);
-                    srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
-                }
-                //srcMLArchiveEventsHandlers.WaitForIndexing();
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
+        }
+
+        private IEnumerable<string> GetNonSourceFileNamesToIndex(IEnumerable<string> sourceExtensions)
+        {
+            var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
+            var nonSourceExtensions = sandoOptions.FileExtensionsToIndex.Except(sourceExtensions);
+            var nonSourceFiles = new List<string>();
+            foreach (var monitoredDir in srcMLService.MonitoredDirectories)
+            {
+                nonSourceFiles.AddRange(Directory.GetFiles(monitoredDir, "*.*", SearchOption.AllDirectories).Where(file =>
+                    nonSourceExtensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))));
+            }
+            return nonSourceFiles;
         }
 
         private static void SetupDataLogging()
@@ -605,10 +592,11 @@ namespace Sando.UI
             }
         }
 
-        private static void SetupRecommenderSystem()
+        private void SetupRecommenderSystem()
         {
             // xige
-            var dictionary = new DictionaryBasedSplitter();
+            var dictionary = new DictionaryBasedSplitter(taskScheduler);
+            ServiceLocator.RegisterInstance(dictionary);
             dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
             ServiceLocator.Resolve<IndexUpdateManager>().indexUpdated +=
                 dictionary.UpdateProgramElement;
@@ -624,9 +612,9 @@ namespace Sando.UI
             ServiceLocator.RegisterInstance(history);
         }
 
-        private void RegisterSrcMLService(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
+        private void RegisterSrcMLService()
         {
-            srcMLService = GetService(typeof(SSrcMLGlobalService)) as ISrcMLGlobalService;
+            srcMLService = GetService(typeof (SSrcMLGlobalService)) as ISrcMLGlobalService;
             if (null == srcMLService)
             {
                 throw new Exception("Can not get the SrcML global service.");
@@ -634,24 +622,19 @@ namespace Sando.UI
             else
             {
                 ServiceLocator.RegisterInstance(srcMLService);
-            }                         
-            if (!SetupHandlers)
-            {
-                SetupHandlers = true;
-                if(srcMLService.IsUpdating) {
-                    ShowProgressBar(true);
-                }
-                srcMLService.UpdateArchivesStarted += srcMLArchiveEventsHandlers.UpdateStarted;
-                srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
-                srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
-                srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
-                srcMLService.DirectoryAdded += srcMLService_DirectoryAdded;
             }
         }
 
-        void srcMLService_DirectoryAdded(object sender, DirectoryScanningMonitorEventArgs e)
+        private void RegisterSrcMLHandlers(SrcMLArchiveEventsHandlers srcMLArchiveEventsHandlers)
         {
-            UpdateIndexingFilesList(e.Directory);
+            if (!_setupHandlers)
+            {
+                _setupHandlers = true;
+                
+                //srcMLService.UpdateArchivesCompleted += srcMLArchiveEventsHandlers.UpdateCompleted;
+                srcMLService.SourceFileChanged += srcMLArchiveEventsHandlers.SourceFileChanged;
+                srcMLService.MonitoringStopped += srcMLArchiveEventsHandlers.MonitoringStopped;
+            }
         }
 
         private SolutionKey SetupSolutionKey()
@@ -690,15 +673,9 @@ namespace Sando.UI
         Action progressAction;
         private bool updatedForThisSolution = false;
         private ITaskManagerService taskSchedulerService;
+        private TaskScheduler taskScheduler;
  
-        private Analyzer GetAnalyzer()
-        {
-            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new SnowballAnalyzer("English"));
-            analyzer.AddAnalyzer(SandoField.Source.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.AccessLevel.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.ProgramElementType.ToString(), new KeywordAnalyzer());
-            return analyzer;
-        }  
+ 
 
         #endregion
 
@@ -709,19 +686,11 @@ namespace Sando.UI
         {
             ServiceLocator.RegisterInstance(GetService(typeof (DTE)) as DTE2);
             ServiceLocator.RegisterInstance(this);
+            ServiceLocator.RegisterInstance<IMissingFilesIncluder>(this);
             ServiceLocator.RegisterInstance(new ViewManager(this));
             ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new SandoOptionsProvider());            
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
-            ServiceLocator.RegisterType<IIndexerSearcher, IndexerSearcher>();
         }
 
-
-        public void UpdateIndexingFilesList()
-        {
-            if (srcMLService != null && srcMLService.MonitoredDirectories != null && srcMLService.MonitoredDirectories.Count > 0)
-            {
-                UpdateIndexingFilesList(srcMLService.MonitoredDirectories.First());
-            }
-        }
     }
 }

@@ -26,9 +26,9 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void SearchRespectsAccessLevelCriteriaInternal()
         {
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
             string keywords = "SingleUsageTypeCriteriaToString";
-            SearchCriteria searchCriteria = new SimpleSearchCriteria()
+            SimpleSearchCriteria searchCriteria = new SimpleSearchCriteria()
             {
                 AccessLevels = new SortedSet<AccessLevel>() { AccessLevel.Internal },
                 SearchByAccessLevel = true,
@@ -60,9 +60,9 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void SearchRespectsAccessLevelCriteria()
 		{
-            var codeSearcher = new CodeSearcher(new IndexerSearcher());
+            var codeSearcher = new CodeSearcher();
 			string keywords = "usage type";
-			SearchCriteria searchCriteria = new SimpleSearchCriteria()
+            SimpleSearchCriteria searchCriteria = new SimpleSearchCriteria()
 			{
 				AccessLevels = new SortedSet<AccessLevel>() { AccessLevel.Private },
 				SearchByAccessLevel = true,
@@ -98,7 +98,7 @@ namespace Sando.IntegrationTests.Search
 		{
 			try
 			{
-				var codeSearcher = new CodeSearcher(new IndexerSearcher());
+				var codeSearcher = new CodeSearcher();
 				string keywords = "  usage ";
 				List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
 			}
@@ -111,9 +111,9 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void SearchReturnsElementsUsingCrossFieldMatching()
 		{
-			var codeSearcher = new CodeSearcher(new IndexerSearcher());
+			var codeSearcher = new CodeSearcher();
 			string keywords = "fetch output argument";
-			SearchCriteria searchCriteria = new SimpleSearchCriteria()
+            SimpleSearchCriteria searchCriteria = new SimpleSearchCriteria()
 			{
 				SearchTerms = new SortedSet<string>(keywords.Split(' '))
 			};

@@ -28,14 +28,13 @@ namespace Sando.SearchEngine.UnitTests
         [Test]
         public void TestCreateCodeSearcher()
         {
-            Assert.DoesNotThrow(() => new CodeSearcher(null));
+            Assert.DoesNotThrow(() => new CodeSearcher());
         }
 
         [Test]
         public void PerformBasicSearch()
         {
-            var indexerSearcher = new IndexerSearcher();
-            CodeSearcher cs = new CodeSearcher(indexerSearcher);
+            CodeSearcher cs = new CodeSearcher();
             List<CodeSearchResult> result = cs.Search("SimpleName");            
             Assert.True(result.Count > 0);
         }

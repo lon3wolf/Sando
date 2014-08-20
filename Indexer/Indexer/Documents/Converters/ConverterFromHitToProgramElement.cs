@@ -51,8 +51,8 @@ namespace Sando.Indexer.Documents.Converters
                     return new MethodPrototypeDocument(document);
                 case ProgramElementType.Struct:
                     return new StructDocument(document);
-                case ProgramElementType.TextLine:
-                    return new TextLineDocument(document);
+                case ProgramElementType.TextFile:
+                    return new TextFileDocument(document);
                 case ProgramElementType.XmlElement:
                     return new XmlXElementDocument(document);
                 case ProgramElementType.Custom:
@@ -70,7 +70,7 @@ namespace Sando.Indexer.Documents.Converters
             Contract.Ensures(Contract.Result<ProgramElement>() != null, "ConverterFromHitToProgramElement:ReadProgramElementFromDocument - an object must be returned from this method!");			
 
             //Get standard field values
-            string name = luceneDocument.GetField(SandoField.Name.ToString()).StringValue().ToSandoDisplayable();
+            string name = luceneDocument.GetField(SandoField.Name.ToString()).StringValue();
             ProgramElementType type = (ProgramElementType)Enum.Parse(typeof(ProgramElementType), luceneDocument.GetField(SandoField.ProgramElementType.ToString()).StringValue(), true);
             string fullFilePath = luceneDocument.GetField(SandoField.FullFilePath.ToString()).StringValue();
             int definitionLineNumber = int.Parse(luceneDocument.GetField(SandoField.DefinitionLineNumber.ToString()).StringValue());

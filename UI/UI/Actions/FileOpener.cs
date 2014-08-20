@@ -31,10 +31,15 @@ namespace Sando.UI.Actions
                 Window window = _dte.ItemOperations.OpenFile(filePath, Constants.vsViewKindTextView);
                 var selection = (TextSelection)_dte.ActiveDocument.Selection;
                 selection.GotoLine(lineNumber);
+
+                if (FileOpened != null)
+                {
+                    FileOpened(null, new EventArgs());
+                }
             }
             catch (Exception e)
             {
-                    LogEvents.UIOpenFileError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, e);
+                LogEvents.UIOpenFileError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, e);
                 //ignore, we don't want this feature ever causing a crash
             }
         }
@@ -55,7 +60,11 @@ namespace Sando.UI.Actions
                 _dte = ServiceLocator.Resolve<DTE2>();
             }
         }
+
+        public static event FileOpenedEventHandler FileOpened;
         
     }
+
+    public delegate void FileOpenedEventHandler(object sender, EventArgs e);
 
 }

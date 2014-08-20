@@ -42,9 +42,9 @@ namespace Sando.Indexer.Documents
             {
                 return new StructDocument(programElement as StructElement);
             }
-			if(programElement as TextLineElement != null)
+			if(programElement as TextFileElement != null)
 			{
-				return new TextLineDocument(programElement as TextLineElement);
+				return new TextFileDocument(programElement as TextFileElement);
 			}
             if (programElement as XmlXElement!= null)
             {

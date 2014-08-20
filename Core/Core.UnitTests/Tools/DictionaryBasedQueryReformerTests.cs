@@ -83,7 +83,7 @@ namespace Sando.Core.UnitTests.Tools
         [SetUp]
         public void setUp()
         {
-            reformer.Initialize(null);
+            reformer.Initialize(String.Empty);
         }
 
         [Test]

@@ -10,6 +10,8 @@ using System.Windows.Media;
 using Sando.Core.Tools;
 using Sando.ExtensionContracts.ResultsReordererContracts;
 using Sando.Core.Logging.Events;
+using System.Windows.Input;
+using Sando.UI.Actions;
 
 namespace Sando.UI.View.Search.Converters {
     [ValueConversion(typeof(IHighlightRawInfo), typeof(object))]
@@ -36,16 +38,31 @@ namespace Sando.UI.View.Search.Converters {
                      preNum = num;
                  }
                 line.AddBeginning(CreateRun("\t", regularWeight));
-                line.AddBeginning(CreateLineNumberHyperLink(num));
+                line.AddBeginning(CreateRun(num.ToString(), regularWeight));
+                AddLineNumberHyperlinks(infor, num, line);
              }
              return lines;
          }
 
-        private Inline CreateLineNumberHyperLink(int number)
-        {
-            var run = CreateRun(number.ToString(), regularWeight);
-            run.Foreground = Brushes.CadetBlue;
-            return run;
+         private void AddLineNumberHyperlinks(IHighlightRawInfo infor, int num, InlineItemLine line)
+         {
+             foreach (var item in line.GetItems())
+             {
+                 var run = item as Run;
+                 if (run != null)
+                     AddLineNumberHyperlink(run, num, infor);
+             }
+         }
+
+        private void AddLineNumberHyperlink(Run run, int number, IHighlightRawInfo infor)
+        {            
+            run.MouseUp += delegate(object sender, MouseButtonEventArgs e)
+            {
+                if (e.ClickCount == 1 && e.LeftButton == MouseButtonState.Released)
+                {
+                    FileOpener.OpenFile(infor.FullFilePath, number);
+                }
+            };                        
         }
 
         private string[] RemoveHeadTailEmptyStrings(IEnumerable<string> lines)
@@ -155,7 +172,7 @@ namespace Sando.UI.View.Search.Converters {
                         foreach (string item in temp)
                         {
                             span.Inlines.Add(IsSearchKey(item, key)
-                                ? CreateRun(item, highlightedWeight, SearchViewControl.GetHistoryTextColor())
+                                ? CreateRun(item, highlightedWeight, ColorGenerator.GetHistoryTextColor())
                                     : CreateRun(item, regularWeight));
                         }
                     }

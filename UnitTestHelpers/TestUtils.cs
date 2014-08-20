@@ -60,7 +60,7 @@ namespace UnitTestHelpers
             var generator = new ABB.SrcML.SrcMLGenerator(SrcMLDirectory);
 
             extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".cs" }, new SrcMLCSharpParser(generator));
-            extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".h", ".cpp", ".cxx" }, new SrcMLCppParser(generator));
+            extensionPointsRepository.RegisterParserImplementation(new List<string>() { ".c", ".h", ".cpp", ".cxx" }, new SrcMLCppParser(generator));
 
 			extensionPointsRepository.RegisterWordSplitterImplementation(new WordSplitter());
 
@@ -87,6 +87,13 @@ namespace UnitTestHelpers
         public static Sando.ExtensionContracts.TaskFactoryContracts.ITaskScheduler GetATestingScheduler()
         {
             return testingScheduler;
+        }
+
+        public static void InitializeFrameworkForUnitTests()
+        {            
+            ServiceLocator.RegisterInstance<DictionaryBasedSplitter>(new DictionaryBasedSplitter());
+            TestUtils.InitializeDefaultExtensionPoints();
+            SeSpecificThesaurus.GetInstance().Initialize("");
         }
     }
 }

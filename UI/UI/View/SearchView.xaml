@@ -1,0 +1,308 @@
+﻿<UserControl x:Class="Sando.UI.View.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewmodel="clr-namespace:Sando.UI.ViewModel"
+             xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
+             xmlns:converters="clr-namespace:Sando.UI.View.Search.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/UI;component/Base/StyleDictionary.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:SwumTypeToColorConverter x:Key="SwumTypeToColorConverter"/>
+            <converters:BackgroundConverter x:Key="BackgroundConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>            
+            <RowDefinition Height="17"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="7" MinHeight="7"/>
+            <RowDefinition Height="15" MinHeight="15"/>
+            <RowDefinition Height="15" MinHeight="15"/>
+            <RowDefinition Height="Auto" MinHeight="15"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="5,0,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="83">
+                </ColumnDefinition>
+                <ColumnDefinition Width="*">
+                </ColumnDefinition>
+
+            </Grid.ColumnDefinitions>
+
+            <TextBox Margin="-3,0,0,0"  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" BorderThickness="0" FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" IsReadOnly="True"   Grid.Row="0"  HorizontalAlignment="Left" 
+                     Width="127"  Grid.Column="0" Height="Auto"  
+                     KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" Text="Indexed Folders:" Grid.ColumnSpan="2"/>
+
+
+            <TextBox KeyboardNavigation.IsTabStop="False"   BorderThickness="0" IsReadOnly="True" Grid.Column="1" Name="IndexingList" Margin="2,0,5,1" FontSize="11" FontStyle="Italic" HorizontalAlignment="Stretch" Text="{Binding Path=CurrentIndexedFile.FilePath}"
+                      KeyDown="IndexingList_KeyDown" PreviewMouseDown="IndexingList_MouseButtonDown"
+                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" ToolTip="Specify folders to index for open solution" Grid.ColumnSpan="2">
+                <TextBox.Background>
+                    <Binding Path="OpenSolutionPaths" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" Converter="{StaticResource BackgroundConverter}"/>
+                </TextBox.Background>
+            </TextBox>
+            <Popup Name="CurrentlyIndexingFoldersPopup" Placement="Bottom" PlacementTarget="{Binding ElementName=IndexingList}" StaysOpen="True" IsOpen="False" Width="Auto">
+                <Grid  IsEnabled="{Binding IsIndexFileEnabled}" Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolboxBackgroundKey   }}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Border Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="0,0,5,5"></Border>
+                    <Grid Margin="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition Height="40"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="70"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <ListBox ItemsSource="{Binding Path=IndexedFiles}" SelectedItem="{Binding SelectedIndexedFile}" Height="120" VerticalAlignment="Top" Width="236" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewmodel:IndexedFile}">
+                                        <TextBlock Text="{Binding FilePath}" ></TextBlock>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <StackPanel Grid.Column="1">
+                                <Button Margin="5" Width="60" Height="25" Command="{Binding AddIndexFolderCommand}">Add</Button>
+                                <Button Margin="5" Width="60" Height="25" Command="{Binding RemoveIndexFolderCommand}">Remove</Button>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition Width="80"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Border BorderBrush="Black" BorderThickness="0,0,0,1" Grid.ColumnSpan="2"></Border>
+                            <TextBox Margin="5" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Height="25" Width="220" 
+                                     Text="{Binding SelectedIndexedFile.FilePath, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="{Binding SelectedIndexedFile.FilePath}">
+
+                            </TextBox>
+                            <Button Height="25" Width="60" Grid.Column="1" Click="BrowserButton_Click" IsEnabled="{Binding IsBrowseButtonEnabled}">Browser</Button>
+                        </Grid>
+
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Name="OKButton" Margin="5" Width="60" Height="25" Click="OKButton_Click" Command="{Binding ApplyCommand}">OK</Button>
+                        <Button Name="CancelButton" Margin="5" Width="60" Height="25" Click="CancelButton_Click" Command="{Binding CancelCommand}">Cancel</Button>
+                    </StackPanel>
+                </Grid>
+            </Popup>
+        </Grid>
+        <Grid Grid.Row="1" Margin="5,0,5,0" Grid.Column="0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="0" />
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Top Part: Query -->
+            <controls:AutoCompleteBox Loaded="SearchBox_Loaded" HorizontalAlignment="Stretch" Grid.Column="0"
+                Name="SearchBox" Margin="0,0,0,0" FilterMode="None"
+                Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
+                KeyUp="SearchBox_OnKeyUpHandler"
+                MinimumPrefixLength="0" MaxDropDownHeight="290" 
+                ValueMemberPath="Query" VerticalAlignment="Top" 
+                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}">
+                <controls:AutoCompleteBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
+                        <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
+                    </StackPanel>
+                </controls:AutoCompleteBox.ToolTip>
+
+                <controls:AutoCompleteBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Query}" >
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground">
+                                        <Setter.Value>
+                                            <MultiBinding  Mode="OneWay" Converter="{StaticResource SwumTypeToColorConverter}">
+                                                <Binding Path="." Mode="OneWay" RelativeSource="{RelativeSource FindAncestor, AncestorType=ListBoxItem}"/>
+                                                <Binding Path="IsSelected" Mode="OneWay" RelativeSource="{RelativeSource FindAncestor, AncestorType=ListBoxItem}"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </controls:AutoCompleteBox.ItemTemplate>
+            </controls:AutoCompleteBox>
+
+            <!--
+            <Button Style="{StaticResource NoChromeButton}" Background="Gainsboro"
+                    Grid.Column="1" Click="TagCloudButton_Click"
+                    Height="25" ToolTip="Show tag cloud">
+                <Image Source="../Resources/cloud.png"/>
+            </Button>
+            -->
+
+            <Button Grid.Row="0" Grid.Column="2" Content="Search"  VerticalAlignment="Top" Height="25" Name="SearchButton" Command="{Binding SearchCommand}"
+                    CommandParameter="{Binding ElementName=SearchBox,Path=Text}" Margin="10,0,0,0"/>
+        </Grid>
+
+
+        <ProgressBar Margin="5,2,5,0" Name="ProgBar" Grid.Row="2"
+                 VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="3" IsIndeterminate="True" Visibility="{Binding ProgressBarVisibility}"/>
+
+        <!-- info string -->
+        <TextBlock Margin="6,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+                 Name = "SearchStatusTextBlock"
+                 FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
+                 Grid.Row="3" Width="Auto" HorizontalAlignment="Stretch"  
+                 Grid.Column="0" Height="Auto"
+                 KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap" />
+
+        <!-- info string -->
+        <TextBlock Margin="6,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" FontSize="11" 
+                Name="RecommendedQueryTextBlock"
+                FontStyle="Italic" Background="{Binding Path=Background, 
+                RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
+                Grid.Row="4" Width="Auto" HorizontalAlignment="Stretch"  
+                 Height="15" 
+                KeyboardNavigation.IsTabStop="False" TextWrapping="Wrap"></TextBlock>
+
+
+
+        <Popup Name="TagCloudPopUpWindow" Placement="Center" StaysOpen="False" IsOpen="False" Width="900" IsEnabled="True" 
+               Grid.Row="3">
+            <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+                <DockPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" Margin="0,0,0,0" HorizontalAlignment="Center">
+                    <Button Name="previousTagButton"  Margin="0,0,0,0" Width="20" HorizontalAlignment="Right"
+                        FontFamily="ExtraBold" IsEnabled="True"
+        		        KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
+                        Click="ChangeSelectedTag" FontWeight="ExtraBold" Height="40" VerticalAlignment="Top" 
+                        ToolTip="Previous Word" Content="&lt;" FontSize="30" Foreground="CadetBlue">
+                    </Button>
+                    <TextBlock Name="tagCloudTitleTextBlock" Margin="0,0,0,0" Visibility="Visible" IsEnabled="True" 
+                                HorizontalAlignment="Stretch" Foreground="CadetBlue"
+                               Background = "{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
+                               FontSize="28" FontFamily="Times">
+                    </TextBlock>
+
+                    <Button Name="nextTagButton"  Margin="0,0,0,0" Width="20" HorizontalAlignment="Left"
+                        FontFamily="ExtraBold" IsEnabled="True" FontSize="30" Foreground="CadetBlue"
+        		        KeyboardNavigation.IsTabStop="False" Style="{DynamicResource ToggleButtonStyleBorderless}" 
+                        Click="ChangeSelectedTag" FontWeight="ExtraBold" Height="40" VerticalAlignment="Top" 
+                        Background = "{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
+                        ToolTip="Next word" Content="&gt;">
+                    </Button>
+                </DockPanel>
+                <TextBlock Margin="0,0,0,0" Name="TagCloudTextBlock" IsEnabled="True" 
+                           Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}" 
+                           HorizontalAlignment="Stretch" 
+                    TextWrapping="Wrap" FontFamily="Times">
+                </TextBlock>
+            </StackPanel>
+        </Popup>
+
+        <!-- details -->
+        <Expander Grid.Row="5" Margin="5" Grid.Column="0" Name="LayoutRoot">
+            <Expander.HeaderTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"  Text="Advanced Options" />
+                    </StackPanel>
+                </DataTemplate>
+            </Expander.HeaderTemplate>
+            <Border CornerRadius="5" BorderThickness="1" BorderBrush="Black" Margin="0,3,0,0">
+                <StackPanel Margin="5">
+                    <!--Access Level-->
+                    <Expander>
+                        <Expander.Header>
+                            <TextBlock Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"  Text="Access level" Grid.Row="0" Grid.ColumnSpan="2"/>
+                        </Expander.Header>
+                        <Expander.Content>
+                            <ListBox Margin="5,3,5,5" ItemsSource="{Binding AccessLevels}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox Width="20" IsChecked="{Binding Path=Checked}"
+                                               />
+                                            <TextBlock 
+                                       Width="100" Text="{Binding Path=Access}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Expander.Content>
+                    </Expander>
+                    <!--Program Element Type-->
+                    <Expander>
+                        <Expander.Header>
+                            <TextBlock Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Text="Element type" Grid.Row="0"/>
+                        </Expander.Header>
+                        <Expander.Content>
+                            <ListBox Margin="5,3,5,5" ItemsSource="{Binding ProgramElements}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox Width="20" IsChecked="{Binding Path=Checked}"
+                                               />
+                                            <TextBlock 
+                                       Width="100" Text="{Binding Path=ProgramElement}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Expander.Content>
+                    </Expander>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="212*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!--<CheckBox Name="isExactMode" Content="Exact mode" IsChecked="{Binding Path=SearchCriteria.ExactMode, Mode=TwoWay}" Grid.Row="0" Grid.Column="0" Margin="4,4,4,4" KeyboardNavigation.IsTabStop="True" KeyboardNavigation.TabIndex="51" />
+                    <CheckBox Name="isMatchCase" Content="Match Case" IsChecked="{Binding Path=SearchCriteria.MatchCase, Mode=TwoWay}" Grid.Column="2" Margin="4,4,4,4" KeyboardNavigation.IsTabStop="True" KeyboardNavigation.TabIndex="53" />
+                    -->
+                    </Grid>
+
+                    <!-- Reset -->
+                    <Grid HorizontalAlignment="Left" Width="276">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button Grid.Column="0" Name="Reset"  Margin="5,5,0,0" FontFamily="ExtraBold" IsEnabled="True" 
+                                KeyboardNavigation.IsTabStop="False" Height="23" Width="120" 
+                                VerticalAlignment="Top" ToolTip="Reset Sando Index"
+                                Command="{Binding ResetCommand}">Reset Sando Index
+                        </Button>
+                        <Button Grid.Column="1" Name="OpenLog"  Margin="10,5,0,0" FontFamily="ExtraBold" IsEnabled="True" 
+                        	KeyboardNavigation.IsTabStop="False" Height="23" Width="120" 
+                        	VerticalAlignment="Top" ToolTip="Open Sando's Error Log"
+                        	Command="{Binding OpenLogCommand}" Content="Open Error Log"/>
+                        <!--Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"-->
+
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+        </Expander>
+
+    </Grid>
+</UserControl>

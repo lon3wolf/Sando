@@ -7,7 +7,6 @@ using Lucene.Net.Analysis.Snowball;
 using NUnit.Framework;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-using Sando.ExtensionContracts.SearchContracts;
 using Sando.Indexer;
 using Sando.Indexer.Searching;
 using Sando.SearchEngine;
@@ -32,22 +31,34 @@ using System.Threading.Tasks;
 using ABB.SrcML.Utilities;
 using ABB.VisualStudio;
 using System.Reflection;
+using Sando.Indexer.Splitter;
+using Sando.Indexer.Searching.Criteria;
 
 namespace Sando.IntegrationTests.Search
 {
-    public class AutomaticallyIndexingTestClass : ISrcMLGlobalService, ISearchResultListener
+    public class AutomaticallyIndexingTestClass : ISrcMLGlobalService
     { 
         public void Reset()
         {
-
+             
         }
 
         [TestFixtureSetUp]
         public void Setup()
-        {
+        {            
             SrcMLArchiveEventsHandlers.MAX_PARALLELISM = 8;
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
+
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            _srcMLArchive.Dispose();
+            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
+            ServiceLocator.Resolve<DocumentIndexer>().Dispose();            
+            DeleteTestDirectoryContents();
+        }
+
 
         public virtual TimeSpan? GetTimeToCommit()
         {
@@ -73,18 +84,19 @@ namespace Sando.IntegrationTests.Search
             CreateArchive(filesInThisDirectory);            
             CreateSwum();            
             AddFilesToIndex(filesInThisDirectory);
-            WaitForIndexing();
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
-            Thread.Sleep((int)GetTimeToCommit().Value.TotalMilliseconds*2);
-            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
+            WaitForIndexing();            
         }
 
-        private static void WaitForIndexing()
+        public void WaitForIndexing()
         {
+            while (_handler.TaskCount() > 0)
+                Thread.Sleep(1000);
             while (((IEnumerable<Task>)GetATestingScheduler().GetType().InvokeMember("GetScheduledTasks",
                    BindingFlags.InvokeMethod | BindingFlags.Instance | BindingFlags.NonPublic,
                    null, GetATestingScheduler(), null)).Count() != 0)
                 Thread.Sleep(1000);
+            ServiceLocator.Resolve<DocumentIndexer>().ForceFlush();
+            ServiceLocator.Resolve<DocumentIndexer>().ForceReaderRefresh();
         }
 
  
@@ -94,15 +106,8 @@ namespace Sando.IntegrationTests.Search
             return scheduler;
         }
 
-        public class InfiniteCoreStrategy : IConcurrencyStrategy
-        {
-            public int ComputeAvailableCores()
-            {
-                return 100;
-            }
-        }
-
-        private void AddFilesToIndex(string filesInThisDirectory)
+ 
+        public void AddFilesToIndex(string filesInThisDirectory)
         {
             _handler = new SrcMLArchiveEventsHandlers(GetATestingScheduler());
             var files = GetFileList(filesInThisDirectory);
@@ -112,7 +117,8 @@ namespace Sando.IntegrationTests.Search
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
                     Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx")
+                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx") ||
+                    Path.GetExtension(Path.GetFullPath(file)).Equals(".txt")
                     )
                     HandleFileUpdated(file);
             }
@@ -124,7 +130,7 @@ namespace Sando.IntegrationTests.Search
             _handler.SourceFileChanged(this, new FileEventRaisedArgs(FileEventType.FileAdded, file));
         }
 
-        protected List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
+        public List<string> GetFileList(string filesInThisDirectory, List<string> incoming = null)
         {
             if (filesInThisDirectory.EndsWith("LIBS") || filesInThisDirectory.EndsWith("bin") || filesInThisDirectory.EndsWith("Debug"))
                 return incoming;
@@ -138,14 +144,14 @@ namespace Sando.IntegrationTests.Search
             return incoming;
         }
 
-        private void CreateSwum()
+        public void CreateSwum()
         {
             SwumManager.Instance.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<Sando.Core.Tools.SolutionKey>()), false);
             SwumManager.Instance.Archive = _srcMLArchive;
         }
 
 
-        private void CreateArchive(string filesInThisDirectory)
+        public void CreateArchive(string filesInThisDirectory)
         {
             var srcMlArchiveFolder = Path.Combine(_indexPath, "archive");
             var srcMLFolder = Path.Combine(".", "SrcML", "CSharp");
@@ -156,16 +162,13 @@ namespace Sando.IntegrationTests.Search
 
 
 
-        private void CreateIndexer()
+        public void CreateIndexer()
         {
             ServiceLocator.Resolve<UIPackage>();
 
             ServiceLocator.RegisterInstance(new IndexFilterManager());
 
-            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new SnowballAnalyzer("English"));            
-            analyzer.AddAnalyzer(SandoField.Source.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.AccessLevel.ToString(), new KeywordAnalyzer());
-            analyzer.AddAnalyzer(SandoField.ProgramElementType.ToString(), new KeywordAnalyzer());
+            Analyzer analyzer = SnowballAndWordSplittingAnalyzer.GetAnalyzer();
             ServiceLocator.RegisterInstance<Analyzer>(analyzer);
 
             var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
@@ -176,6 +179,7 @@ namespace Sando.IntegrationTests.Search
 
             var dictionary = new DictionaryBasedSplitter();
             dictionary.Initialize(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
+            ServiceLocator.RegisterInstance(dictionary);
 
             var reformer = new QueryReformerManager(dictionary);
             reformer.Initialize(null);
@@ -186,36 +190,29 @@ namespace Sando.IntegrationTests.Search
                 (ServiceLocator.Resolve<SolutionKey>()));
             ServiceLocator.RegisterInstance(history);
 
+            ServiceLocator.RegisterType<IIndexerSearcher<SimpleSearchCriteria>, SimpleIndexerSearcher>();
         }
 
 
 
-        private void CreateKey(string filesInThisDirectory)
+        public void CreateKey(string filesInThisDirectory)
         {
             Directory.CreateDirectory(_indexPath);
             var key = new Sando.Core.Tools.SolutionKey(Guid.NewGuid(), filesInThisDirectory);
             ServiceLocator.RegisterInstance(key);
         }
 
-        private void CreateSystemWideDefaults(string indexDirName)
+        public void CreateSystemWideDefaults(string indexDirName)
         {
             _indexPath = Path.Combine(Path.GetTempPath(), indexDirName);
             TestUtils.InitializeDefaultExtensionPoints();
-            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(_indexPath,40,false));
+            ServiceLocator.RegisterInstance<ISandoOptionsProvider>(new FakeOptionsProvider(_indexPath,40,false,new List<string>()));
             ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(GetATestingScheduler()));
             ServiceLocator.RegisterInstance(new InitialIndexingWatcher());
         }
 
 
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            _srcMLArchive.Dispose();
-            ServiceLocator.Resolve<IndexFilterManager>().Dispose();
-            ServiceLocator.Resolve<DocumentIndexer>().Dispose();
-            DeleteTestDirectoryContents();
-        }
-
+    
         private void DeleteTestDirectoryContents()
         {
             var deleted = false;
@@ -224,6 +221,10 @@ namespace Sando.IntegrationTests.Search
                 try
                 {
                     Directory.Delete(_indexPath, true);
+                    deleted = true;
+                }
+                catch (DirectoryNotFoundException e)
+                {
                     deleted = true;
                 }
                 catch (Exception e)
@@ -278,16 +279,21 @@ namespace Sando.IntegrationTests.Search
             }
             if (_results != null)
                 foreach (var result in _results)
-                    info.AppendLine(result.Name+" in "+ result.FileName);
+                    info.AppendLine(result.Name + " in " + result.FileName);
+            else
+                info.AppendLine("Returned 0 results");
             return info.ToString();
         }
 
         protected List<CodeSearchResult> GetResults(string keywords)
         {
             var manager = SearchManagerFactory.GetNewBackgroundSearchManager();
-            manager.AddListener(this);
+            manager.SearchResultUpdated += this.Update;
+            manager.SearchCompletedMessageUpdated += this.UpdateMessage;
+
             _results = null;
-            manager.Search(keywords);
+            var criteria = CriteriaBuilderFactory.GetBuilder().GetCriteria(keywords);
+            manager.Search(keywords, criteria);
             int i = 0;
             while (_results == null)
             {
@@ -306,7 +312,7 @@ namespace Sando.IntegrationTests.Search
 
         public ISrcMLArchive GetSrcMLArchive()
         {
-            throw new NotImplementedException();
+            return _srcMLArchive;
         }
 
         public bool IsMonitoring { get { return true; } }
@@ -341,33 +347,6 @@ namespace Sando.IntegrationTests.Search
         {
             _myMessage = message;            
         }
-
-        public void UpdateRecommendedQueries(IQueryable<string> queries)
-        {
-            
-        }
-
-        public class FakeOptionsProvider : ISandoOptionsProvider
-        {
-            private string _myIndex;
-            private int _myResultsNumber;
-			private bool _myAllowLogs;
-
-            public FakeOptionsProvider(string index, int num, bool allowLogs)
-            {
-                _myIndex = index;
-                _myResultsNumber = num;
-				_myAllowLogs = allowLogs;
-            }
-
-            public SandoOptions GetSandoOptions()
-            {
-                return new SandoOptions(_myIndex,_myResultsNumber, _myAllowLogs);
-            }
-        }
-
-
-       
 
         public void StartMonitoring()
         {

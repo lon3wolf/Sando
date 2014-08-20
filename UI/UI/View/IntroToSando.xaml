@@ -21,7 +21,7 @@
                         <TableRow>
                             <TableCell >
                                 <Paragraph FontFamily="Arial">
-                                    Alt + Shift + S
+                                    Crtl + Shift + F
                                 </Paragraph>
                             </TableCell>
                             <TableCell>

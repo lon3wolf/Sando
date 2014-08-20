@@ -101,7 +101,7 @@ namespace Sando.Core.UnitTests.Tools
             var sandoQueryDescription = sandoQueryParser.Parse(query);
 
             Assert.IsTrue(sandoQueryDescription.IsValid);
-            Assert.AreEqual(expectedQueryDescription, sandoQueryDescription.ToString());
+            Assert.AreEqual(expectedQueryDescription.ToLowerInvariant(), sandoQueryDescription.ToString().ToLowerInvariant());
         }
 
 
@@ -166,9 +166,9 @@ namespace Sando.Core.UnitTests.Tools
         private static readonly object[] ValidNormalQueryTestCases =
             {
                 new object[]{"identifier",                          "Search terms:[identifier]"},
-                new object[]{"open*file",                           "Search terms:[open*file,open*,file]"},
+                new object[]{"open*file",                           "Search terms:[open*file,open,file]"},
                 new object[]{"do something special",                "Search terms:[do,something,special]"},
-                new object[]{"every*Single*Word",                   "Search terms:[every*Single*Word,every*,Single*,Word]"}
+                new object[]{"every*Single*Word",                   "Search terms:[every*Single*Word,Single,every,Word]"}
             };
     }
 }
