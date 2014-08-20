@@ -19,15 +19,15 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="7" MinHeight="7"/>
+        <Grid.RowDefinitions>            
             <RowDefinition Height="17"/>
             <RowDefinition Height="25"/>
+            <RowDefinition Height="7" MinHeight="7"/>
             <RowDefinition Height="15" MinHeight="15"/>
             <RowDefinition Height="15" MinHeight="15"/>
             <RowDefinition Height="Auto" MinHeight="15"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="1" Margin="5,0,5,0">
+        <Grid Grid.Row="0" Margin="5,0,5,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="83">
                 </ColumnDefinition>
@@ -100,7 +100,7 @@
                 </Grid>
             </Popup>
         </Grid>
-        <Grid Grid.Row="2" Margin="5,0,5,0" Grid.Column="0">
+        <Grid Grid.Row="1" Margin="5,0,5,0" Grid.Column="0">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -157,11 +157,11 @@
         </Grid>
 
 
-        <ProgressBar Margin="5,0,5,0" Name="ProgBar" Grid.Row="0"
+        <ProgressBar Margin="5,2,5,0" Name="ProgBar" Grid.Row="2"
                  VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="3" IsIndeterminate="True" Visibility="{Binding ProgressBarVisibility}"/>
 
         <!-- info string -->
-        <TextBlock Margin="4,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
+        <TextBlock Margin="6,0,0,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" 
                  Name = "SearchStatusTextBlock"
                  FontSize="11" FontStyle="Italic" Background="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
                  Grid.Row="3" Width="Auto" HorizontalAlignment="Stretch"  
