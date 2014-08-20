@@ -412,6 +412,7 @@ namespace Sando.UI.ViewModel
 
         private void AddDirectoryToMonitor(ISrcMLGlobalService srcMlService, IndexedFile file)
         {
+            List<IndexedFile> indexFilesThatFailedToAdd = new List<IndexedFile>();
 
             foreach (IndexedFile addFile in this.IndexedFiles)
             {
@@ -426,16 +427,19 @@ namespace Sando.UI.ViewModel
                     {
                         MessageBox.Show("Sub-directories of existing directories cannot be added - " + cantAdd.Message,
                             "Invalid Directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        indexFilesThatFailedToAdd.Add(addFile);
                     }
                     catch (ForbiddenDirectoryException cantAdd)
                     {
                         MessageBox.Show(cantAdd.Message, "Invalid Directory", MessageBoxButton.OK,
                             MessageBoxImage.Warning);
+                        indexFilesThatFailedToAdd.Add(addFile);
                     }
                 }
 
             }
-
+            foreach (var indexedFile in indexFilesThatFailedToAdd)
+                this.IndexedFiles.Remove(indexedFile);
         }
 
         private bool IsPathEqual(String indexedFilePath, String eventFilePath)
