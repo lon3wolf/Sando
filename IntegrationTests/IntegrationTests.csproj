@@ -79,6 +79,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ABB.SrcML.Core.3.1.11.26\lib\net40\ABB.SrcML.Core.dll</HintPath>
     </Reference>
+    <Reference Include="ABB.SrcML.Data">
+      <HintPath>..\packages\ABB.SrcML.Data.3.1.11.26\lib\net40\ABB.SrcML.Data.dll</HintPath>
+    </Reference>
     <Reference Include="ABB.SrcML.Data.Core, Version=3.1.11.26, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ABB.SrcML.Data.Core.3.1.11.26\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>

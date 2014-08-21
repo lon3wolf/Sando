@@ -48,6 +48,10 @@
       <HintPath>..\packages\ABB.SrcML.Data.Core.3.1.11.26\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.1.11.26, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ABB.SrcML.VisualStudio.Interfaces.3.1.11.26\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
