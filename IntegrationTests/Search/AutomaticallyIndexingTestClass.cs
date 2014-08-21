@@ -310,10 +310,9 @@ namespace Sando.IntegrationTests.Search
             return _srcMLArchive.GetXElementForSourceFile(sourceFilePath);
         }
 
-        public ISrcMLArchive GetSrcMLArchive()
-        {
-            return _srcMLArchive;
-        }
+        public SrcMLArchive CurrentSrcMLArchive { get { return _srcMLArchive; } }
+
+        public SourceMonitor CurrentMonitor { get { return null; } }
 
         public bool IsMonitoring { get { return true; } }
         public bool IsUpdating { get { return !done; } }

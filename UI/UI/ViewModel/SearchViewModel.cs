@@ -479,7 +479,7 @@ namespace Sando.UI.ViewModel
         private void RegisterSrcMLService()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
-
+            
             srcMLService.DirectoryAdded += (sender, e) =>
             {
 

@@ -93,7 +93,7 @@ namespace Sando.UI
     {
         // JZ: SrcMLService Integration
         //private ABB.SrcML.VisualStudio.SolutionMonitor.SolutionMonitor _currentMonitor;
-        private ISrcMLArchive _srcMLArchive;
+        private SrcMLArchive _srcMLArchive;
         private ISrcMLGlobalService srcMLService;
         // End of code changes
 
@@ -512,7 +512,7 @@ namespace Sando.UI
                     try
                     {
                         SrcMLArchiveEventsHandlers handlers = null;
-                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        foreach (var fileName in srcMLService.CurrentSrcMLArchive.GetFiles())
                         {
                             if(handlers == null)
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
@@ -534,7 +534,7 @@ namespace Sando.UI
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                     //go through all files and delete necessary ones                    
                     foreach(var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
-                        if (!srcMLService.GetSrcMLArchive().ContainsFile(file))
+                        if (!srcMLService.CurrentSrcMLArchive.ContainsFile(file))
                             srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
                 }, 
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
@@ -550,7 +550,7 @@ namespace Sando.UI
                     try
                     {
                         SrcMLArchiveEventsHandlers handlers = null;
-                        foreach (var fileName in srcMLService.GetSrcMLArchive().GetFiles())
+                        foreach (var fileName in srcMLService.CurrentSrcMLArchive.GetFiles())
                         {
                             if (handlers == null)
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();

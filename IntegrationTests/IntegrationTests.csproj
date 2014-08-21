@@ -71,30 +71,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML, Version=99.99.410.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.3.1.8.22\lib\net40\ABB.SrcML.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\ABB.SrcML.99.99.410.0\lib\net40\ABB.SrcML.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Core, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data, Version=99.99.410.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.Core.3.1.8.22\lib\net40\ABB.SrcML.Core.dll</HintPath>
+      <HintPath>..\packages\ABB.SrcML.Data.99.99.410.0\lib\net40\ABB.SrcML.Data.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Data, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.VisualStudio.SrcMLService, Version=99.99.410.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.Data.3.1.8.22\lib\net40\ABB.SrcML.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="ABB.SrcML.Data.Core, Version=3.1.8.22, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.Data.Core.3.1.8.22\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.0.20.18, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.VisualStudio.Interfaces.3.1.8.22\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.SrcMLService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\LIBS\srcML.NET\ABB.SrcML.VisualStudio.SrcMLService.dll</HintPath>
+      <HintPath>..\packages\ABB.SrcML.VisualStudio.SrcMLService.99.99.410.0\lib\net40\ABB.SrcML.VisualStudio.SrcMLService.dll</HintPath>
     </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
@@ -255,6 +242,33 @@
     </Compile>
     <Compile Include="TestConstants.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Content Include="epl-v10.txt" />
+    <Content Include="Resources\Package.ico" />
+    <Content Include="SrcML\about.html" />
+    <Content Include="SrcML\gpl-2.0.html" />
+    <Content Include="SrcML\iconv.dll" />
+    <Content Include="SrcML\libantlr2-0.dll" />
+    <Content Include="SrcML\libarchive-13.dll" />
+    <Content Include="SrcML\libbz2-1.dll" />
+    <Content Include="SrcML\libcrypto-10.dll" />
+    <Content Include="SrcML\libcurl-4.dll" />
+    <Content Include="SrcML\libexslt-0.dll" />
+    <Content Include="SrcML\libgcc_s_sjlj-1.dll" />
+    <Content Include="SrcML\libgnurx-0.dll" />
+    <Content Include="SrcML\libidn-11.dll" />
+    <Content Include="SrcML\libintl-8.dll" />
+    <Content Include="SrcML\liblzma-5.dll" />
+    <Content Include="SrcML\libsrcml.dll" />
+    <Content Include="SrcML\libssh2-1.dll" />
+    <Content Include="SrcML\libssl-10.dll" />
+    <Content Include="SrcML\libstdc++-6.dll" />
+    <Content Include="SrcML\libxml2-2.dll" />
+    <Content Include="SrcML\libxslt-1.dll" />
+    <Content Include="SrcML\src2srcml.exe" />
+    <Content Include="SrcML\src2srcml.html" />
+    <Content Include="SrcML\srcml2src.exe" />
+    <Content Include="SrcML\srcml2src.html" />
+    <Content Include="SrcML\zlib1.dll" />
     <Content Include="TestFiles\MethodElementTestFiles\Hello.cpp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
