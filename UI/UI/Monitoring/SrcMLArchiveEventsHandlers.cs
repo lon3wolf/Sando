@@ -142,7 +142,7 @@ namespace Sando.UI.Monitoring
             if (parsableToXml)
             {
                 xelement = GetXElement(args, srcMLService);
-                if (xelement == null) return;
+                if (xelement == null && args.EventType!= FileEventType.FileDeleted) return;
             }
             var indexUpdateManager = ServiceLocator.Resolve<IndexUpdateManager>();
             try
