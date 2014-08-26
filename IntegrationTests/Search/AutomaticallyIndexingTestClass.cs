@@ -19,7 +19,7 @@ using Configuration.OptionsPages;
 using ABB.SrcML;
 using System.Threading;
 using Sando.Core.Tools;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Sando.UI.View;
 using System.Diagnostics;
 using System.Text;

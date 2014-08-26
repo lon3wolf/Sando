@@ -19,7 +19,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Sando.UI.Actions;
 using FocusTestVC;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Thread = System.Threading.Thread;
 using Sando.Indexer.Searching.Criteria;
 

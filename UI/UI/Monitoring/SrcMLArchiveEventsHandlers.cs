@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using ABB.SrcML;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Sando.Core.Extensions;
 using Sando.Core.Logging;
 using Sando.DependencyInjection;

@@ -14,7 +14,7 @@ using Sando.Core.Logging.Persistence;
 using Sando.Core.Logging.Events;
 using System.Timers;
 using Sando.DependencyInjection;
-using ABB.VisualStudio.Interfaces;
+using ABB.VisualStudio;
 using System.Threading.Tasks;
 
 
