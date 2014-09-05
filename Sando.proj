@@ -34,6 +34,10 @@
     <RemoveDir Directories="@(OutDirs)" />
   </Target> 
   
+  <Target Name="RestorePackages" BeforeTargets="Build">
+    <Exec Command="&quot;$(MSBuildThisFileDirectory).nuget\NuGet.exe&quot; restore &quot;%(SolutionToBuild.Identity)&quot;" />
+  </Target>
+  
   <Target Name="Build" DependsOnTargets="CreateAssemblyInfo;SetVsixVersion">
     <MSBuild Projects="$(SolutionFullPath)" Properties="Configuration=$(Configuration);Platform=Any CPU;DeployExtension=$(DeployExtension)" />
   </Target>
