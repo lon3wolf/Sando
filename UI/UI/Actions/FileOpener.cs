@@ -32,6 +32,8 @@ namespace Sando.UI.Actions
                 var selection = (TextSelection)_dte.ActiveDocument.Selection;
                 selection.GotoLine(lineNumber);
 
+                LogEvents.OpeningCodeSearchResult(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
                 if (FileOpened != null)
                 {
                     FileOpened(null, new EventArgs());
