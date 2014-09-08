@@ -61,17 +61,9 @@ namespace Sando.Core.Logging.Events
             DataCollectionLogEventHandlers.WriteInfoLogMessage(sender.GetType().ToString(), "User single-clicked a result: SingleClickedResultRank=" + rank );
         }
 
-        public static void OpeningCodeSearchResult(CodeSearchResult result, int rank, string queryMatchDescription)
+        public static void OpeningCodeSearchResult(Object sender)
         {
-            string lang = "OtherLang";
-            var resultFile = result.FileName;
-            if (resultFile.EndsWith(".cs")) lang = "C#";
-            if (resultFile.EndsWith(".cpp") || resultFile.EndsWith(".c") || resultFile.EndsWith(".h") || resultFile.EndsWith(".cc")) lang = "C++";
-            DataCollectionLogEventHandlers.WriteInfoLogMessage("FileOpener", "User double-clicked a result: TypeOfResult=" +  result.ProgramElementType.ToString() +
-																	", QueryToResultSimilarityDescription=" + queryMatchDescription +
-																	", ResultLanguage=" + lang + 
-																	", ResultLuceneScore=" + result.Score + 
-																	", DoubleClickedResultRank=" + rank );
+            DataCollectionLogEventHandlers.WriteInfoLogMessage(sender.GetType().ToString(), "User double-clicked a result");
         }
 
         public static void SolutionOpened(Object sender, string solutionName)
