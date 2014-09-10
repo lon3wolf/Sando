@@ -27,12 +27,9 @@ namespace Sando.Parser
                     string line = string.Empty;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        if (!String.IsNullOrWhiteSpace(line))
-                        {
-                            fileText.Append(line + Environment.NewLine);
-                            numberOfTermsRead +=
-                                line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;
-                        }
+                        fileText.Append(line + Environment.NewLine);
+                        numberOfTermsRead += line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;                       
+
                         if (numberOfTermsRead >= MaxNumberOfTermsInFile)
                         {
                             break;
