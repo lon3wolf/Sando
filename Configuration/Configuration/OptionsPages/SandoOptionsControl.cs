@@ -14,8 +14,10 @@ namespace Configuration.OptionsPages
             new List<string> { ".cs", ".h", ".cpp", ".cxx", ".c" };
         public static readonly List<string> DefaultFileExtensionsList =
             new List<string> { ".xaml", ".xml", ".txt", ".text", ".lic", ".js", 
-                               ".java", ".rb", ".py", ".vb", ".asp", ".aspx", 
-                               ".html", ".htm", ".css", ".fs" }.Concat(
+                               ".java", ".rb", ".py", ".vb", ".vbs", ".asp", ".aspx", 
+                               ".asax", ".config", ".html", ".htm", ".css", ".fs", 
+                               ".tcl", ".pl", ".pm", ".ps1", ".cls", ".frm", ".clj", 
+                               ".go", ".resx", ".m" }.Concat(
                                 UnremovableFileExtensionsList).ToList(); 
 
 		#region Fields
