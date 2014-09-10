@@ -15,7 +15,7 @@ namespace Configuration.OptionsPages
         public static readonly List<string> DefaultFileExtensionsList =
             new List<string> { ".xaml", ".xml", ".txt", ".text", ".lic", ".js", 
                                ".java", ".rb", ".py", ".vb", ".asp", ".aspx", 
-                               ".html", ".htm", ".css" }.Concat(
+                               ".html", ".htm", ".css", ".fs" }.Concat(
                                 UnremovableFileExtensionsList).ToList(); 
 
 		#region Fields
