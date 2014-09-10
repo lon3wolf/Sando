@@ -371,10 +371,10 @@ namespace Configuration.OptionsPages
                     FileExtensionsListBox.Refresh();
 
                     customOptionsPage.FileExtensionsToIndexList = FileExtensionsList;
-
-                    var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
-                    missingFilesIncluder.EnsureNoMissingFilesAndNoDeletedFiles();
                 }
+                var missingFilesIncluder = ServiceLocator.Resolve<IMissingFilesIncluder>();
+                missingFilesIncluder.EnsureNoMissingFilesAndNoDeletedFiles();
+
             }
         }
 

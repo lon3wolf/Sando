@@ -104,6 +104,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ABB.SrcML">
+      <HintPath>..\..\packages\ABB.SrcML.3.1.11.26\lib\net40\ABB.SrcML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ABB.SrcML.Core">
       <HintPath>..\..\packages\ABB.SrcML.Core.3.1.11.26\lib\net40\ABB.SrcML.Core.dll</HintPath>
     </Reference>

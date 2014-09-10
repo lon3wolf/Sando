@@ -48,6 +48,7 @@ using System.Threading;
 using Sando.Indexer.Splitter;
 using Sando.ExtensionContracts.IndexerContracts;
 using Sando.Indexer.Searching.Criteria;
+using ABB.SrcML.VisualStudio;
 
 
 
@@ -518,6 +519,12 @@ namespace Sando.UI
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                             handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
                         }
+                        IArchive fileArchive = GetDefaultArchive();
+                        if (fileArchive != null)
+                        {
+                            foreach(var fileName in fileArchive.GetFiles())
+                                handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileRenamed, fileName));
+                        }
                         break;
                     }
                     catch (NullReferenceException ne)
@@ -532,12 +539,38 @@ namespace Sando.UI
             indexingTask.ContinueWith( (t) => 
                 {
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
-                    //go through all files and delete necessary ones                    
-                    foreach(var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
-                        if (!srcMLService.GetSrcMLArchive().ContainsFile(file))
-                            srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
+                    IArchive fileArchive = GetDefaultArchive();
+                    if (fileArchive != null)
+                    {
+                        //go through all files and delete necessary ones                    
+                        foreach (var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
+                        {
+                            if ((!srcMLService.GetSrcMLArchive().ContainsFile(file) && !fileArchive.ContainsFile(file)) || 
+                                !ServiceLocator.Resolve<IndexFilterManager>().ShouldFileBeIndexed(file))
+                                srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
+                        }
+                    }
                 }, 
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
+        }
+
+        //XXX - Temporary hack until SrcML exposes the necessary API to determine which files are being monitored.
+        private IArchive GetDefaultArchive()
+        {
+            try
+            {
+                var currentMonitor = srcMLService.GetType().GetField("CurrentMonitor", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance);
+                var fileMonitor = currentMonitor.GetValue(srcMLService);
+                var defaultArchive = fileMonitor.GetType().BaseType.BaseType.GetField("defaultArchive", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance);
+                var defaultArchiveValue = defaultArchive.GetValue(fileMonitor);
+                var archive = defaultArchiveValue as IArchive;
+                return archive;
+            }
+            catch (Exception e)
+            {
+                //we do not want this temporary code taking down Sando
+                return null; 
+            }
         }
 
         private void RecreateEntireIndex()
@@ -555,6 +588,12 @@ namespace Sando.UI
                             if (handlers == null)
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                             handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
+                        }
+                        IArchive fileArchive = GetDefaultArchive();
+                        if (fileArchive != null)
+                        {
+                            foreach (var fileName in fileArchive.GetFiles())
+                                handlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileAdded, fileName));
                         }
                         break;
                     }
