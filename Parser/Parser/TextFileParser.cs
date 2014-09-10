@@ -24,7 +24,7 @@ namespace Sando.Parser
                 using (var sr = new StreamReader(filename))
                 {
                     StringBuilder fileText = new StringBuilder();
-                    string line = string.Empty;
+                    string line = Environment.NewLine; //in order to start line numbers at 1 instead of 0
                     while ((line = sr.ReadLine()) != null)
                     {
                         fileText.Append(line + Environment.NewLine);
@@ -36,9 +36,10 @@ namespace Sando.Parser
                         }
                     }
 
-                    if (fileText.Length!=0)
+                    var fileString = fileText.ToString();
+                    if (!String.IsNullOrWhiteSpace(fileString))
                     {
-                        var element = new TextFileElement(filename, fileText.ToString(), fileText.ToString());
+                        var element = new TextFileElement(filename, fileString, fileString);
                         list.Add(element);
                     }
                 }
