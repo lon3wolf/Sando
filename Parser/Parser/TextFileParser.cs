@@ -24,7 +24,8 @@ namespace Sando.Parser
                 using (var sr = new StreamReader(filename))
                 {
                     StringBuilder fileText = new StringBuilder();
-                    string line = Environment.NewLine; //in order to start line numbers at 1 instead of 0
+                    fileText.Append(Environment.NewLine); //in order to start line numbers at 1 instead of 0
+                    string line = String.Empty; 
                     while ((line = sr.ReadLine()) != null)
                     {
                         fileText.Append(line + Environment.NewLine);
