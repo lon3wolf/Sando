@@ -4,7 +4,7 @@
     <Name>Sando Code Search Tool</Name>
     <Author>Bartosz Ropski, Kostadin Damevski, Xi Ge</Author>
     <Version>99.99.0.0</Version>
-    <Description xml:space="preserve">Search your C, C++, C#, and XAML code instantly. Form a better query with identifier-based and phrase-based auto-complete. Explore project terms with the word cloud.</Description>
+    <Description xml:space="preserve">Search your C, C++, C#, XAML, and any text file instantly. Form a better query with auto-complete. Get ranked results powered by Lucene.NET.</Description>
     <Locale>1033</Locale>
     <License>epl-1.0.txt</License>
     <Icon>sandoFolder.png</Icon>
@@ -27,6 +27,11 @@
         <Edition>Pro</Edition>
       </VisualStudio>
       <VisualStudio Version="13.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+      </VisualStudio>
+      <VisualStudio Version="14.0">
         <Edition>Ultimate</Edition>
         <Edition>Premium</Edition>
         <Edition>Pro</Edition>

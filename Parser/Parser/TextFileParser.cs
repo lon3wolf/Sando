@@ -24,24 +24,23 @@ namespace Sando.Parser
                 using (var sr = new StreamReader(filename))
                 {
                     StringBuilder fileText = new StringBuilder();
-                    string line = string.Empty;
+                    fileText.Append(Environment.NewLine); //in order to start line numbers at 1 instead of 0
+                    string line = String.Empty; 
                     while ((line = sr.ReadLine()) != null)
                     {
-                        if (!String.IsNullOrWhiteSpace(line))
-                        {
-                            fileText.Append(line + Environment.NewLine);
-                            numberOfTermsRead +=
-                                line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;
-                        }
+                        fileText.Append(line + Environment.NewLine);
+                        numberOfTermsRead += line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;                       
+
                         if (numberOfTermsRead >= MaxNumberOfTermsInFile)
                         {
                             break;
                         }
                     }
 
-                    if (fileText.Length!=0)
+                    var fileString = fileText.ToString();
+                    if (!String.IsNullOrWhiteSpace(fileString))
                     {
-                        var element = new TextFileElement(filename, fileText.ToString(), fileText.ToString());
+                        var element = new TextFileElement(filename, fileString, fileString);
                         list.Add(element);
                     }
                 }
