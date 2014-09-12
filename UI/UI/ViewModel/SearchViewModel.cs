@@ -262,6 +262,18 @@ namespace Sando.UI.ViewModel
 
             if (null != srcMlService)
             {
+                foreach (var file in this.IndexedFiles)
+                {
+                    IndexedFile indexFile = this.ModifiedIndexedFile.Find((f) => f.GUID == file.GUID);
+                    if (null != indexFile)
+                    {
+                        if (null != file.FilePath && !file.FilePath.Equals(indexFile.FilePath))
+                        {                            
+                            indexFile.OperationStatus = IndexedFile.Status.Modified;
+                        }
+                    }
+                }
+
                 foreach (var file in this.ModifiedIndexedFile)
                 {
 
@@ -405,7 +417,7 @@ namespace Sando.UI.ViewModel
             foreach (var file in this.IndexedFiles)
             {
                 file.OperationStatus = IndexedFile.Status.Normal;
-                this.ModifiedIndexedFile.Add(file);
+                this.ModifiedIndexedFile.Add(new IndexedFile(file.GUID, file.FilePath));
             }
 
         }
@@ -747,6 +759,13 @@ namespace Sando.UI.ViewModel
         public IndexedFile()
         {
             this.GUID = Guid.NewGuid();
+        }
+
+
+        public IndexedFile(Guid guid, string filePath)
+        {
+            this.GUID = guid;
+            this._filePath = filePath;
         }
 
         public String FilePath
