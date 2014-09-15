@@ -13,6 +13,8 @@ using log4net;
 using Sando.Core.Tools;
 using Sando.Core.Logging.Persistence;
 using Configuration.OptionsPages;
+using Microsoft.VisualStudio.Utilities;
+using System.Diagnostics;
 
 namespace Sando.Indexer.IndexFiltering
 {
@@ -114,10 +116,30 @@ namespace Sando.Indexer.IndexFiltering
                 var sandoOptions = ServiceLocator.Resolve<ISandoOptionsProvider>().GetSandoOptions();
                 if(!sandoOptions.FileExtensionsToIndex.Any( ext => fullFilePath.EndsWith(ext)))
                 {
-                    return false;
+                    if (IsTextFileAccordingToVS(fileInfo.Extension))
+                        return true;
+                    else
+                        return false;
                 }
             }
             return true;
+        }
+
+        private bool IsTextFileAccordingToVS(string fileExtension)
+        {
+            var extensionRegistry = ServiceLocator.Resolve<IFileExtensionRegistryService>();
+            if (extensionRegistry == null)
+                return false;
+            else
+            {
+                var contentType = extensionRegistry.GetContentTypeForExtension(fileExtension);
+                if (contentType != null)
+                {
+                    if (contentType.IsOfType("code") || contentType.IsOfType("text"))
+                        return true;
+                }
+            }
+            return false;
         }
 
         private static IndexFilterSettings GetIndexFilterSettingsFromFile(string indexFilterSettingsFilePath)
