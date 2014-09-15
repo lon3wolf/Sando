@@ -99,10 +99,10 @@ namespace Configuration.OptionsPages
             this.DeleteFileExtensionButton = new System.Windows.Forms.Button();
             this.NewFileExtensionButton = new System.Windows.Forms.Button();
             this.FileExtensionsListBox = new System.Windows.Forms.ListBox();
+            this.NoteOnFileExtensions = new System.Windows.Forms.Label();
             this.SearchResultsConfigurationGroupBox.SuspendLayout();
             this.ToggleLogCollectionGroupBox.SuspendLayout();
             this.FileExtensionsGroupBox.SuspendLayout();
-            this.NoteOnFileExtensions = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ExtensionPointsPluginDirectoryPathFolderBrowserDialog
@@ -179,7 +179,6 @@ namespace Configuration.OptionsPages
             this.FileExtensionsGroupBox.Controls.Add(this.NewFileExtensionButton);
             this.FileExtensionsGroupBox.Controls.Add(this.FileExtensionsListBox);
             this.FileExtensionsGroupBox.Controls.Add(this.NoteOnFileExtensions);
-            NoteOnFileExtensions.Text = "Note: All files that Visual Studio designates as 'text' or 'code' will be indexed. Ensure your favorite file is being indexed by adding its extension above.";
             this.FileExtensionsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.FileExtensionsGroupBox.Name = "FileExtensionsGroupBox";
             this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 185);
@@ -224,14 +223,19 @@ namespace Configuration.OptionsPages
             this.FileExtensionsListBox.Name = "FileExtensionsListBox";
             this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 134);
             this.FileExtensionsListBox.TabIndex = 0;
-            //
-            // Note on file extensions controls
-            //
+            // 
+            // NoteOnFileExtensions
+            // 
             this.NoteOnFileExtensions.AutoSize = true;
-            this.NoteOnFileExtensions.Location = new System.Drawing.Point(10, 145);            
+            this.NoteOnFileExtensions.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.NoteOnFileExtensions.Location = new System.Drawing.Point(10, 145);
             this.NoteOnFileExtensions.MaximumSize = new System.Drawing.Size(420, 0);
-            this.NoteOnFileExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;                        
-
+            this.NoteOnFileExtensions.Name = "NoteOnFileExtensions";
+            this.NoteOnFileExtensions.Size = new System.Drawing.Size(402, 26);
+            this.NoteOnFileExtensions.TabIndex = 4;
+            this.NoteOnFileExtensions.Text = "Note: All files that Visual Studio designates as \'text\' or \'code\' will be indexed" +
+    ". Ensure your favorite file is being indexed by adding its extension above.";
+            this.NoteOnFileExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // SandoOptionsControl
             // 
@@ -246,6 +250,7 @@ namespace Configuration.OptionsPages
             this.ToggleLogCollectionGroupBox.ResumeLayout(false);
             this.ToggleLogCollectionGroupBox.PerformLayout();
             this.FileExtensionsGroupBox.ResumeLayout(false);
+            this.FileExtensionsGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
 		}
@@ -353,10 +358,7 @@ namespace Configuration.OptionsPages
             {
                 newExtension = addExtensionForm.textBoxNewExtension.Text;
             }
-            if (addExtensionForm != null)
-            {
-                addExtensionForm.Dispose();
-            }
+            addExtensionForm.Dispose();
 
             //add dot if missing
             if (!newExtension.StartsWith("."))
@@ -364,8 +366,8 @@ namespace Configuration.OptionsPages
                 newExtension = "." + newExtension;
             }
 
-            //validate entered text (should be dot followed by <3 >0 letters)
-            if (newExtension.Length > 1 && newExtension.Length < 5 && newExtension.Skip(1).All(Char.IsLetter))
+            //validate entered text (should be dot followed by > 0 letters)
+            if (newExtension.Length > 1 && newExtension.Skip(1).All(Char.IsLetter))
             {
                 List<string> extensionsList;
                 if (FileExtensionsList != null)
@@ -379,7 +381,7 @@ namespace Configuration.OptionsPages
 
                 if (!extensionsList.Contains(newExtension))
                 {
-                    extensionsList.Add(newExtension);
+                    extensionsList.Insert(0, newExtension);
                     FileExtensionsList = null;
                     FileExtensionsList = extensionsList;
                     FileExtensionsListBox.Refresh();
