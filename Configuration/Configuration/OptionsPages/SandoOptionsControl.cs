@@ -41,6 +41,7 @@ namespace Configuration.OptionsPages
 		/// Required designer variable. 
 		/// </summary> 
 		private System.ComponentModel.Container components = null;
+        private Label NoteOnFileExtensions;
 
 		#endregion
 
@@ -101,6 +102,7 @@ namespace Configuration.OptionsPages
             this.SearchResultsConfigurationGroupBox.SuspendLayout();
             this.ToggleLogCollectionGroupBox.SuspendLayout();
             this.FileExtensionsGroupBox.SuspendLayout();
+            this.NoteOnFileExtensions = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ExtensionPointsPluginDirectoryPathFolderBrowserDialog
@@ -111,7 +113,7 @@ namespace Configuration.OptionsPages
             // 
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.SearchResultsConfigurationNumberOfResultsReturnedTextBox);
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.NumberOfResultsReturnedLabel);
-            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 169);
+            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 194);
             this.SearchResultsConfigurationGroupBox.Name = "SearchResultsConfigurationGroupBox";
             this.SearchResultsConfigurationGroupBox.Size = new System.Drawing.Size(445, 60);
             this.SearchResultsConfigurationGroupBox.TabIndex = 7;
@@ -141,7 +143,7 @@ namespace Configuration.OptionsPages
             // 
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionCheckBox);
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionLabel);
-            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 235);
+            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 258);
             this.ToggleLogCollectionGroupBox.Name = "ToggleLogCollectionGroupBox";
             this.ToggleLogCollectionGroupBox.Size = new System.Drawing.Size(445, 56);
             this.ToggleLogCollectionGroupBox.TabIndex = 8;
@@ -176,12 +178,14 @@ namespace Configuration.OptionsPages
             this.FileExtensionsGroupBox.Controls.Add(this.DeleteFileExtensionButton);
             this.FileExtensionsGroupBox.Controls.Add(this.NewFileExtensionButton);
             this.FileExtensionsGroupBox.Controls.Add(this.FileExtensionsListBox);
+            this.FileExtensionsGroupBox.Controls.Add(this.NoteOnFileExtensions);
+            NoteOnFileExtensions.Text = "Note: All files that Visual Studio designates as 'text' or 'code' will be indexed. Ensure your favorite file is being indexed by adding its extension above.";
             this.FileExtensionsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.FileExtensionsGroupBox.Name = "FileExtensionsGroupBox";
-            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 160);
+            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 185);
             this.FileExtensionsGroupBox.TabIndex = 8;
             this.FileExtensionsGroupBox.TabStop = false;
-            this.FileExtensionsGroupBox.Text = "File extensions to include in index";
+            this.FileExtensionsGroupBox.Text = "File extensions to index";
             // 
             // buttonDefault
             // 
@@ -220,6 +224,14 @@ namespace Configuration.OptionsPages
             this.FileExtensionsListBox.Name = "FileExtensionsListBox";
             this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 134);
             this.FileExtensionsListBox.TabIndex = 0;
+            //
+            // Note on file extensions controls
+            //
+            this.NoteOnFileExtensions.AutoSize = true;
+            this.NoteOnFileExtensions.Location = new System.Drawing.Point(10, 145);            
+            this.NoteOnFileExtensions.MaximumSize = new System.Drawing.Size(420, 0);
+            this.NoteOnFileExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;                        
+
             // 
             // SandoOptionsControl
             // 
