@@ -49,6 +49,9 @@ using Sando.Indexer.Splitter;
 using Sando.ExtensionContracts.IndexerContracts;
 using Sando.Indexer.Searching.Criteria;
 using ABB.SrcML.VisualStudio;
+using Microsoft.VisualStudio.Utilities;
+using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Shell.Interop;
 
 
 
@@ -105,6 +108,10 @@ namespace Sando.UI
         private WindowEvents _windowEvents;
         private bool _setupHandlers = false;
         private bool WindowActivated = false;
+
+        //used to determine if a file is text, so Sando can index it.
+        [Import(typeof(IFileExtensionRegistryService))]
+        internal IFileExtensionRegistryService fileExtensionRegistry = null;
 
         /// <summary>
         /// Default constructor of the package.
@@ -221,11 +228,22 @@ namespace Sando.UI
                 taskScheduler = GetTaskSchedulerService();
                 ServiceLocator.RegisterInstance(new SrcMLArchiveEventsHandlers(taskScheduler));
                 RegisterSrcMLService();
+                GetFileExtensionService();
             }
             catch(Exception e)
             {
                 LogEvents.UISandoInitializationError(this, e);
             }            
+        }
+
+        private void GetFileExtensionService()
+        {
+            var dte2 = (DTE2)Package.GetGlobalService(typeof(SDTE));
+            var sp = new ServiceProvider(dte2 as Microsoft.VisualStudio.OLE.Interop.IServiceProvider);
+            var mefContainer = sp.GetService(typeof(Microsoft.VisualStudio.ComponentModelHost.SComponentModel)) as Microsoft.VisualStudio.ComponentModelHost.IComponentModel;
+            mefContainer.DefaultCompositionService.SatisfyImportsOnce(this);
+            if (fileExtensionRegistry != null)
+                ServiceLocator.RegisterInstance<IFileExtensionRegistryService>(fileExtensionRegistry);
         }
 
 
