@@ -27,12 +27,12 @@ namespace Sando.Parser.UnitTests
             var parser = new TextFileParser();
             var elements = parser.Parse("..\\..\\Parser\\Parser.UnitTests\\TestFiles\\LongFile.txt");
             Assert.IsNotNull(elements);
-            Assert.AreEqual(elements.Count, 709);
+            Assert.AreEqual(elements.Count, 8);
             Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("the")); //first word
             Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("16761152")); //second number
 
             //this file is too big, so a word near the end of it should not have been parsed
-            Assert.IsFalse(elements.ElementAt(0).RawSource.Contains("aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz")); 
+            Assert.IsFalse(elements.ElementAt(7).RawSource.Contains("aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz")); 
         }
 
         [Test]
