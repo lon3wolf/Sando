@@ -11,8 +11,8 @@ namespace Sando.Parser
 {
     public class TextFileParser : IParser
     {
-        //this should be twice Lucene's default number of terms
-        private const int MaxNumberOfTermsInFile = 20000;
+        //Lucene's max term length is 16383, we choose something a bit lower to chunk on.
+        private const int MaxLengthOfTermInLucene = 15500;
 
         public List<ProgramElement> Parse(string filename)
         {
@@ -20,27 +20,37 @@ namespace Sando.Parser
             var termSeparators = new char[] {' ', '\n', '\t', '\r'};
             try
             {
-                int numberOfTermsRead = 0;
+                int charactersInCurrentChunk = 0;
+                int currentLineNumber = 1;
+                int startingLineNumber = 1;
                 using (var sr = new StreamReader(filename))
                 {
                     StringBuilder fileText = new StringBuilder();
-                    fileText.Append(Environment.NewLine); //in order to start line numbers at 1 instead of 0
+                    //fileText.Append(Environment.NewLine); //in order to start line numbers at 1 instead of 0
                     string line = String.Empty; 
                     while ((line = sr.ReadLine()) != null)
                     {
                         fileText.Append(line + Environment.NewLine);
-                        numberOfTermsRead += line.Split(termSeparators, StringSplitOptions.RemoveEmptyEntries).Length;                       
+                        charactersInCurrentChunk += line.Length;
+                        currentLineNumber++;
 
-                        if (numberOfTermsRead >= MaxNumberOfTermsInFile)
+                        if (charactersInCurrentChunk >= MaxLengthOfTermInLucene)
                         {
-                            break;
+                            if (!String.IsNullOrWhiteSpace(fileText.ToString()))
+                            {
+                                var element = new TextFileElement(startingLineNumber, 0, filename, fileText.ToString(), fileText.ToString());
+                                list.Add(element);
+                                startingLineNumber = currentLineNumber;
+                                charactersInCurrentChunk = 0;
+                                fileText = new StringBuilder();
+                            }
                         }
                     }
 
                     var fileString = fileText.ToString();
                     if (!String.IsNullOrWhiteSpace(fileString))
                     {
-                        var element = new TextFileElement(filename, fileString, fileString);
+                        var element = new TextFileElement(startingLineNumber, 0, filename, fileText.ToString(), fileText.ToString());
                         list.Add(element);
                     }
                 }

@@ -23,10 +23,19 @@ namespace Sando.IntegrationTests.Search
         }
 
 		
-        //[Test]
+        [Test]
         public void LargeTextFileSearch()
         {
             string keywords = "\"<CommandTable xmlns\"";
+            var expectedLowestRank = 3;
+            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("codemaidtest.txt");
+            List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
+        }
+
+        [Test]
+        public void LargeTextFileSearchBottomOfFile()
+        {
+            string keywords = "\"IDSymbol name=\"IconUnlock\"";
             var expectedLowestRank = 3;
             Predicate<CodeSearchResult> predicate = el => el.Name.Equals("codemaidtest.txt");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
