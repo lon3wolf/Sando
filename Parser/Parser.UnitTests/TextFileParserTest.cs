@@ -35,6 +35,16 @@ namespace Sando.Parser.UnitTests
             Assert.IsFalse(elements.ElementAt(0).RawSource.Contains("aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz")); 
         }
 
+        [Test]
+        public void ParseCodeMaidTxtFile()
+        {
+            var parser = new TextFileParser();
+            var elements = parser.Parse("..\\..\\IntegrationTests\\TestFiles\\TextFilesTestFiles\\CodeMaidTest.txt");
+            Assert.IsNotNull(elements);
+            Assert.AreEqual(elements.Count, 1);
+            Assert.IsTrue(elements.ElementAt(0).RawSource.Contains("IconUnlock")); //first word
+        }
+
 		[Test]
 		public void ParseXAMLFile2()
 		{

@@ -32,7 +32,7 @@ namespace Sando.IntegrationTests.Search
             var codeSearcher = new CodeSearcher();
 			string keywords = "fetch output stream";
 			List<CodeSearchResult> codeSearchResults = codeSearcher.Search(keywords);
-			Assert.AreEqual(codeSearchResults.Count, 5, "Invalid results number");
+			Assert.AreEqual(codeSearchResults.Count, 7, "Invalid results number");
 			var methodSearchResult = codeSearchResults.Find(el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && el.ProgramElement.Name == "FetchOutputStream");
 			if(methodSearchResult == null)
 			{ 
@@ -96,7 +96,7 @@ namespace Sando.IntegrationTests.Search
                     FileExtensions = new SortedSet<string> {"cpp"}
                 };
             var codeSearchResults = codeSearcher.Search(searchCriteria);
-            Assert.AreEqual(1, codeSearchResults.Count, "Invalid results number");
+            Assert.AreEqual(2, codeSearchResults.Count, "Invalid results number");
             var methodSearchResult = codeSearchResults.Find(el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && el.ProgramElement.Name == "main");
             if (methodSearchResult == null)
             {

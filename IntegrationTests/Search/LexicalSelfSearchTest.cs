@@ -24,7 +24,7 @@ namespace Sando.IntegrationTests.Search
 		[Test]
 		public void ExactLexMatchSearch1(){
             string keywords = "LexicalSelfSearchTest";
-		    var expectedLowestRank = 1;
+		    var expectedLowestRank = 2;
 			Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Class && (el.ProgramElement.Name == "LexicalSelfSearchTest");
 			EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
 		}
@@ -33,7 +33,7 @@ namespace Sando.IntegrationTests.Search
         public void ExactLexMatchSearch2()
         {
             string keywords = "lexicalselfsearchtest";
-            var expectedLowestRank = 1;
+            var expectedLowestRank = 2;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Class && (el.ProgramElement.Name == "LexicalSelfSearchTest");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
@@ -125,6 +125,15 @@ namespace Sando.IntegrationTests.Search
             string keywords = "\"Assert.IsNotNull(wordSplitter, \\\"Default word splitter should x used!!\\\");\"";
             var expectedLowestRank = 3;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "FindAndRegisterValidExtensionPoints_RemovesInvalidCustomWordSplitterConfiguration");
+            List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
+        }
+
+        [Test]
+        public void QuotedSearchInTextFile()
+        {
+            string keywords = "\"<CommandTable xmlns\"";
+            var expectedLowestRank = 5;
+            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("sandovsct.txt");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 
