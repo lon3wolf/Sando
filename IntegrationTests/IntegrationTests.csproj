@@ -240,12 +240,16 @@
     <Compile Include="Search\NameWithNumbersSearchTest.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Search\TextFileParsingTests.cs" />
     <Compile Include="TestConstants.cs" />
+    <None Include="TestFiles\TextFilesTestFiles\NoClassClass.cs" />
     <Compile Include="TestHelpers.cs" />
     <Content Include="TestFiles\MethodElementTestFiles\Hello.cpp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="TestFiles\TestFieldParsing.cs" />
+    <Content Include="TestFiles\TextFilesTestFiles\CodeMaidTest.txt" />
+    <Content Include="TestFiles\TextFilesTestFiles\SandoVsct.txt" />
     <Shadow Include="Test References\UI.UnitTests.accessor" />
     <None Include="app.config" />
     <None Include="packages.config" />

@@ -14,8 +14,8 @@ namespace Sando.IntegrationTests.Search
         [Test]
         public void SearchRetrievesTextFiles()
         {
-            string keywords = "gnu";
-            var expectedLowestRank = 10;
+            string keywords = "gnu memops";
+            var expectedLowestRank = 11;
             Predicate<CodeSearchResult> predicate =
                 el => el.ProgramElement.ProgramElementType == ProgramElementType.TextFile && (el.ProgramElement.Name == "notsolongfile.txt");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
@@ -151,7 +151,7 @@ namespace Sando.IntegrationTests.Search
         public void FileTypeWithTerm()
         {
             string keywords = "hello world file:cpp";
-            var expectedLowestRank = 3;
+            var expectedLowestRank = 4;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "MyFunction");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }

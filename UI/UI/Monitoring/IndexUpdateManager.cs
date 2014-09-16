@@ -39,9 +39,9 @@ namespace Sando.UI.Monitoring
                 {
                     parsed.AddRange(codeParser.Parse(filePath, xElement));
                 }
-                else
+                if (codeParser == null || !codeParser.GetType().Equals(typeof(TextFileParser)))
                 {
-                    //TODO: parse everything with the TextFileParser (double parsing things that were parsed with SrcML)
+                    //parses everything with the TextFileParser (double parsing things that were parsed with SrcML)
                     var textFileParser = new TextFileParser();
                     parsed.AddRange(textFileParser.Parse(filePath, xElement));
                 }
