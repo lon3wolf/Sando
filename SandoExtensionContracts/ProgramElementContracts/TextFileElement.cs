@@ -15,9 +15,16 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
 			Body = body;
         }
 
-        public TextFileElement(string name, int definitionLineNumber, int definitionColumnNumber, string fullFilePath, string snippet, string body) 
-			: this(fullFilePath, snippet, body)
+        public TextFileElement(string name, int definitionLineNumber, int definitionColumnNumber, string fullFilePath, string snippet, string body)
+            : base(Path.GetFileName(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
+        {
+            Body = body;
+        }
+
+        public TextFileElement(int definitionLineNumber, int definitionColumnNumber, string fullFilePath, string snippet, string body)
+            : base(Path.GetFileName(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
 		{
+            Body = body;
 		}
 
 
