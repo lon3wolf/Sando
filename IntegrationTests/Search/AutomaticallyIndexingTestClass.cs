@@ -113,16 +113,23 @@ namespace Sando.IntegrationTests.Search
             var files = GetFileList(filesInThisDirectory);
             foreach (var file in files)
             {
-                if (Path.GetExtension(Path.GetFullPath(file)).Equals(".cs") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".txt")
-                    )
+                if (IsSourceFile(file) || Path.GetExtension(Path.GetFullPath(file)).Equals(".txt"))
+                {
+                    if (IsSourceFile(file) )
+                        _srcMLArchive.AddOrUpdateFile(file);
                     HandleFileUpdated(file);
+                }
             }
             done = true;
+        }
+
+        private static bool IsSourceFile(string file)
+        {
+            return Path.GetExtension(Path.GetFullPath(file)).Equals(".cs") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx");
         }
 
         protected virtual void HandleFileUpdated(string file)
