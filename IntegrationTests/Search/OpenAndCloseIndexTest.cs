@@ -18,7 +18,7 @@ namespace Sando.IntegrationTests.Search
         {
             var indexer = ServiceLocator.Resolve<DocumentIndexer>();
             indexer.Dispose();
-            var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+            var currentIndexer = new DocumentIndexer();
             ServiceLocator.RegisterInstance(currentIndexer);
             Assert.IsTrue(currentIndexer.GetNumberOfIndexedDocuments() > 5, "The index is being destroyed when it is closed and reopened");
         }

@@ -44,7 +44,7 @@ namespace Sando.Indexer.UnitTests.TestFiles.Searching.Results
         public void CheckFolderForExpectedResults(string searchString, string methodNameToFind, string solutionPath)
         {
             ServiceLocator.RegisterInstance<Analyzer>(new SnowballAnalyzer("English"));
-            _indexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+            _indexer = new DocumentIndexer();
             ServiceLocator.RegisterInstance(_indexer);
 
             try
