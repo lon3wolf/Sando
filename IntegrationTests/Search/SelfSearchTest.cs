@@ -85,7 +85,7 @@ namespace Sando.IntegrationTests.Search
         public void QuotedWithoutQuotes()
         {
             string keywords = "ServiceLocator.Resolve<DTE2>();";
-            var expectedLowestRank = 11;
+            var expectedLowestRank = 12;
             Predicate<CodeSearchResult> predicate = el => el.ProgramElement.ProgramElementType == ProgramElementType.Method && (el.ProgramElement.Name == "InitDte2");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
