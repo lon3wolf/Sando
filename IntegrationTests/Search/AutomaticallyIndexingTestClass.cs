@@ -46,7 +46,6 @@ namespace Sando.IntegrationTests.Search
         [TestFixtureSetUp]
         public void Setup()
         {            
-            SrcMLArchiveEventsHandlers.MAX_PARALLELISM = 8;
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
 
@@ -178,7 +177,7 @@ namespace Sando.IntegrationTests.Search
             Analyzer analyzer = SnowballAndWordSplittingAnalyzer.GetAnalyzer();
             ServiceLocator.RegisterInstance<Analyzer>(analyzer);
 
-            var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+            var currentIndexer = new DocumentIndexer(); 
             ServiceLocator.RegisterInstance(currentIndexer);
             ServiceLocator.RegisterInstance(new IndexUpdateManager());
             currentIndexer.ClearIndex();            

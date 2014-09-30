@@ -26,7 +26,7 @@ namespace Sando.Indexer.UnitTests
 		{
 			try
 			{
-                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+                _documentIndexer = new DocumentIndexer();
 			}
 			catch(Exception ex)
 			{
@@ -39,7 +39,7 @@ namespace Sando.Indexer.UnitTests
 		{
 			try
 			{
-                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+                _documentIndexer = new DocumentIndexer();
 				ClassElement classElement = SampleProgramElementFactory.GetSampleClassElement();
 				SandoDocument sandoDocument = DocumentFactory.Create(classElement);
 				Assert.NotNull(sandoDocument);
@@ -60,7 +60,7 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+                _documentIndexer = new DocumentIndexer();
                 MethodElement sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
                 Thread.Sleep(2000);
@@ -83,7 +83,7 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+                _documentIndexer = new DocumentIndexer();
                 var sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
                 const string searchQueryString = "body: sth";
@@ -105,7 +105,7 @@ namespace Sando.Indexer.UnitTests
             try
             {
                 TestUtils.ClearDirectory(PathManager.Instance.GetIndexPath(ServiceLocator.Resolve<SolutionKey>()));
-                _documentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+                _documentIndexer = new DocumentIndexer();
                 var sampleMethodElement = SampleProgramElementFactory.GetSampleMethodElement();
                 _documentIndexer.AddDocument(DocumentFactory.Create(sampleMethodElement));
                 const string searchQueryString = "body: sth";

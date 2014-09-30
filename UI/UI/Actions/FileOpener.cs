@@ -1,26 +1,37 @@
-﻿using System;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
+using Sando.Core.Logging.Events;
 using Sando.DependencyInjection;
 using Sando.ExtensionContracts.ResultsReordererContracts;
-using Sando.Core.Logging.Events;
-using Sando.Core.Tools;
-using System.Collections.Generic;
-using Sando.Indexer.Searching;
-using Microsoft.VisualStudio.Shell;
+using System;
 
 namespace Sando.UI.Actions
 {
+    public delegate void FileOpenedEventHandler(object sender, EventArgs e);
+
     public static class FileOpener
     {
+        #region Private Fields
+
         private static DTE2 _dte;
 
-        public static void OpenItem(CodeSearchResult result)
+        #endregion Private Fields
+
+        #region Public Events
+
+        public static event FileOpenedEventHandler FileOpened;
+
+        #endregion Public Events
+
+        #region Public Methods
+
+        public static bool Is2012OrLater()
         {
-            if (result != null && result.ProgramElement!=null)
-            {
-                OpenFile(result.ProgramElement.FullFilePath, result.ProgramElement.DefinitionLineNumber);
-            }
+            InitDte2();
+            if (_dte.Version.Contains("11.0") || _dte.Version.Contains("12.0") || _dte.Version.Contains("13.0"))
+                return true;
+            return false;
         }
 
         public static void OpenFile(string filePath, int lineNumber)
@@ -47,26 +58,26 @@ namespace Sando.UI.Actions
         }
 
 
-        public static bool Is2012OrLater()
-        {
-            EnvDTE.DTE dte = (EnvDTE.DTE)Package.GetGlobalService(typeof(EnvDTE.DTE));
-            if (dte.Version.Contains("11.0") || dte.Version.Contains("12.0") || dte.Version.Contains("13.0"))
-                return true;
-            return false;
-        }
+        #endregion Public Methods
+
+        #region Private Methods
 
         private static void InitDte2()
         {
-            if (_dte == null)
+            try
             {
-                _dte = ServiceLocator.Resolve<DTE2>();
+                if (_dte == null)
+                {
+                    _dte = ServiceLocator.Resolve<DTE2>();
+                }
+            }
+            catch (Exception e)
+            {
+                LogEvents.UIOpenFileError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, e);
+                //ignore, we don't want this feature ever causing a crash
             }
         }
 
-        public static event FileOpenedEventHandler FileOpened;
-        
+        #endregion Private Methods
     }
-
-    public delegate void FileOpenedEventHandler(object sender, EventArgs e);
-
 }
