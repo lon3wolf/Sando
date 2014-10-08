@@ -48,6 +48,18 @@ namespace Sando.UI.ViewModel
                 
             };
 
+            this.SearchResultViewModel.SearchResults.CollectionChanged += (sender, e) =>
+            {
+                if (this.SearchResultViewModel.SearchResults.Count > 0)
+                {
+                    this.SearchViewModel.ValidationButtonVisibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.SearchViewModel.ValidationButtonVisibility = Visibility.Hidden;
+                }
+            };
+
         }
 
 

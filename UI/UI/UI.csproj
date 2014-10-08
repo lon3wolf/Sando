@@ -367,6 +367,8 @@
     </Resource>
     <Resource Include="Resources\filter.png" />
     <Resource Include="Resources\bluefilter.png" />
+    <Resource Include="Resources\greenThunder.png" />
+    <Resource Include="Resources\checkbox_checked_icon.png" />
     <Content Include="S3Credentials">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

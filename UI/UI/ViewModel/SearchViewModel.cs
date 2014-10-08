@@ -40,6 +40,7 @@ namespace Sando.UI.ViewModel
         private bool _isBrowseButtonEnabled;
         private bool _isSearchingDisabled;
         private Visibility _progressBarVisibility;
+        private Visibility _validationButtonVisibility;
         private SearchManager _searchManager;
 
         public ICommand AddIndexFolderCommand { get; set; }
@@ -55,6 +56,8 @@ namespace Sando.UI.ViewModel
         public ICommand ResetCommand { get; set; }
 
         public ICommand OpenLogCommand { get; set; }
+
+        public ICommand ValidateCommand { get; set; }
 
         public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
 
@@ -127,6 +130,16 @@ namespace Sando.UI.ViewModel
             }
         }
 
+        public Visibility ValidationButtonVisibility
+        {
+            get { return this._validationButtonVisibility; }
+            set
+            {
+                this._validationButtonVisibility = value;
+                OnPropertyChanged("ValidationButtonVisibility");
+            }
+        }
+
         public ObservableCollection<AccessWrapper> AccessLevels { get; set; }
 
         public ObservableCollection<ProgramElementWrapper> ProgramElements { get; set; }
@@ -147,12 +160,13 @@ namespace Sando.UI.ViewModel
             this.SearchCommand = new RelayCommand(Search);
             this.ResetCommand = new RelayCommand(Reset);
             this.OpenLogCommand = new RelayCommand(OpenLog);
-            
+            this.ValidateCommand = new RelayCommand(Validate);
 
             this.IsIndexFileEnabled = false;
             this.IsBrowseButtonEnabled = false;
             this._isSearchingDisabled = false;
             this.ProgressBarVisibility = Visibility.Collapsed;
+            this.ValidationButtonVisibility = Visibility.Hidden;
 
             InitAccessLevels();
             InitProgramElements();
@@ -175,6 +189,7 @@ namespace Sando.UI.ViewModel
             };
 
         }
+
 
         /// <summary>
         /// Used by Browse button in the user interface
@@ -356,6 +371,11 @@ namespace Sando.UI.ViewModel
         {
             var dte = ServiceLocator.Resolve<DTE2>();
             dte.ItemOperations.OpenFile(SandoLogManager.DefaultLogFilePath, Constants.vsViewKindTextView);
+        }
+
+        private void Validate(object param)
+        {
+            //do nothing
         }
 
         #endregion
