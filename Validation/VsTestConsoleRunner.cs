@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EnvDTE80;
 using Sando.DependencyInjection;
+using System.IO;
 
 namespace Validation
 {
@@ -46,11 +47,25 @@ namespace Validation
         {
             var libraryList = new List<String>();
             var openSolution = dte.Solution;           
-            for (int i = 0; i < openSolution.Projects.Count; i++)
+            for (int i = 1; i < openSolution.Projects.Count; i++)
             {
-                libraryList.Add(openSolution.Projects.Item(i).FullName);
+                var project = openSolution.Projects.Item(i);
+                if (!String.IsNullOrWhiteSpace(project.FullName))
+                {
+                    libraryList.Add(GetAssemblyPath(project));
+                }
             }
             return libraryList;            
         }
+
+        private string GetAssemblyPath(EnvDTE.Project vsProject)
+        {
+            var fullPath = vsProject.Properties.Item("FullPath").Value.ToString();
+            var outputPath = vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
+            var outputDir = Path.Combine(fullPath, outputPath);
+            var outputFileName = vsProject.Properties.Item("OutputFileName").Value.ToString();
+            return Path.Combine(outputDir, outputFileName);
+        }
+
     }
 }

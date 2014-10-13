@@ -56,7 +56,12 @@ namespace Validation.UnitTests
         [Test]
         public void TestFindAllLibrariesInSolution()
         {
-            _testRunner.FindAllLibrariesInSolution(dte);
+            var libraries = _testRunner.FindAllLibrariesInSolution(dte);
+            var parserLib = from library in libraries
+                            where library.Contains("Parser.dll")
+                            select library;
+            Assert.IsTrue(parserLib.Count() == 1);
+            Assert.IsTrue(File.Exists(parserLib.ElementAt(0)));
         }
 
     }
