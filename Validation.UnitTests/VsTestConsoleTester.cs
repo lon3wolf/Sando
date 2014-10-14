@@ -34,7 +34,7 @@ namespace Validation.UnitTests
             //takes a while to open Sando solution
             System.Threading.Thread.Sleep(10000);
 
-            _testRunner = new VsTestConsoleRunner();
+            _testRunner = new VsTestConsoleRunner(dte);
 		}
 
         [TestFixtureTearDown]
@@ -49,14 +49,13 @@ namespace Validation.UnitTests
         [Test]
         public void TestDiscoverTests()
         {
-            //_testRunner.DiscoverTests();
-
+            _testRunner.DiscoverTests();
         }
 
         [Test]
         public void TestFindAllLibrariesInSolution()
         {
-            var libraries = _testRunner.FindAllLibrariesInSolution(dte);
+            var libraries = _testRunner.FindAllLibrariesInSolution();
             var parserLib = from library in libraries
                             where library.Contains("Parser.dll")
                             select library;
