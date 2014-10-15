@@ -49,7 +49,9 @@ namespace Validation.UnitTests
         [Test]
         public void TestDiscoverTests()
         {
-            _testRunner.DiscoverTests();
+            var tuples = _testRunner.DiscoverTests();
+            Assert.IsTrue(tuples.Count > 0);
+            Assert.IsTrue(tuples.Any(t => t.Item1 == "TestDiscoverTests"));
         }
 
         [Test]

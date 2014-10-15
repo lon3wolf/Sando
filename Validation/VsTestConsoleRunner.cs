@@ -9,6 +9,7 @@ using System.IO;
 using Microsoft.Win32;
 using System.Diagnostics.Contracts;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Validation
 {
@@ -102,45 +103,97 @@ namespace Validation
 
         private string ExecuteVSTestConsole(string command)
         {
+            var outputWaitHandle = new AutoResetEvent(false);
+            var errorWaitHandle = new AutoResetEvent(false);
+
             var startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
             startInfo.RedirectStandardInput = false;
             startInfo.FileName = "\"" + _pathToVsTestConsoleExe + "\"";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.Arguments = "/UseVsixExtensions:true " + command;
 
+            var timeout = 5000; //5 seconds
+            var output = new StringBuilder();
+            var error = new StringBuilder();
+
             try
             {
-                using (var exeProcess = Process.Start(startInfo))
+                using (var exeProcess = new Process())
                 {
-                    if (exeProcess != null) exeProcess.WaitForExit();
-
-                    using (StreamReader reader = exeProcess.StandardOutput)
+                    exeProcess.OutputDataReceived += (sender, e) =>
                     {
-                        string result = reader.ReadToEnd();
-                        return result;
-                    }
+                        if (e.Data == null)
+                        {
+                            outputWaitHandle.Set();
+                        }
+                        else
+                        {
+                            output.AppendLine(e.Data);
+                        }
+                    };
+                    exeProcess.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (e.Data == null)
+                        {
+                            errorWaitHandle.Set();
+                        }
+                        else
+                        {
+                            error.AppendLine(e.Data);
+                        }
+                    };
 
+                    exeProcess.StartInfo = startInfo;
+                    exeProcess.Start();
+                    exeProcess.BeginOutputReadLine();
+                    exeProcess.BeginErrorReadLine();
+
+                    if (exeProcess.WaitForExit(timeout) &&
+                        outputWaitHandle.WaitOne(timeout) &&
+                        errorWaitHandle.WaitOne(timeout))
+                    {
+                        // Process completed. Check process.ExitCode here.
+                    }
+                    else
+                    {
+                        // Timed out.
+                    }
                 }
             }
             catch (Exception ex)
             {
             }
 
-            return String.Empty;
+            return output.ToString();
         }
 
         private List<string> ParseTestsFromConsoleOutput(string output)
         {
-            var foundString = @"The following Tests are available";
+            var foundString = @"The following Tests are available:";
             var tests = new List<string>();
 
-            if(output.Contains(foundString))
+            var foundStringIndex = output.IndexOf(foundString);
+            if (foundStringIndex != -1)
             {
-
+                var start = foundStringIndex + foundString.Length;
+                var lines = output.Substring(start).Split(Environment.NewLine.ToCharArray(), 
+                                                            StringSplitOptions.RemoveEmptyEntries);
+                foreach(var line in lines)
+                {
+                    var words = line.Split(new Char[] { ' ' }, 
+                                            StringSplitOptions.RemoveEmptyEntries);
+                    if(words.Length == 1 && words.ElementAt(0).Any(Char.IsLetter))
+                    {
+                        tests.Add(words.ElementAt(0));
+                    }
+                }
             }
+
+            
             return tests;
         }
 
