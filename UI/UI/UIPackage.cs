@@ -42,6 +42,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Validation;
 
 namespace Sando.UI
 {
@@ -508,6 +509,8 @@ namespace Sando.UI
                 }
 
                 RegisterSrcMLHandlers(ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>());
+
+                TestValidator.Initialize();
             }
             catch (Exception e)
             {

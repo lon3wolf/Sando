@@ -654,6 +654,10 @@
       <Project>{8DD830F7-7923-4E90-8CD3-6D4313A20FE8}</Project>
       <Name>Translation</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Validation\Validation.csproj">
+      <Project>{a2bfbf0b-47cf-4e22-94bb-0fe4a76b89e5}</Project>
+      <Name>Validation</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Themes\" />
