@@ -39,6 +39,7 @@ namespace Sando.UI.ViewModel
         private bool _isIndexFileEnabled;
         private bool _isBrowseButtonEnabled;
         private bool _isSearchingDisabled;
+        private bool _isValidationPopupEnabled;
         private Visibility _progressBarVisibility;
         private Visibility _validationButtonVisibility;
         private SearchManager _searchManager;
@@ -58,6 +59,11 @@ namespace Sando.UI.ViewModel
         public ICommand OpenLogCommand { get; set; }
 
         public ICommand ValidateCommand { get; set; }
+
+        public ICommand CancelValidateCommand { get; set; }
+
+        public ICommand GoValidateCommand { get; set; }
+
 
         public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
 
@@ -112,6 +118,16 @@ namespace Sando.UI.ViewModel
             }
         }
 
+        public bool IsValidationPopupEnabled
+        {
+            get { return this._isValidationPopupEnabled; }
+            set
+            {
+                this._isValidationPopupEnabled = value;
+                OnPropertyChanged("IsValidationPopupEnabled");
+            }
+        }
+
         public Visibility ProgressBarVisibility
         {
             get { return this._progressBarVisibility; }
@@ -161,12 +177,15 @@ namespace Sando.UI.ViewModel
             this.ResetCommand = new RelayCommand(Reset);
             this.OpenLogCommand = new RelayCommand(OpenLog);
             this.ValidateCommand = new RelayCommand(Validate);
+            this.GoValidateCommand = new RelayCommand(GoValidate);
+            this.CancelValidateCommand = new RelayCommand(CancelValidate);
 
             this.IsIndexFileEnabled = false;
             this.IsBrowseButtonEnabled = false;
             this._isSearchingDisabled = false;
             this.ProgressBarVisibility = Visibility.Collapsed;
             this.ValidationButtonVisibility = Visibility.Hidden;
+            this.IsValidationPopupEnabled = false;
 
             InitAccessLevels();
             InitProgramElements();
@@ -375,7 +394,17 @@ namespace Sando.UI.ViewModel
 
         private void Validate(object param)
         {
-            //do nothing
+            IsValidationPopupEnabled = true;
+        }
+
+        private void GoValidate(object param)
+        {
+
+        }
+
+        private void CancelValidate(object param)
+        {
+            IsValidationPopupEnabled = false;
         }
 
         #endregion

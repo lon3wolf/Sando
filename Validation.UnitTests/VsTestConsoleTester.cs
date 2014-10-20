@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 using NUnit.Framework;
+using Sando.Validation;
 using UnitTestHelpers;
 
 namespace Validation.UnitTests

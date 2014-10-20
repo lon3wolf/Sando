@@ -11,7 +11,7 @@ using System.Diagnostics.Contracts;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Validation
+namespace Sando.Validation
 {
     public class VsTestConsoleRunner
     {
