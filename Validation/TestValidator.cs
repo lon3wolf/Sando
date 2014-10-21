@@ -11,7 +11,8 @@ namespace Sando.Validation
 {
     public static class TestValidator
     {
-        private static List<Tuple<string, string>> _testLibraryTupleList;
+        private static List<Tuple<String, String>> _testNameLibraryList;
+        private static bool _updatedTestList = false;
         private static VsTestConsoleRunner _testRunner;
 
         public static void Initialize()
@@ -19,14 +20,21 @@ namespace Sando.Validation
             var dte = ServiceLocator.Resolve<DTE2>();
             _testRunner = new VsTestConsoleRunner(dte);
 
-            var testDiscoveryTask = System.Threading.Tasks.Task.Factory.StartNew(() =>
+            var testDiscoveryTask = Task.Factory.StartNew(() =>
             {
-                _testLibraryTupleList = _testRunner.DiscoverTests();
+                _testNameLibraryList = _testRunner.DiscoverTests();
             }, new CancellationToken(false));
-            
+
+            testDiscoveryTask.ContinueWith((continuation) =>
+            {
+                _updatedTestList = true;
+
+            });
         }
 
-
-
+        public static List<Tuple<String, String>> GetTestList()
+        {
+            return _updatedTestList ? _testNameLibraryList : null;
+        }
     }
 }

@@ -26,6 +26,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Sando.Validation;
 using Thread = System.Threading.Thread;
 
 namespace Sando.UI.ViewModel
@@ -43,6 +44,7 @@ namespace Sando.UI.ViewModel
         private Visibility _progressBarVisibility;
         private Visibility _validationButtonVisibility;
         private SearchManager _searchManager;
+        private String _selectedValidationTest;
 
         public ICommand AddIndexFolderCommand { get; set; }
 
@@ -63,6 +65,18 @@ namespace Sando.UI.ViewModel
         public ICommand CancelValidateCommand { get; set; }
 
         public ICommand GoValidateCommand { get; set; }
+
+        public ObservableCollection<String> TestForValidationList { get; set; }
+
+        public String SelectedValidationTest
+        {
+            get { return this._selectedValidationTest; }
+            set
+            {
+                this._selectedValidationTest = value;
+                OnPropertyChanged("SelectedValidationTest");
+            }
+        }
 
 
         public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
@@ -186,6 +200,7 @@ namespace Sando.UI.ViewModel
             this.ProgressBarVisibility = Visibility.Collapsed;
             this.ValidationButtonVisibility = Visibility.Hidden;
             this.IsValidationPopupEnabled = false;
+            this.TestForValidationList = new ObservableCollection<String>();
 
             InitAccessLevels();
             InitProgramElements();
@@ -394,12 +409,17 @@ namespace Sando.UI.ViewModel
 
         private void Validate(object param)
         {
+            var testTuples = TestValidator.GetTestList();
+            foreach (var testTuple in testTuples)
+            {                
+                TestForValidationList.Add(testTuple.Item1 + " (" + Path.GetFileName(testTuple.Item2) + ")");
+            }
             IsValidationPopupEnabled = true;
         }
 
         private void GoValidate(object param)
         {
-
+            
         }
 
         private void CancelValidate(object param)
