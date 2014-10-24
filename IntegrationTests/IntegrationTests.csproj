@@ -71,17 +71,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML, Version=4.0.27.41, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML, Version=4.1.0.43, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.4.0.27.41\lib\net40\ABB.SrcML.dll</HintPath>
+      <HintPath>..\packages\ABB.SrcML.4.1.0.43\lib\net40\ABB.SrcML.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.Data, Version=4.0.27.41, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data, Version=4.1.0.43, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.Data.4.0.27.41\lib\net40\ABB.SrcML.Data.dll</HintPath>
+      <HintPath>..\packages\ABB.SrcML.Data.4.1.0.43\lib\net40\ABB.SrcML.Data.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio, Version=4.0.27.41, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.VisualStudio, Version=4.1.0.43, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ABB.SrcML.VisualStudio.4.0.27.41\lib\net40\ABB.SrcML.VisualStudio.dll</HintPath>
+      <HintPath>..\packages\ABB.SrcML.VisualStudio.4.1.0.43\lib\net40\ABB.SrcML.VisualStudio.dll</HintPath>
     </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
