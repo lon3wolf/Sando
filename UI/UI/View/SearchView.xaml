@@ -330,8 +330,8 @@
                     </Grid.ColumnDefinitions>
                     <Border Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="0,0,5,5"></Border>
 
-                    <ListBox Height="150" Width="200" VerticalAlignment="Top" 
-                             ItemsSource="{Binding Path=TestsForValidationList}" SelectedItem="{Binding SelectedValidationTest}">
+                    <ListBox Height="150" Width="200" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ItemsSource="{Binding Path=TestForValidationList}" SelectedItem="{Binding SelectedValidationTest}">
                     </ListBox>
                     
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

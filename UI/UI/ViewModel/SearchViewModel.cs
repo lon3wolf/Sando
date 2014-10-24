@@ -409,6 +409,7 @@ namespace Sando.UI.ViewModel
 
         private void Validate(object param)
         {
+            TestForValidationList.Clear();
             var testTuples = TestValidator.GetTestList();
             foreach (var testTuple in testTuples)
             {                
