@@ -43,6 +43,7 @@ namespace Sando.UI.ViewModel
         private bool _isValidationPopupEnabled;
         private Visibility _progressBarVisibility;
         private Visibility _validationButtonVisibility;
+        private Visibility _circularProgressBarVisibility;
         private SearchManager _searchManager;
         private String _selectedValidationTest;
 
@@ -170,6 +171,16 @@ namespace Sando.UI.ViewModel
             }
         }
 
+        public Visibility CircularProgressBarVisibility
+        {
+            get { return this._circularProgressBarVisibility; }
+            set
+            {
+                this._circularProgressBarVisibility = value;
+                OnPropertyChanged("CircularProgressBarVisibility");
+            }
+        }
+
         public ObservableCollection<AccessWrapper> AccessLevels { get; set; }
 
         public ObservableCollection<ProgramElementWrapper> ProgramElements { get; set; }
@@ -199,6 +210,7 @@ namespace Sando.UI.ViewModel
             this._isSearchingDisabled = false;
             this.ProgressBarVisibility = Visibility.Collapsed;
             this.ValidationButtonVisibility = Visibility.Hidden;
+            this.CircularProgressBarVisibility = Visibility.Hidden;
             this.IsValidationPopupEnabled = false;
             this.TestForValidationList = new ObservableCollection<String>();
 
@@ -420,7 +432,9 @@ namespace Sando.UI.ViewModel
 
         private void GoValidate(object param)
         {
-            
+            IsValidationPopupEnabled = false;
+            CircularProgressBarVisibility = Visibility.Visible;
+            TestValidator.FilterResultsUsingTestExecution(SelectedValidationTest);
         }
 
         private void CancelValidate(object param)

@@ -36,5 +36,20 @@ namespace Sando.Validation
         {
             return _updatedTestList ? _testNameLibraryList : null;
         }
+
+        public static void FilterResultsUsingTestExecution(String selectedTest)
+        {
+            var validateResultsTask = Task.Factory.StartNew(() =>
+            {
+                //execute intellitrace
+            }, new CancellationToken(false));
+
+            validateResultsTask.ContinueWith((continuation) =>
+            {
+                //filter results in UI
+                //hide circular progress bar
+            });
+        }
+
     }
 }

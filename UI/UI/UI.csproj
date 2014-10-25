@@ -286,6 +286,9 @@
     <Compile Include="Monitoring\SrcMLArchiveEventsHandlers.cs" />
     <Compile Include="Options\KeyBindingsManager.cs" />
     <Compile Include="Options\SandoOptionsProvider.cs" />
+    <Compile Include="Resources\CircularProgressBar.xaml.cs">
+      <DependentUpon>CircularProgressBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SandoHighLighter.cs" />
     <Compile Include="View\ColorGenerator.cs" />
     <Compile Include="View\Converters\MyFontConverter.cs" />
@@ -583,6 +586,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Base\StyleDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\CircularProgressBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

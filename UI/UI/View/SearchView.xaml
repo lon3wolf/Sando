@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:viewmodel="clr-namespace:Sando.UI.ViewModel"
+             xmlns:resources="clr-namespace:Sando.UI"
              xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              xmlns:converters="clr-namespace:Sando.UI.View.Search.Converters"
@@ -312,6 +313,13 @@
                     </StackPanel>
                 </Border>
             </Expander>
+            
+            <Viewbox Name="ValidationCircularProgress" Grid.Column="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Visibility="{Binding CircularProgressBarVisibility}">
+                <resources:CircularProgressBar />
+            </Viewbox>
+
             <Button Name="ValidateButton" Grid.Column="2" Margin="5,5,5,5" FontSize="11" Height="25" VerticalAlignment="Bottom" 
                     Visibility="{Binding ValidationButtonVisibility}" Command="{Binding ValidateCommand}">
                 <StackPanel VerticalAlignment="Center">
@@ -326,11 +334,11 @@
                         <RowDefinition Height="35"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"></ColumnDefinition>                        
+                        <ColumnDefinition Width="250"></ColumnDefinition>                        
                     </Grid.ColumnDefinitions>
                     <Border Grid.RowSpan="2" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="0,0,5,5"></Border>
 
-                    <ListBox Height="150" Width="200" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    <ListBox Height="150" Width="250" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ItemsSource="{Binding Path=TestForValidationList}" SelectedItem="{Binding SelectedValidationTest}">
                     </ListBox>
                     
