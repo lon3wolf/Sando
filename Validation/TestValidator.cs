@@ -14,11 +14,13 @@ namespace Sando.Validation
         private static List<Tuple<String, String>> _testNameLibraryList;
         private static bool _updatedTestList = false;
         private static VsTestConsoleRunner _testRunner;
+        private static IntelliTraceConsoleRunner _intellitraceRunner;
 
         public static void Initialize()
         {
             var dte = ServiceLocator.Resolve<DTE2>();
             _testRunner = new VsTestConsoleRunner(dte);
+            _intellitraceRunner = new IntelliTraceConsoleRunner(dte);
 
             var testDiscoveryTask = Task.Factory.StartNew(() =>
             {
@@ -42,11 +44,13 @@ namespace Sando.Validation
             var validateResultsTask = Task.Factory.StartNew(() =>
             {
                 //execute intellitrace
+                _intellitraceRunner.SelectResultsUsingIntelliTrace(selectedTest);
+
             }, new CancellationToken(false));
 
             validateResultsTask.ContinueWith((continuation) =>
             {
-                //filter results in UI
+                //highlight results in UI
                 //hide circular progress bar
             });
         }

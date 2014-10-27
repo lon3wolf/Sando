@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleUtils.cs" />
+    <Compile Include="IntelliTraceConsoleRunner.cs" />
     <Compile Include="TestValidator.cs" />
     <Compile Include="VsTestConsoleRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

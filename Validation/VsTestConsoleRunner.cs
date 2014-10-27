@@ -25,7 +25,7 @@ namespace Sando.Validation
 
             _dte = dte;
 
-            _pathToVsTestConsoleExe = Path.Combine(GetVisualStudioInstallationPath(), 
+            _pathToVsTestConsoleExe = Path.Combine(ConsoleUtils.GetVisualStudioInstallationPath(dte), 
                                         @"CommonExtensions\Microsoft\TestWindow\vstest.console.exe"); 
         }
 
@@ -39,7 +39,7 @@ namespace Sando.Validation
             foreach (var library in libraryList)
             {
                 var command = "/ListTests:\"" + library + "\"";
-                var output = ExecuteVSTestConsole(command);
+                var output = ExecuteVsTestConsole(command);
                 var testList = ParseTestsFromConsoleOutput(output);
                 foreach(var test in testList)
                 {
@@ -80,95 +80,10 @@ namespace Sando.Validation
             return Path.Combine(outputDir, outputFileName);
         }
 
-        private string GetVisualStudioInstallationPath()
+        private string ExecuteVsTestConsole(string command)
         {
-            string installationPath = null;
-            string version = _dte.Version;
-            if (Environment.Is64BitOperatingSystem)
-            {
-                installationPath = (string)Registry.GetValue(
-                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\" + version + @"\",
-                    "InstallDir",
-                    null);
-            }
-            else
-            {
-                installationPath = (string)Registry.GetValue(
-                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\" + version + @"\",
-                    "InstallDir",
-                    null);
-            }
-            return installationPath;
-        }
-
-        private string ExecuteVSTestConsole(string command)
-        {
-            var outputWaitHandle = new AutoResetEvent(false);
-            var errorWaitHandle = new AutoResetEvent(false);
-
-            var startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardInput = false;
-            startInfo.FileName = "\"" + _pathToVsTestConsoleExe + "\"";
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = "/UseVsixExtensions:true " + command;
-
-            var timeout = 5000; //5 seconds
-            var output = new StringBuilder();
-            var error = new StringBuilder();
-
-            try
-            {
-                using (var exeProcess = new Process())
-                {
-                    exeProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (e.Data == null)
-                        {
-                            outputWaitHandle.Set();
-                        }
-                        else
-                        {
-                            output.AppendLine(e.Data);
-                        }
-                    };
-                    exeProcess.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (e.Data == null)
-                        {
-                            errorWaitHandle.Set();
-                        }
-                        else
-                        {
-                            error.AppendLine(e.Data);
-                        }
-                    };
-
-                    exeProcess.StartInfo = startInfo;
-                    exeProcess.Start();
-                    exeProcess.BeginOutputReadLine();
-                    exeProcess.BeginErrorReadLine();
-
-                    if (exeProcess.WaitForExit(timeout) &&
-                        outputWaitHandle.WaitOne(timeout) &&
-                        errorWaitHandle.WaitOne(timeout))
-                    {
-                        // Process completed. Check process.ExitCode here.
-                    }
-                    else
-                    {
-                        // Timed out.
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-
-            return output.ToString();
+            var commandPlus = "/UseVsixExtensions:true " + command;
+            return ConsoleUtils.ExecuteCommandInConsole(_pathToVsTestConsoleExe, commandPlus);
         }
 
         private List<string> ParseTestsFromConsoleOutput(string output)
