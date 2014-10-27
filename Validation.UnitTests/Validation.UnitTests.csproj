@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntelliTraceConsoleTester.cs" />
     <Compile Include="VsTestConsoleTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

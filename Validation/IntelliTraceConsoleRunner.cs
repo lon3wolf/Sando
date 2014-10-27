@@ -17,15 +17,22 @@ namespace Sando.Validation
         public IntelliTraceConsoleRunner(DTE2 dte)
         {
             Contract.Requires(dte != null, "Received a null VS DTE object");
+            Contract.Ensures(File.Exists(_pathToVsTestConsoleExe), "vstest.console.exe could not be found in it usual location.");
             Contract.Ensures(File.Exists(_pathToIntelliTraceExe), "intellitrace.exe could not be found in it usual location.");
 
             _dte = dte;
 
             _pathToIntelliTraceExe = Path.Combine(ConsoleUtils.GetVisualStudioInstallationPath(dte),
-                                            @"CommonExtensions\Microsoft\TestWindow\intellitrace.exe");
+                                            @"CommonExtensions\Microsoft\IntelliTrace\" + dte.Version + @".0.0\IntelliTrace.exe");
 
             _pathToVsTestConsoleExe = Path.Combine(ConsoleUtils.GetVisualStudioInstallationPath(dte),
                                             @"CommonExtensions\Microsoft\TestWindow\vstest.console.exe"); 
+        }
+
+        public IntelliTraceConsoleRunner(string intelliTracePath, string vsTestConsolePath)
+        {
+            _pathToIntelliTraceExe = intelliTracePath;
+            _pathToVsTestConsoleExe = vsTestConsolePath;
         }
 
         public void SelectResultsUsingIntelliTrace(string testName)
