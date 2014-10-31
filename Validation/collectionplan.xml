@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CollectionPlan xmlns="urn:schemas-microsoft-com:visualstudio:tracelog">
+  <StartupInfo>
+    <LogFileName></LogFileName>
+    <LogFileDirectory></LogFileDirectory>
+    <MaximumLogFileSize>100000</MaximumLogFileSize>
+  </StartupInfo>
+  <TraceInstrumentation enabled="true">
+    <Options>PresetFull</Options>
+    <ModuleList isExclusionList="true">
+      <Name>PublicKeyToken:B77A5C561934E089</Name>
+      <Name>PublicKeyToken:B03F5F7F11D50A3A</Name>
+      <Name>PublicKeyToken:31BF3856AD364E35</Name>
+      <Name>PublicKeyToken:89845DCD8080CC91</Name>
+      <Name>PublicKeyToken:71E9BCE111E9429C</Name>
+      <Name>Microsoft.</Name>
+    </ModuleList>
+    <ProcessList isExclusionList="true">
+      <Name>devenv.exe</Name>
+      <Name>mtm.exe</Name>
+      <Name>TestAgentConfigUI.exe</Name>
+      <Name>TestControllerConfigUI.exe</Name>
+      <Name>DW20.exe</Name>
+      <Name>TFSMgmt.exe</Name>
+      <Name>TFSJobAgent.exe</Name>
+      <Name>TFSBuildServiceHost.exe</Name>
+      <Name>Microsoft.VisualStudio.PerfWatson.exe</Name>
+      <Name>FxCopCmd.exe</Name>
+      <Name>MSBuild.exe</Name>
+      <Name>sqlservr.exe</Name>
+      <Name>IntelliTrace.exe</Name>
+      <Name>MSVSMON.exe</Name>
+      <Name>IntelliTraceSC.exe</Name>
+      <Name>xdesproc.exe</Name>
+      <Name>VWDExpress.exe</Name>
+      <Name>VsWinExpress.exe</Name>
+      <Name>Blend.exe</Name>
+    </ProcessList>
+  </TraceInstrumentation>
+  <TracePointProvider>
+    <!-- List of Categories Grouping Events -->
+    <Categories>
+      <Category Id="tracing" _locID="category.Tracing">Tracing</Category>
+    </Categories>
+    <!-- List of Module Specifications -->
+    <ModuleSpecifications>
+      <ModuleSpecification Id="mscorlib">mscorlib.dll</ModuleSpecification>
+      <ModuleSpecification Id="mscorlib2_only" maxVersion="2.0">mscorlib.dll</ModuleSpecification>
+      <ModuleSpecification Id="mscorlib4_plus" minVersion="4.0">mscorlib.dll</ModuleSpecification>
+      <ModuleSpecification Id="mscorlib45_plus" minVersion="4.0.30319.236">mscorlib.dll</ModuleSpecification>
+      <ModuleSpecification Id="mscorlib4_only" minVersion="4.0" maxVersion="4.0.30319.235">mscorlib.dll</ModuleSpecification>
+      <ModuleSpecification Id="presentationframework">PresentationFramework.dll</ModuleSpecification>
+      <ModuleSpecification Id="system">System.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.activities4_plus" minVersion="4.0">System.Activities.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.data">System.Data.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.servicemodel">System.ServiceModel.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.web">System.Web.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.web2_only" maxVersion="2.0">System.Web.dll</ModuleSpecification>
+      <ModuleSpecification Id="winforms">System.Windows.Forms.dll</ModuleSpecification>
+      <ModuleSpecification Id="system.xml">System.Xml.dll</ModuleSpecification>
+    </ModuleSpecifications>
+    <!-- List of Diagnostic Events -->
+    <DiagnosticEventSpecifications>
+      <!-- Begin Diagnostic Events for Tracing -->
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Fail.1">Assertion (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Fail.1">The application threw an assertion with a message.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Fail</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Fail(System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.Fail.1">Assert "{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.Fail.1">Assertion with the message "{0}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.Fail.1.Message" _locAttrData="name" name="Message" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Fail.2">Assertion (String, String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Fail.2">The application threw an assertion with a message and detailed message.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Fail</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Fail(System.String,System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.Fail.2">Assert "{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.Fail.2">Assertion with the message "{0}" and detailed message "{1}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.Fail.Message" _locAttrData="name" name="Message" query="" />
+              <DataQuery index="1" maxSize="256" type="String" _locID="dataquery.TraceInternal.Fail.DetailMessage" _locAttrData="name" name="Detail Message" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Write.1">Trace Write (Object)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Write.1">Trace Write output with an object passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Write</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Write(System.Object):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceInternal.TraceWriteDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Write.2">Trace Write (Object, String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Write.2">Trace Write output with an object and a string category passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Write</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Write(System.Object,System.String):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceInternal.TraceWriteDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Write.3">Trace Write (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Write.3">Trace Write output with a message string passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Write</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Write(System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.Write.3">"{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.Write.3">Trace Write with the message "{0}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.Write.3.message" _locAttrData="name" name="message" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.Write.4">Trace Write (String, String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.Write.4">Trace Write output with a message and category string passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>Write</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.Write(System.String,System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.Write.4">"{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.Write.4">Trace Write from category "{1}" with the message "{0}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.Write.4.message" _locAttrData="name" name="message" query="" />
+              <DataQuery index="1" maxSize="256" type="String" _locID="dataquery.TraceInternal.Write.4.category" _locAttrData="name" name="category" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.WriteLine.1">Trace WriteLine (Object)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.WriteLine.1">Trace WriteLine output with an object passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>WriteLine</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.WriteLine(System.Object):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceInternal.TraceWriteLineDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.WriteLine.2">Trace WriteLine (Object, String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.WriteLine.2">Trace WriteLine output with an object and a string category passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>WriteLine</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.WriteLine(System.Object,System.String):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceInternal.TraceWriteLineDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.WriteLine.3">Trace WriteLine (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.WriteLine.3">Trace WriteLine output with a message passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>WriteLine</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.WriteLine(System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.WriteLine.3">"{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.WriteLine.3">Trace WriteLine with the message "{0}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.WriteLine.3.message" _locAttrData="name" name="message" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification enabled="false">
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.TraceInternal.WriteLine.4">Trace WriteLine (String, String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.TraceInternal.WriteLine.4">Trace WriteLine output with a message and category string passed in.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.TraceInternal</TypeName>
+            <MethodName>WriteLine</MethodName>
+            <MethodId>System.Diagnostics.TraceInternal.WriteLine(System.String,System.String):System.Void</MethodId>
+            <ShortDescription _locID="shortDescription.TraceInternal.WriteLine.4">"{0}"</ShortDescription>
+            <LongDescription _locID="longDescription.TraceInternal.WriteLine.4">Trace WriteLine from category "{1}" with the message "{0}".</LongDescription>
+            <DataQueries>
+              <DataQuery index="0" maxSize="256" type="String" _locID="dataquery.TraceInternal.WriteLine.4.message" _locAttrData="name" name="message" query="" />
+              <DataQuery index="1" maxSize="256" type="String" _locID="dataquery.TraceInternal.WriteLine.4.category" _locAttrData="name" name="category" query="" />
+            </DataQueries>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceError.1">TraceError (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceError.1">TraceError with no formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceError</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceError(System.String):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceErrorNoFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceWarning.1">TraceWarning (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceWarning.1">TraceWarning with no formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceWarning</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceWarning(System.String):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceWarningNoFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceInformation.1">TraceInformation (String)</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceInformation.1">TraceInformation with no formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceInformation</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceInformation(System.String):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceInformationNoFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceError.2">TraceError (String, Object[])</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceError.2">TraceError with formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceError</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceError(System.String,System.Object[]):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceErrorFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceWarning.2">TraceWarning (String, Object[])</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceWarning.2">TraceWarning with formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceWarning</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceWarning(System.String,System.Object[]):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceWarningFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <DiagnosticEventSpecification>
+        <CategoryId>tracing</CategoryId>
+        <SettingsName _locID="settingsName.Trace.TraceInformation.2">TraceInformation (String, Object[])</SettingsName>
+        <SettingsDescription _locID="settingsDescription.Trace.TraceInformation.2">TraceInformation with formatting recorded.</SettingsDescription>
+        <Bindings>
+          <Binding>
+            <ModuleSpecificationId>system</ModuleSpecificationId>
+            <TypeName>System.Diagnostics.Trace</TypeName>
+            <MethodName>TraceInformation</MethodName>
+            <MethodId>System.Diagnostics.Trace.TraceInformation(System.String,System.Object[]):System.Void</MethodId>
+            <ProgrammableDataQuery>
+              <ModuleName>Microsoft.VisualStudio.DefaultDataQueries.dll</ModuleName>
+              <TypeName>Microsoft.VisualStudio.DataQueries.Tracing.TraceEvent.TraceInformationFormatDataQuery</TypeName>
+            </ProgrammableDataQuery>
+          </Binding>
+        </Bindings>
+      </DiagnosticEventSpecification>
+      <!-- End Diagnostic Events for Tracing -->
+    </DiagnosticEventSpecifications>
+  </TracePointProvider>
+</CollectionPlan>

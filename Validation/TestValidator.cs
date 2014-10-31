@@ -39,12 +39,12 @@ namespace Sando.Validation
             return _updatedTestList ? _testNameLibraryList : null;
         }
 
-        public static void FilterResultsUsingTestExecution(String selectedTest)
+        public static void FilterResultsUsingTestExecution(string selectedTest, string selectedTestLibrary)
         {
             var validateResultsTask = Task.Factory.StartNew(() =>
             {
                 //execute intellitrace
-                _intellitraceRunner.SelectResultsUsingIntelliTrace(selectedTest);
+                _intellitraceRunner.SelectResultsUsingIntelliTrace(selectedTest, selectedTestLibrary);
 
             }, new CancellationToken(false));
 

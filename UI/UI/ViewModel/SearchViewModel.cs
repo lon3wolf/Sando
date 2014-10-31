@@ -1,4 +1,5 @@
-﻿using ABB.SrcML;
+﻿using System.Text.RegularExpressions;
+using ABB.SrcML;
 using ABB.SrcML.VisualStudio;
 using EnvDTE;
 using EnvDTE80;
@@ -425,7 +426,7 @@ namespace Sando.UI.ViewModel
             var testTuples = TestValidator.GetTestList();
             foreach (var testTuple in testTuples)
             {                
-                TestForValidationList.Add(testTuple.Item1 + " (" + Path.GetFileName(testTuple.Item2) + ")");
+                TestForValidationList.Add(ConvertTestTupleToDisplayString(testTuple));
             }
             IsValidationPopupEnabled = true;
         }
@@ -434,7 +435,8 @@ namespace Sando.UI.ViewModel
         {
             IsValidationPopupEnabled = false;
             CircularProgressBarVisibility = Visibility.Visible;
-            TestValidator.FilterResultsUsingTestExecution(SelectedValidationTest);
+            var testTuple = ConvertDisplayStringToTestTuple(SelectedValidationTest, TestValidator.GetTestList());
+            TestValidator.FilterResultsUsingTestExecution(testTuple.Item1, testTuple.Item2);
         }
 
         private void CancelValidate(object param)
@@ -445,6 +447,25 @@ namespace Sando.UI.ViewModel
         #endregion
 
         #region Private Methods
+
+        private string ConvertTestTupleToDisplayString(Tuple<string, string> testTuple)
+        {
+            return testTuple.Item1 + " (" + Path.GetFileName(testTuple.Item2) + ")";
+        }
+
+        private Tuple<string, string> ConvertDisplayStringToTestTuple(string displayString, List<Tuple<string, string>> allTests)
+        {
+            Tuple<string, string> tuple = null;
+            Match match = Regex.Match(displayString, @"(\w+)\s*\(([\w\.]+)\)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                var testName = match.Groups[1].Value;
+                var libName = match.Groups[2].Value;
+
+                tuple = allTests.Find(t => t.Item1 == testName && t.Item2.EndsWith(libName));
+            }
+            return tuple;
+        }
 
         private void NotifyProgressBarVisibilityWithDelay()
         {

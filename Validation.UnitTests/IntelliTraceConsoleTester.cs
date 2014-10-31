@@ -11,9 +11,11 @@ namespace Validation.UnitTests
         private IntelliTraceConsoleRunner _traceRunner;
 
         [TestFixtureSetUp]
-		public void FixtureSetUp() 
-        {            
-            _traceRunner = new IntelliTraceConsoleRunner("IntelliTrace.exe", "VsTestConsole.exe");
+		public void FixtureSetUp()
+        {
+            const string intelliTraceExe = @"../../LIBS/IntelliTrace/IntelliTrace.exe";
+            const string testConsoleExe = @"../../LIBS/IntelliTrace/vstest.console.exe";
+            _traceRunner = new IntelliTraceConsoleRunner(intelliTraceExe, testConsoleExe);
 		}
 
         [Test]

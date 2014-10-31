@@ -12,6 +12,8 @@ namespace Sando.Validation
     {
         private string _pathToIntelliTraceExe;
         private string _pathToVsTestConsoleExe;
+        private const string PathToCollectionPlanXml = @"../collectionplan.xml";
+        private string _pathToLogFile;
         private DTE2 _dte;
 
         public IntelliTraceConsoleRunner(DTE2 dte)
@@ -23,10 +25,12 @@ namespace Sando.Validation
             _dte = dte;
 
             _pathToIntelliTraceExe = Path.Combine(ConsoleUtils.GetVisualStudioInstallationPath(dte),
-                                            @"CommonExtensions\Microsoft\IntelliTrace\" + dte.Version + @".0.0\IntelliTrace.exe");
+                                            @"CommonExtensions\Microsoft\IntelliTrace\" + dte.Version + @".0\IntelliTrace.exe");
 
             _pathToVsTestConsoleExe = Path.Combine(ConsoleUtils.GetVisualStudioInstallationPath(dte),
-                                            @"CommonExtensions\Microsoft\TestWindow\vstest.console.exe"); 
+                                            @"CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+
+            _pathToLogFile = Path.GetTempFileName();
         }
 
         public IntelliTraceConsoleRunner(string intelliTracePath, string vsTestConsolePath)
@@ -35,15 +39,17 @@ namespace Sando.Validation
             _pathToVsTestConsoleExe = vsTestConsolePath;
         }
 
-        public void SelectResultsUsingIntelliTrace(string testName)
+        public void SelectResultsUsingIntelliTrace(string testName, string testLibraryPath)
         {
-            ExecuteIntelliTrace("some command");
+            var command = "\"" + _pathToVsTestConsoleExe + "\" /UseVsixExtensions:true /Tests:" + testName + " \"" + testLibraryPath + "\"";
+            ExecuteIntelliTrace(command);
         }
-
 
         private string ExecuteIntelliTrace(string command)
         {
-            var commandPlus = "/UseVsixExtensions:true " + command;
+            var collectionPlanCommand = "/cp:\"" + PathToCollectionPlanXml + "\"";
+            var logFileCommand = "/logfile:\"" + _pathToLogFile + "\"";
+            var commandPlus = " " + collectionPlanCommand + " " + logFileCommand + " " + command;
             return ConsoleUtils.ExecuteCommandInConsole(_pathToIntelliTraceExe, commandPlus);
         }
 
