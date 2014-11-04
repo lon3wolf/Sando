@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Sando.ExtensionContracts.ParserContracts;
 using Sando.ExtensionContracts.ProgramElementContracts;
 using ABB.SrcML;
@@ -15,8 +15,8 @@ namespace Sando.Parser
     public class SrcMLCppParser : IParser
     {
         public ISrcMLGlobalService SrcMLService;
-        public ISrcMLArchive Archive { get; set; }           // should be deleted
-        public ISrcMLGenerator Generator { get; set; }
+        public SrcMLArchive Archive { get; set; }           // should be deleted
+        public SrcMLGenerator Generator { get; set; }
 
         public SrcMLCppParser() {
         }
@@ -25,11 +25,11 @@ namespace Sando.Parser
             this.SrcMLService = srcmlService;
         }
 
-        public SrcMLCppParser(ISrcMLArchive archive) {
+        public SrcMLCppParser(SrcMLArchive archive) {
             this.Archive = archive;
         }
 
-        public SrcMLCppParser(ISrcMLGenerator generator) {
+        public SrcMLCppParser(SrcMLGenerator generator) {
             this.Generator = generator;
         }
 

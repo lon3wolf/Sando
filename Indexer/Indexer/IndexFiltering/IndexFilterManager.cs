@@ -126,8 +126,8 @@ namespace Sando.Indexer.IndexFiltering
         }
 
         private bool IsTextFileAccordingToVS(string fileExtension)
-        {
-            var extensionRegistry = ServiceLocator.Resolve<IFileExtensionRegistryService>();
+        {            
+            var extensionRegistry = ServiceLocator.ResolveOptional<IFileExtensionRegistryService>();
             if (extensionRegistry == null)
                 return false;
             else

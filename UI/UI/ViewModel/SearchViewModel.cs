@@ -1,5 +1,5 @@
 ﻿using ABB.SrcML;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.Practices.Unity;
@@ -491,7 +491,7 @@ namespace Sando.UI.ViewModel
         private void RegisterSrcMLService()
         {
             ISrcMLGlobalService srcMLService = ServiceLocator.Resolve<ISrcMLGlobalService>();
-
+            
             srcMLService.DirectoryAdded += (sender, e) =>
             {
 

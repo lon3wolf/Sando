@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using ABB.SrcML.Utilities;
 using Sando.ExtensionContracts.ServiceContracts;
 using Sando.UI;

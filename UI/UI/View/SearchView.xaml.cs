@@ -19,7 +19,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Sando.UI.Actions;
 using FocusTestVC;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Thread = System.Threading.Thread;
 using Sando.Indexer.Searching.Criteria;
 
@@ -176,6 +176,18 @@ namespace Sando.UI.View
 
                 }
             }
+        }
+
+        private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SearchBoxTooltip.PlacementTarget = this.SearchBox;
+            SearchBoxTooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+            SearchBoxTooltip.IsOpen = true;
+        }
+
+        private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SearchBoxTooltip.IsOpen = false;
         }
 
         private void UpdateMessage(string message)
@@ -510,5 +522,7 @@ namespace Sando.UI.View
 
         #endregion
 
+        
+        
     }
 }

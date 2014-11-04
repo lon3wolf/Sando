@@ -14,8 +14,6 @@ namespace Sando.Parser
         //Lucene's max term length is 16383, we choose something a bit lower to chunk on.
         private const int MaxLengthOfTermInLucene = 15500;
 
-        private const int MaxLengthOfFileToIndex = 10000;
-
         public List<ProgramElement> Parse(string filename)
         {
             var list = new List<ProgramElement>();
@@ -47,8 +45,6 @@ namespace Sando.Parser
                                 fileText = new StringBuilder();
                             }
                         }
-                        if (currentLineNumber > MaxLengthOfFileToIndex)
-                            break;
                     }
 
                     var fileString = fileText.ToString();

@@ -19,7 +19,7 @@ using Configuration.OptionsPages;
 using ABB.SrcML;
 using System.Threading;
 using Sando.Core.Tools;
-using ABB.SrcML.VisualStudio.SrcMLService;
+using ABB.SrcML.VisualStudio;
 using Sando.UI.View;
 using System.Diagnostics;
 using System.Text;
@@ -46,7 +46,6 @@ namespace Sando.IntegrationTests.Search
         [TestFixtureSetUp]
         public void Setup()
         {            
-            SrcMLArchiveEventsHandlers.MAX_PARALLELISM = 8;
             IndexSpecifiedFiles(GetFilesDirectory(), GetIndexDirName());
         }
 
@@ -113,16 +112,23 @@ namespace Sando.IntegrationTests.Search
             var files = GetFileList(filesInThisDirectory);
             foreach (var file in files)
             {
-                if (Path.GetExtension(Path.GetFullPath(file)).Equals(".cs") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx") ||
-                    Path.GetExtension(Path.GetFullPath(file)).Equals(".txt")
-                    )
+                if (IsSourceFile(file) || Path.GetExtension(Path.GetFullPath(file)).Equals(".txt"))
+                {
+                    if (IsSourceFile(file) )
+                        _srcMLArchive.AddOrUpdateFile(file);
                     HandleFileUpdated(file);
+                }
             }
             done = true;
+        }
+
+        private static bool IsSourceFile(string file)
+        {
+            return Path.GetExtension(Path.GetFullPath(file)).Equals(".cs") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".cpp") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".c") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".h") ||
+                                Path.GetExtension(Path.GetFullPath(file)).Equals(".cxx");
         }
 
         protected virtual void HandleFileUpdated(string file)
@@ -171,7 +177,7 @@ namespace Sando.IntegrationTests.Search
             Analyzer analyzer = SnowballAndWordSplittingAnalyzer.GetAnalyzer();
             ServiceLocator.RegisterInstance<Analyzer>(analyzer);
 
-            var currentIndexer = new DocumentIndexer(TestUtils.GetATestingScheduler());
+            var currentIndexer = new DocumentIndexer(); 
             ServiceLocator.RegisterInstance(currentIndexer);
             ServiceLocator.RegisterInstance(new IndexUpdateManager());
             currentIndexer.ClearIndex();            
@@ -310,10 +316,9 @@ namespace Sando.IntegrationTests.Search
             return _srcMLArchive.GetXElementForSourceFile(sourceFilePath);
         }
 
-        public ISrcMLArchive GetSrcMLArchive()
-        {
-            return _srcMLArchive;
-        }
+        public SrcMLArchive CurrentSrcMLArchive { get { return _srcMLArchive; } }
+
+        public SourceMonitor CurrentMonitor { get { return null; } }
 
         public bool IsMonitoring { get { return true; } }
         public bool IsUpdating { get { return !done; } }

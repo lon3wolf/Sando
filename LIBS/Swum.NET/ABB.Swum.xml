@@ -2718,7 +2718,7 @@
             <param name="printSplitTrace">Whether or not to print a trace of the splitting process.</param>
             <returns>An array of the words resulting from the split.</returns>
         </member>
-        <member name="M:ABB.Swum.SamuraiIdSplitter.CountProgramWords(ABB.SrcML.ISrcMLArchive)">
+        <member name="M:ABB.Swum.SamuraiIdSplitter.CountProgramWords(ABB.SrcML.SrcMLArchive)">
             <summary>
             Counts the number of occurrences of words within the identifiers in the given srcml files.
             </summary>

@@ -104,20 +104,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ABB.SrcML">
-      <HintPath>..\..\packages\ABB.SrcML.3.1.11.26\lib\net40\ABB.SrcML.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ABB.SrcML.Core">
-      <HintPath>..\..\packages\ABB.SrcML.Core.3.1.11.26\lib\net40\ABB.SrcML.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="ABB.SrcML.Data.Core, Version=3.1.11.26, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML, Version=4.1.7.46, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.Data.Core.3.1.11.26\lib\net40\ABB.SrcML.Data.Core.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.4.1.7.46\lib\net40\ABB.SrcML.dll</HintPath>
     </Reference>
-    <Reference Include="ABB.SrcML.VisualStudio.Interfaces, Version=3.1.11.26, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ABB.SrcML.Data, Version=4.1.7.46, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.Interfaces.3.1.11.26\lib\net40\ABB.SrcML.VisualStudio.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\ABB.SrcML.Data.4.1.7.46\lib\net40\ABB.SrcML.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="ABB.SrcML.VisualStudio, Version=4.1.7.46, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\ABB.SrcML.VisualStudio.4.1.7.46\lib\net40\ABB.SrcML.VisualStudio.dll</HintPath>
     </Reference>
     <Reference Include="Accessibility" />
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -183,7 +180,7 @@
       <HintPath>..\..\LIBS\Extensions\Microsoft.VisualStudio.CommandBars.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-	  <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\LIBS\VisualStudio\Microsoft.VisualStudio.ComponentModelHost.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -374,7 +371,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="ABB.SrcML.VisualStudio.SrcMLService.vsix">
+    <Content Include="ABB.SrcML.VisualStudio.vsix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="packages.config" />

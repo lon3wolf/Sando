@@ -14,7 +14,7 @@ using Sando.Core.Logging.Persistence;
 using Sando.Core.Logging.Events;
 using System.Timers;
 using Sando.DependencyInjection;
-using ABB.VisualStudio.Interfaces;
+using ABB.VisualStudio;
 using System.Threading.Tasks;
 
 
@@ -90,13 +90,13 @@ namespace Sando.Recommender {
         /// <summary>
         /// The SrcMLArchive to retrieve SrcML files from
         /// </summary>
-        public ISrcMLArchive Archive { get; set; }
+        public SrcMLArchive Archive { get; set; }
 
         /// <summary>
         /// The SrcMLGenerator to use to convert source files to SrcML.
         /// This is only used if Archive is null.
         /// </summary>
-        public ISrcMLGenerator Generator { get; set; }
+        public SrcMLGenerator Generator { get; set; }
     
         /// <summary>
         /// The path to the cache file on disk.
