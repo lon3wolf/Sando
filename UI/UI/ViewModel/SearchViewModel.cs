@@ -304,27 +304,6 @@ namespace Sando.UI.ViewModel
 
         private void Cancel(object param)
         {
-            foreach (var file in this.ModifiedIndexedFile)
-            {
-                if (file.OperationStatus == IndexedFile.Status.Add)
-                {
-                    this.IndexedFiles.Remove(GetFileFromIndexedFiles(file.GUID));
-                }
-                else if (file.OperationStatus == IndexedFile.Status.Remove)
-                {
-                    this.IndexedFiles.Add(file);
-
-                    if (this.IndexedFiles.IndexOf(file) == 0)
-                    {
-                        this.CurrentIndexedFile = file;
-                    }
-                }
-                else if (file.OperationStatus == IndexedFile.Status.Modified)
-                {
-                    GetFileFromIndexedFiles(file.GUID).FilePath = file.FilePath;
-                }
-            }
-
             Synchronize();
 
         }
@@ -411,15 +390,9 @@ namespace Sando.UI.ViewModel
 
         private void Synchronize()
         {
-
             this.ModifiedIndexedFile.Clear();
-
-            foreach (var file in this.IndexedFiles)
-            {
-                file.OperationStatus = IndexedFile.Status.Normal;
-                this.ModifiedIndexedFile.Add(new IndexedFile(file.GUID, file.FilePath));
-            }
-
+            this.IndexedFiles.Clear();
+            InitializeIndexedFile();
         }
 
         private void AddDirectoryToMonitor(ISrcMLGlobalService srcMlService, IndexedFile file)
