@@ -510,33 +510,5 @@ namespace Sando.UI.View
 
         #endregion
 
-        private ToolTip SearchBoxTooltip = new ToolTip 
-        { Content = "Add ALL relevant words (i.e., Google-style query) " 
-                    + "\n" 
-                    + "Keyboard shortcut: Ctrl+Shift+F"
-                    + "\n"
-                    + "Put exact phrases in quotes:" + "\t" + "\"void StartMonitor(\""
-                    + "\n"
-                    + "Escape \\ and \" in quotes:" + "\t" + "\"OpenFile(\"file.txt\");\""
-                    + "\n"
-                    + "Put '-' before unwanted words:" + "\t" + "parse method -test"
-                    + "\n"
-                    + "Filter results by file extensions:" + "\t" + "image file:cs"
-        };
-
-        private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            SearchBox.ToolTip = SearchBoxTooltip;
-            SearchBoxTooltip.PlacementTarget = this.SearchBox;
-            SearchBoxTooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Top;
-            SearchBoxTooltip.IsOpen = true;
-        }
-
-        private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            SearchBoxTooltip.IsOpen = false;
-        }
-
-        
     }
 }
