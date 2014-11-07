@@ -118,21 +118,13 @@
                 MinimumPrefixLength="0" MaxDropDownHeight="290" 
                 ValueMemberPath="Query" VerticalAlignment="Top" 
                 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}"
-                ToolTipService.ShowDuration="12000">
-                <controls:AutoCompleteBox.ToolTip>
-                    <ToolTip Name="SearchBoxTooltip">
-                        <StackPanel>
-                            <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
-                            <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
-                            <TextBlock>Put exact phrases in quotes: "void StartMonitor("</TextBlock>
-                            <TextBlock>Escape \ and " in quotes: "OpenFile(\"file.txt\");"</TextBlock>
-                            <TextBlock>Put '-' before unwanted words: parse method -test</TextBlock>
-                            <TextBlock>Filter results by file extensions: image file:cs</TextBlock>                            
-                        </StackPanel>
-                    </ToolTip>
-                </controls:AutoCompleteBox.ToolTip>              
-
+                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}">
+                <!--<controls:AutoCompleteBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
+                        <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
+                    </StackPanel>
+                </controls:AutoCompleteBox.ToolTip>-->
 
                 <controls:AutoCompleteBox.ItemTemplate>
                     <DataTemplate>
@@ -154,7 +146,7 @@
                 </controls:AutoCompleteBox.ItemTemplate>
             </controls:AutoCompleteBox>
 
-           
+            
             <!--
             <Button Style="{StaticResource NoChromeButton}" Background="Gainsboro"
                     Grid.Column="1" Click="TagCloudButton_Click"
