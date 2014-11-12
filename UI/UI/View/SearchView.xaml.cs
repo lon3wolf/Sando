@@ -22,6 +22,7 @@ using FocusTestVC;
 using ABB.SrcML.VisualStudio;
 using Thread = System.Threading.Thread;
 using Sando.Indexer.Searching.Criteria;
+using Configuration.OptionsPages;
 
 namespace Sando.UI.View
 {
@@ -180,14 +181,26 @@ namespace Sando.UI.View
 
         private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
         {
+            if (this.SearchBoxTooltipNoShow.IsChecked.Value)
+                return;
             SearchBoxTooltip.PlacementTarget = this.SearchBox;
             SearchBoxTooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+            //if(!this.SearchBoxTooltipNoShow.IsChecked.Value) 
             SearchBoxTooltip.IsOpen = true;
-        }
+        }      
+
 
         private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
         {
+            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+            if (elementWithFocus.Equals(SearchBoxTooltipNoShow))
+                return;
             SearchBoxTooltip.IsOpen = false;
+        }
+
+        private void SearchBoxTooltipNoShow_Checked(object sender, RoutedEventArgs e)
+        {
+            SearchBoxTooltip.IsOpen = false;            
         }
 
         private void UpdateMessage(string message)
@@ -523,6 +536,7 @@ namespace Sando.UI.View
         #endregion
 
         
+
         
     }
 }

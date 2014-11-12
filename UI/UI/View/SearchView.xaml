@@ -16,8 +16,13 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:SwumTypeToColorConverter x:Key="SwumTypeToColorConverter"/>
             <converters:BackgroundConverter x:Key="BackgroundConverter" />
-        </ResourceDictionary>
+            <Style  x:Key="FixedWidthLBStyle" TargetType="ListBoxItem">
+                <Setter Property="MaxWidth" Value="500" />
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+            </Style>
+        </ResourceDictionary>        
     </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>            
             <RowDefinition Height="17"/>
@@ -107,33 +112,27 @@
                 <ColumnDefinition Width="0" />
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-
+            
             <!-- Top Part: Query -->
             <controls:AutoCompleteBox Loaded="SearchBox_Loaded" HorizontalAlignment="Stretch" Grid.Column="0"
                 Name="SearchBox" Margin="0,0,0,0" FilterMode="None"
                 Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
                 KeyUp="SearchBox_OnKeyUpHandler"
                 GotFocus="SearchBox_GotFocus"
-                LostFocus="SearchBox_LostFocus"
+                LostFocus="SearchBox_LostFocus"   
                 MinimumPrefixLength="0" MaxDropDownHeight="290" 
                 ValueMemberPath="Query" VerticalAlignment="Top" 
                 Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}"
-                ToolTipService.ShowDuration="12000">
+                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}"  
+                ItemContainerStyle="{StaticResource FixedWidthLBStyle}"
+                ToolTipService.ShowDuration="2000">
                 <controls:AutoCompleteBox.ToolTip>
-                    <ToolTip Name="SearchBoxTooltip">
-                        <StackPanel>
-                            <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
-                            <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
-                            <TextBlock>Put exact phrases in quotes: "void StartMonitor("</TextBlock>
-                            <TextBlock>Escape \ and " in quotes: "OpenFile(\"file.txt\");"</TextBlock>
-                            <TextBlock>Put '-' before unwanted words: parse method -test</TextBlock>
-                            <TextBlock>Filter results by file extensions: image file:cs</TextBlock>                            
-                        </StackPanel>
-                    </ToolTip>
-                </controls:AutoCompleteBox.ToolTip>              
-
-
+                    <StackPanel>
+                        <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
+                        <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
+                    </StackPanel>
+                </controls:AutoCompleteBox.ToolTip>  
+                
                 <controls:AutoCompleteBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Query}" >
@@ -154,7 +153,36 @@
                 </controls:AutoCompleteBox.ItemTemplate>
             </controls:AutoCompleteBox>
 
-           
+            <Popup Name="SearchBoxTooltip" PlacementTarget="{Binding ElementName=SearchBox}" Placement="Left"
+                           AllowsTransparency="True">
+                <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}" BorderThickness="1,1,1,1">
+                    <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+                        <TextBlock Margin="6,0,6,4" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
+                            Add ALL relevant words (i.e., Google-style query)
+                        </TextBlock>
+                        <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
+                            Put exact phrases in quotes: "void StartMonitor("
+                        </TextBlock>
+                        <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
+                            Escape \ and " in quotes: "OpenFile(\"file.txt\");"
+                        </TextBlock>
+                        <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
+                            Put '-' before unwanted words: parse method -test
+                        </TextBlock>
+                        <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
+                            Filter results by file extensions: image file:cs
+                        </TextBlock>
+                        
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+
+                        <CheckBox Margin="6,0,0,0" Name="SearchBoxTooltipNoShow" IsEnabled="True" Checked="SearchBoxTooltipNoShow_Checked">
+                                Don't show again. Get query tips in Help (?).
+                        </CheckBox>
+                        
+                    </StackPanel>
+                </Border>
+            </Popup>
+
             <!--
             <Button Style="{StaticResource NoChromeButton}" Background="Gainsboro"
                     Grid.Column="1" Click="TagCloudButton_Click"
