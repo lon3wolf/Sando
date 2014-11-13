@@ -377,6 +377,7 @@
     </Content>
     <None Include="packages.config" />
     <None Include="Properties\vsix-compress.props" />
+    <Resource Include="Resources\FontAwesome.otf" />
     <None Include="sandoKey.snk" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>

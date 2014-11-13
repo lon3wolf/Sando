@@ -12,145 +12,170 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/UI;component/Base/StyleDictionary.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="CommandBarStyle" TargetType="{x:Type WrapPanel}">
+            <Style x:Key="CommandBarStyle" TargetType="{x:Type Grid}">
                 <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarGradientKey}}" />
+            </Style>
+            <Style x:Key="ToolbarButtonStyle" TargetType="{x:Type Button}">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="TextElement.FontFamily" Value="pack://application:,,,/UI;component/Resources/#FontAwesome"/>
+                <Setter Property="TextElement.FontSize" Value="18"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarOptionsGlyphKey}}"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarOptionsBackgroundKey}}"/>
+                <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border x:Name="Border" BorderThickness="1" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,2" Padding="2,2,2,0">
+                                <ContentPresenter Margin="1,0,1,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedKey}}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedIconBorderKey}}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value> 
+                </Setter>
+            </Style>
+            <Style x:Key="ToolbarLeftButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ToolbarButtonStyle}">
+                <Setter Property="Margin" Value="4,0,0,0"/>
+            </Style>
+            <Style x:Key="ToolbarRightButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ToolbarButtonStyle}">
+                <Setter Property="Margin" Value="0,0,4,0"/>
             </Style>
             <converters:BoolToOppositeBoolConverter x:Key="oppositeConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource CommandBarStyle}">
-        <Button Name="Options"  Margin="1,3,0,0" FontFamily="ExtraBold" IsEnabled="True"
-                    KeyboardNavigation.IsTabStop="False" FontWeight="ExtraBold" 
-                    Height="19" Width="19" VerticalAlignment="Top" ToolTip="Open Sando Options"
-                    Style="{StaticResource ToolWindowButtonStyle}" Command="{Binding OpenSandoOptionsCommand}">⚙
-        </Button>
+    <Grid Style="{StaticResource CommandBarStyle}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Grid.Column="0">
+            <!--<Button x:Name="ClearHistoryButton" Content="&#xf00d;" ToolTip="Clear Search History" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource ToolbarLeftButtonStyle}"/>-->
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Grid.Column="2">
+            <Button x:Name="ClearHistoryButton" Content="&#xf00d;" ToolTip="Clear Search History" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource ToolbarRightButtonStyle}"/>
+            <Button x:Name="Options" Content="&#xf013;" ToolTip="Open Sando Options" Command="{Binding OpenSandoOptionsCommand}" Style="{StaticResource ToolbarRightButtonStyle}"/>
+            <Button x:Name="HelpButton" Content="&#xf128;" ToolTip="Help" Click="HelpButton_Click" IsEnabled="{Binding IsOpen, Converter={StaticResource oppositeConverter}, ElementName=HelpPopup, Mode=TwoWay}" Style="{StaticResource ToolbarRightButtonStyle}"/>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Grid.Column="1">
+            <Popup Name="HelpPopup" Placement="Mouse" StaysOpen="False" IsOpen="False" Width="430.189">
+                <RichTextBox Margin="0,0,0,0" Name="richTB" HorizontalAlignment="Stretch" IsDocumentEnabled="False" IsEnabled="False">
+                    <FlowDocument >
+                        <Paragraph FontSize="5" Margin="0,0,0,0"></Paragraph>
+                        <Paragraph Margin="0,0,0,0" FontFamily="Arial">
+                            <Bold>Keyboard Usage</Bold>
+                        </Paragraph>
+                        <Table>
+                            <Table.Columns>
+                                <TableColumn Width="0.37*" />
+                                <TableColumn Width="1.3*" />
+                            </Table.Columns>
+                            <TableRowGroup Paragraph.TextAlignment="left" >
+                                <TableRow>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Arial">
+                                            Ctrl + Shift + F
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph>Opens the Sando view and focuses on the query box.</Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Arial">
+                                            ↑ + ↓
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph>Navigate through results following a query.</Paragraph>
+                                    </TableCell>
+                                </TableRow>
 
-        <Button Name="ClearHistoryButton"  Margin="1,3,0,0" FontFamily="ExtraBold" IsEnabled="True" 
-                    KeyboardNavigation.IsTabStop="False" FontWeight="ExtraBold" 
-                    Height="19" Width="19" VerticalAlignment="Top" ToolTip="Clear search history"
-                    Style="{StaticResource ToolWindowButtonStyle}" Command="{Binding ClearSearchHistoryCommand}">✘
-        </Button>
+                                <TableRow>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Arial">
+                                            Enter
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph>Opens the currently selected result in editor.</Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                            </TableRowGroup>
+                        </Table>
+                        <Paragraph xml:space="preserve"><Bold>Creating an Effective Query</Bold></Paragraph>
+                        <Table>
+                            <Table.Columns>
+                                <TableColumn Width="1.85*" />
+                                <TableColumn Width="1.5*" />
+                            </Table.Columns>
+                            <TableRowGroup Paragraph.TextAlignment="left">
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph FontFamily="Arial">Add
+                                            <Italic>
+                                                <Bold>all</Bold>
+                                            </Italic> relevant terms:
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Courier New">convert image
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph FontFamily="Arial">Put exact phrases in quotes:
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Courier New">"void StartMonitor("
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph FontFamily="Arial">Escape \ and " in quotes:
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Courier New">"OpenFile(\"file.txt\");"
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
 
-        <Button x:Name="HelpButton"  ToolTip="Help" Margin="1,3,0,0" FontFamily="ExtraBold" VerticalAlignment="Top"   
-                IsEnabled="{Binding IsOpen, Converter={StaticResource oppositeConverter}, ElementName=HelpPopup, Mode=TwoWay}"
-            	Style="{StaticResource ToolWindowButtonStyle}" Click="HelpButton_Click"
-            	KeyboardNavigation.IsTabStop="False" Height="19" Width="19"
-            	FontWeight="ExtraBold" Content="⁈">
-            
-        </Button>
-
-        <Popup Name="HelpPopup" Placement="Mouse" StaysOpen="False" IsOpen="False" Width="430.189">
-            <RichTextBox Margin="0,0,0,0" Name="richTB" HorizontalAlignment="Stretch" IsDocumentEnabled="False" IsEnabled="False">
-                <FlowDocument >
-                    <Paragraph FontSize="5" Margin="0,0,0,0"></Paragraph>
-                    <Paragraph Margin="0,0,0,0" FontFamily="Arial">
-                        <Bold>Keyboard Usage</Bold>
-                    </Paragraph>
-                    <Table>
-                        <Table.Columns>
-                            <TableColumn Width="0.37*" />
-                            <TableColumn Width="1.3*" />
-                        </Table.Columns>
-                        <TableRowGroup Paragraph.TextAlignment="left" >
-                            <TableRow>
-                                <TableCell >
-                                    <Paragraph FontFamily="Arial">
-                                        Ctrl + Shift + F
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph>Opens the Sando view and focuses on the query box.</Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell >
-                                    <Paragraph FontFamily="Arial">
-                                        ↑ + ↓
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph>Navigate through results following a query.</Paragraph>
-                                </TableCell>
-                            </TableRow>
-
-                            <TableRow>
-                                <TableCell >
-                                    <Paragraph FontFamily="Arial">
-                                        Enter
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph>Opens the currently selected result in editor.</Paragraph>
-                                </TableCell>
-                            </TableRow>
-                        </TableRowGroup>
-                    </Table>
-                    <Paragraph xml:space="preserve"><Bold>Creating an Effective Query</Bold></Paragraph>
-                    <Table>
-                        <Table.Columns>
-                            <TableColumn Width="1.85*" />
-                            <TableColumn Width="1.5*" />
-                        </Table.Columns>
-                        <TableRowGroup Paragraph.TextAlignment="left">
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph FontFamily="Arial">Add
-                                        <Italic>
-                                            <Bold>all</Bold>
-                                        </Italic> relevant terms:
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell >
-                                    <Paragraph FontFamily="Courier New">convert image
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph FontFamily="Arial">Put exact phrases in quotes:
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell >
-                                    <Paragraph FontFamily="Courier New">"void StartMonitor("
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph FontFamily="Arial">Escape \ and " in quotes:
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell >
-                                    <Paragraph FontFamily="Courier New">"OpenFile(\"file.txt\");"
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph FontFamily="Arial">Put '-' before unwanted words:
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell >
-                                    <Paragraph FontFamily="Courier New">parse method -test
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph FontFamily="Arial">Filter results by file extensions:
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell >
-                                    <Paragraph FontFamily="Courier New">image file:cs
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                        </TableRowGroup>
-                    </Table>
-                </FlowDocument>
-            </RichTextBox>
-        </Popup>
-
-    </WrapPanel>
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph FontFamily="Arial">Put '-' before unwanted words:
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Courier New">parse method -test
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph FontFamily="Arial">Filter results by file extensions:
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell >
+                                        <Paragraph FontFamily="Courier New">image file:cs
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                            </TableRowGroup>
+                        </Table>
+                    </FlowDocument>
+                </RichTextBox>
+            </Popup>
+        </WrapPanel>
+    </Grid>
 </UserControl>

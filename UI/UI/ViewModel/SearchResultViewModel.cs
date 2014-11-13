@@ -393,14 +393,6 @@ namespace Sando.UI.ViewModel
             this._isPopupOpen = false;
         }
 
-        public string Header
-        {
-            get
-            {
-                return "Type";
-            }
-        }
-
         public bool IsPopupOpen
         {
             get
