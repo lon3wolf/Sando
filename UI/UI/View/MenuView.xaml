@@ -59,7 +59,7 @@
             <!--<Button x:Name="ClearHistoryButton" Content="&#xf00d;" ToolTip="Clear Search History" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource ToolbarLeftButtonStyle}"/>-->
         </WrapPanel>
         <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Grid.Column="2">
-            <Button x:Name="ClearHistoryButton" Content="&#xf00d;" ToolTip="Clear Search History" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource ToolbarRightButtonStyle}"/>
+            <!--<Button x:Name="ClearHistoryButton" Content="&#xf00d;" ToolTip="Clear Search History" Command="{Binding ClearSearchHistoryCommand}" Style="{StaticResource ToolbarRightButtonStyle}"/>-->
             <Button x:Name="Options" Content="&#xf013;" ToolTip="Open Sando Options" Command="{Binding OpenSandoOptionsCommand}" Style="{StaticResource ToolbarRightButtonStyle}"/>
             <Button x:Name="HelpButton" Content="&#xf128;" ToolTip="Help" Click="HelpButton_Click" IsEnabled="{Binding IsOpen, Converter={StaticResource oppositeConverter}, ElementName=HelpPopup, Mode=TwoWay}" Style="{StaticResource ToolbarRightButtonStyle}"/>
         </WrapPanel>

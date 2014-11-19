@@ -173,8 +173,8 @@ namespace Sando.UI.View
                     this.SearchBox.ItemsSource = null;
                     this.UpdateRecommendedQueries(Enumerable.Empty<String>().AsQueryable());
 
-                    this.SearchButton.Command.Execute(this.SearchButton.CommandParameter);
-
+                    var searchButton = this.SearchBox.Template.FindName("SearchButton", this.SearchBox) as Button;
+                    searchButton.Command.Execute(searchButton.CommandParameter);
                 }
             }
         }
@@ -193,8 +193,9 @@ namespace Sando.UI.View
         private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
         {
             UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
-            if (elementWithFocus.Equals(SearchBoxTooltipNoShow))
-                return;
+            if (null != elementWithFocus)
+                if (elementWithFocus.Equals(SearchBoxTooltipNoShow))
+                    return;
             SearchBoxTooltip.IsOpen = false;
         }
 
@@ -355,7 +356,8 @@ namespace Sando.UI.View
                 var reformedQuery = (sender as SandoQueryHyperLink).Query;
                 this.SearchBox.Text = reformedQuery;
 
-                this.SearchButton.Command.Execute(this.SearchButton.CommandParameter);
+                var searchButton = this.SearchBox.Template.FindName("SearchButton", this.SearchBox) as Button;
+                searchButton.Command.Execute(searchButton.CommandParameter);
             }
         }
 
@@ -535,8 +537,15 @@ namespace Sando.UI.View
 
         #endregion
 
-        
+        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var dc = this.DataContext as SearchViewModel;
+            dc.ClearSearchHistoryCommand.Execute(null);
 
-        
+            this.SearchBox.ItemsSource = null;
+            this.UpdateRecommendedQueries(Enumerable.Empty<String>().AsQueryable());
+            
+            this.SearchBox.IsDropDownOpen = false;
+        }
     }
 }
