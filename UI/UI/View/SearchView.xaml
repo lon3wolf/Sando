@@ -165,7 +165,7 @@
                     HorizontalAlignment="Stretch"
                     ItemContainerStyle="{StaticResource FixedWidthLBStyle}"
                     Margin="0,0,0,0"
-                    MaxDropDownHeight="290" 
+                    MaxDropDownHeight="500" 
                     ToolTipService.ShowDuration="2000"
                     VerticalAlignment="Top" 
                     >
@@ -262,10 +262,10 @@
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.SearchBoxMouseOverBackgroundMiddle1Key}}"/>
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedKey}}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsPressed" Value="True">
-                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.SearchBoxPressedBackgroundKey}}"/>
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMouseDownBackgroundGradientKey}}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -330,7 +330,7 @@
                                                 Fill="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}"
                                                 />
                                             <TextBlock Grid.Row="4" x:Name="ClearSearchHistoryText"
-                                                       Padding="3,1,0,3" MouseDown="TextBlock_MouseDown"
+                                                       Padding="3,3,0,3" MouseDown="TextBlock_MouseDown"
                                                        >
                                                     <Run FontFamily="pack://application:,,,/UI;component/Resources/#FontAwesome" Text="&#xf00d;"/>
                                                     <Run/>
@@ -355,7 +355,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="AutoCompleteSearchBoxBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.SearchBoxMouseOverBorderKey}}"/>
+                                <Setter TargetName="AutoCompleteSearchBoxBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedIconBorderKey}}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -367,28 +367,31 @@
                         AllowsTransparency="True">
             <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}" BorderThickness="1,1,1,1">
                 <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
-                    <TextBlock Margin="6,0,6,4" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
-                        Add ALL relevant words (i.e., Google-style query)
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
+                            <Setter Property="Margin" Value="6,6,6,0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Add ALL relevant words (i.e., Google-style query)</Run>
                     </TextBlock>
-                    <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
-                        Put exact phrases in quotes: "void StartMonitor("
+                    <TextBlock>
+                        <Run FontFamily="Arial">Put exact phrases in quotes:</Run> <Run FontFamily="Courier New">"void StartMonitor("</Run>
                     </TextBlock>
-                    <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
-                        Escape \ and " in quotes: "OpenFile(\"file.txt\");"
+                    <TextBlock>
+                        <Run FontFamily="Arial">Escape \ and " in quotes:</Run> <Run FontFamily="Courier New">"OpenFile(\"file.txt\");"</Run>
                     </TextBlock>
-                    <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
-                        Put '-' before unwanted words: parse method -test
+                    <TextBlock>
+                        <Run FontFamily="Arial">Put '-' before unwanted words:</Run> <Run FontFamily="Courier New">parse method -test</Run>
                     </TextBlock>
-                    <TextBlock Margin="6,0,6,0" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}">
-                        Filter results by file extensions: image file:cs
+                    <TextBlock>
+                        <Run FontFamily="Arial">Filter results by file extensions:</Run> <Run FontFamily="Courier New">image file:cs</Run>
                     </TextBlock>
-                        
-                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
-
-                    <CheckBox Margin="6,0,0,0" Name="SearchBoxTooltipNoShow" IsEnabled="True" Checked="SearchBoxTooltipNoShow_Checked">
-                            Don't show again. Get query tips in Help (?).
+                    <Rectangle Height="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,4,0,0" Fill="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}"/>
+                    <CheckBox Margin="6,0,0,3" Name="SearchBoxTooltipNoShow" IsEnabled="True" Checked="SearchBoxTooltipNoShow_Checked">
+                        <Run FontFamily="Arial">Don't show again. Get query tips in Help (?).</Run>
                     </CheckBox>
-                        
                 </StackPanel>
             </Border>
         </Popup>
