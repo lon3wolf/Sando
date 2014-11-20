@@ -8,7 +8,7 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
     public class TextFileElement : ProgramElement
     {
         public TextFileElement(string fullFilePath, string snippet, string body)
-			: base(Path.GetFileName(fullFilePath), 0, 0, fullFilePath, snippet)
+			: base(GetProperFilePathCapitalization(fullFilePath), 0, 0, fullFilePath, snippet)
         {
 			Contract.Requires(!String.IsNullOrWhiteSpace(body), "TextFileElement:Constructor - body cannot be null or an empty string!");
 
@@ -16,13 +16,13 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
         }
 
         public TextFileElement(string name, int definitionLineNumber, int definitionColumnNumber, string fullFilePath, string snippet, string body)
-            : base(Path.GetFileName(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
+            : base(GetProperFilePathCapitalization(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
         {
             Body = body;
         }
 
         public TextFileElement(int definitionLineNumber, int definitionColumnNumber, string fullFilePath, string snippet, string body)
-            : base(Path.GetFileName(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
+            : base(GetProperFilePathCapitalization(fullFilePath), definitionLineNumber, definitionColumnNumber, fullFilePath, snippet)
 		{
             Body = body;
 		}
@@ -33,6 +33,13 @@ namespace Sando.ExtensionContracts.ProgramElementContracts
         public override ProgramElementType ProgramElementType
         {
             get { return ProgramElementType.TextFile; }
+        }
+
+        private static string GetProperFilePathCapitalization(string filename)
+        {
+            FileInfo fileInfo = new FileInfo(filename);
+            DirectoryInfo dirInfo = fileInfo.Directory;
+            return dirInfo.GetFiles(fileInfo.Name)[0].Name;
         }
     }
 }
