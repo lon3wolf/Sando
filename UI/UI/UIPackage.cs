@@ -226,7 +226,7 @@ namespace Sando.UI
                     try
                     {
                         SrcMLArchiveEventsHandlers handlers = null;
-                        foreach (var fileName in srcMLService.CurrentSrcMLArchive.GetFiles())
+                        foreach (var fileName in srcMLService.CurrentMonitor.GetArchivedFiles())
                         {
                             if (handlers == null)
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
@@ -246,15 +246,11 @@ namespace Sando.UI
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                     //go through all files and delete necessary ones
                     foreach (var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
-                        if (!PathFileExists(new System.Text.StringBuilder(file)))
+                        if (!srcMLService.CurrentMonitor.IsMonitoringFile(file))
                             srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
                 },
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
         }
-
-        // http://stackoverflow.com/questions/2225415/why-is-file-exists-much-slower-when-the-file-does-not-exist#2230169
-        [DllImport("Shlwapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private extern static bool PathFileExists(System.Text.StringBuilder path);
 
         public void RegisterSolutionEvents()
         {
@@ -408,7 +404,7 @@ namespace Sando.UI
                     try
                     {
                         SrcMLArchiveEventsHandlers handlers = null;
-                        foreach (var fileName in srcMLService.CurrentSrcMLArchive.GetFiles())
+                        foreach (var fileName in srcMLService.CurrentMonitor.GetArchivedFiles())
                         {
                             if (handlers == null)
                                 handlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
