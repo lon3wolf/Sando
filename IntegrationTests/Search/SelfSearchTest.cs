@@ -17,7 +17,7 @@ namespace Sando.IntegrationTests.Search
             string keywords = "gnu memops";
             var expectedLowestRank = 11;
             Predicate<CodeSearchResult> predicate =
-                el => el.ProgramElement.ProgramElementType == ProgramElementType.TextFile && (el.ProgramElement.Name == "notsolongfile.txt");
+                el => el.ProgramElement.ProgramElementType == ProgramElementType.TextFile && (el.ProgramElement.Name.ToLowerInvariant() == "notsolongfile.txt");
             EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 

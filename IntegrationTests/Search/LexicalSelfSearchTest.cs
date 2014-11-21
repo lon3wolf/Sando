@@ -133,7 +133,7 @@ namespace Sando.IntegrationTests.Search
         {
             string keywords = "\"<CommandTable xmlns\"";
             var expectedLowestRank = 6;
-            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("sandovsct.txt");
+            Predicate<CodeSearchResult> predicate = el => el.Name.ToLowerInvariant().Equals("sandovsct.txt");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 

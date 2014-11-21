@@ -16,8 +16,53 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:SwumTypeToColorConverter x:Key="SwumTypeToColorConverter"/>
             <converters:BackgroundConverter x:Key="BackgroundConverter" />
-        </ResourceDictionary>
+            <Style x:Key="FixedWidthLBStyle" TargetType="ListBoxItem">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <!--<MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="True"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMouseOverBackgroundGradientKey}}"/>
+                                </MultiTrigger>-->
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                                        <Condition Property="IsSelected" Value="True"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMouseOverBackgroundGradientKey}}"/>
+                                </MultiTrigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="Selector.IsSelectionActive" Value="True"/>
+                                        <Condition Property="IsSelected" Value="True"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMouseDownBackgroundGradientKey}}"/>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <!--<Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="IsSelected" Value="True"/>
+                    </Trigger>
+                </Style.Triggers>-->
+            </Style>
+        </ResourceDictionary>        
     </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>            
             <RowDefinition Height="17"/>
@@ -102,33 +147,42 @@
         </Grid>
         <Grid Grid.Row="1" Margin="5,0,5,0" Grid.Column="0">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="0" />
-                <ColumnDefinition Width="100"/>
-            </Grid.ColumnDefinitions>
-
             <!-- Top Part: Query -->
-            <controls:AutoCompleteBox Loaded="SearchBox_Loaded" HorizontalAlignment="Stretch" Grid.Column="0"
-                Name="SearchBox" Margin="0,0,0,0" FilterMode="None"
-                Height="25" BorderBrush="DimGray" Populating="SearchBox_Populating"
-                KeyUp="SearchBox_OnKeyUpHandler"
-                MinimumPrefixLength="0" MaxDropDownHeight="290" 
-                ValueMemberPath="Query" VerticalAlignment="Top" 
-                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
-                Background="{DynamicResource {x:Static vsfx:VsBrushes.DropDownBackgroundKey}}">
+            <controls:AutoCompleteBox 
+                    Name="SearchBox"
+                        GotFocus="SearchBox_GotFocus"
+                        KeyUp="SearchBox_OnKeyUpHandler"
+                        Loaded="SearchBox_Loaded"
+                        LostFocus="SearchBox_LostFocus"   
+                        Populating="SearchBox_Populating"
+                    FilterMode="None"
+                    MinimumPrefixLength="0"
+                    ValueMemberPath="Query"
+                        Background="{DynamicResource {x:Static vsfx:VsBrushes.SearchBoxBackgroundKey}}"  
+                        BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.SearchBoxBorderKey}}"
+                        Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                    Height="25"
+                    HorizontalAlignment="Stretch"
+                    ItemContainerStyle="{StaticResource FixedWidthLBStyle}"
+                    Margin="0,0,0,0"
+                    MaxDropDownHeight="500" 
+                    ToolTipService.ShowDuration="2000"
+                    VerticalAlignment="Top" 
+                    >
                 <controls:AutoCompleteBox.ToolTip>
                     <StackPanel>
                         <TextBlock>Add ALL relevant words (i.e., Google-style query)</TextBlock>
                         <TextBlock>Keyboard shortcut: Ctrl+Shift+F</TextBlock>
                     </StackPanel>
                 </controls:AutoCompleteBox.ToolTip>
-
                 <controls:AutoCompleteBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Query}" >
+                        <TextBlock Text="{Binding Query}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="Padding" Value="0,2,8,2"/>
+                                    <Setter Property="Margin" Value="16,0,0,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="Foreground">
                                         <Setter.Value>
                                             <MultiBinding  Mode="OneWay" Converter="{StaticResource SwumTypeToColorConverter}">
@@ -142,20 +196,205 @@
                         </TextBlock>
                     </DataTemplate>
                 </controls:AutoCompleteBox.ItemTemplate>
+                <controls:AutoCompleteBox.Template>
+                    <ControlTemplate TargetType="{x:Type controls:AutoCompleteBox}">
+                        <Grid Opacity="{TemplateBinding Opacity}">
+                            <Border Name="AutoCompleteSearchBoxBorder"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Margin="0"
+                                    Padding="0"
+                                    >
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="{TemplateBinding Height}"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="25"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                        x:Name="Text"
+                                            Background="{TemplateBinding Background}"
+                                            Foreground="{TemplateBinding Foreground}"
+                                        IsTabStop="True"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        Margin="2,0,0,0"
+                                        Padding="0"
+                                             HorizontalContentAlignment="Left"
+                                             VerticalContentAlignment="Center"
+                                        Style="{TemplateBinding TextBoxStyle}"
+                                        />
+                                    <Button Grid.Column="1"
+                                        Name="SearchButton"
+                                        Command="{Binding SearchCommand}"
+                                        CommandParameter="{Binding ElementName=SearchBox, Path=Text}"
+                                            Content="&#xf002;"
+                                            FontFamily="pack://application:,,,/UI;component/Resources/#FontAwesome"
+                                            FontSize="14"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                        Background="{TemplateBinding Background}"
+                                        Foreground="{TemplateBinding Foreground}"
+                                            BorderBrush="Transparent"
+                                            BorderThickness="0"
+                                            Margin="0"
+                                            Padding="0"
+                                        >
+                                        <Button.LayoutTransform>
+                                            <RotateTransform Angle="90"/>
+                                        </Button.LayoutTransform>
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="{x:Type Button}">
+                                                <Border x:Name="ButtonBorder"                                                
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Margin="0"
+                                                        >
+                                                    <ContentPresenter x:Name="ButtonContentPresenter"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      Margin="{TemplateBinding Padding}"
+                                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedKey}}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMouseDownBackgroundGradientKey}}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="Popup" Visibility="Collapsed" MaxWidth="{Binding ElementName=AutoCompleteSearchBoxBorder, Path=ActualWidth}" MinWidth="{Binding ElementName=AutoCompleteSearchBoxBorder, Path=ActualWidth}">
+                                <Grid>
+                                    <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBorderKey}}"
+                                            BorderThickness="1"
+                                            CornerRadius="0"
+                                            HorizontalAlignment="Stretch"
+                                            Opacity="1"
+                                            Padding="0"
+                                            Background="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBackgroundGradientKey}}"
+                                            >
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform X="-1" Y="-1"/>
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="4"/>
+                                                <RowDefinition MaxHeight="{TemplateBinding MaxDropDownHeight}"/>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Rectangle Grid.Row="0"
+                                                Margin="0"
+                                                Height="4"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Fill="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBackgroundGradientKey}}"
+                                                />
+                                            <ListBox x:Name="Selector" Grid.Row="1"
+                                                ItemTemplate="{TemplateBinding ItemTemplate}"
+                                                ItemContainerStyle="{TemplateBinding ItemContainerStyle}"
+                                                BorderThickness="0"
+                                                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                     HorizontalContentAlignment="Stretch"
+                                                Background="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBackgroundGradientKey}}"
+                                                     MinWidth="{Binding ElementName=AutoCompleteSearchBoxBorder, Path=ActualWidth}"
+                                                     MaxWidth="{Binding ElementName=AutoCompleteSearchBoxBorder, Path=ActualWidth}"
+                                                     HorizontalAlignment="Left"
+                                                />
+                                            <Rectangle Grid.Row="2"
+                                                Margin="0"
+                                                Height="1"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Fill="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBackgroundGradientKey}}"
+                                                />
+                                            <Rectangle Grid.Row="3" x:Name="ClearSearchHistorySeparator"
+                                                Margin="0"
+                                                Height="1"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Bottom"
+                                                Fill="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuSeparatorKey}}"
+                                                />
+                                            <TextBlock Grid.Row="4" x:Name="ClearSearchHistoryText"
+                                                       Padding="3,3,0,3" MouseDown="TextBlock_MouseDown"
+                                                       >
+                                                    <Run FontFamily="pack://application:,,,/UI;component/Resources/#FontAwesome" Text="&#xf00d;"/>
+                                                    <Run/>
+                                                    <Run>Clear Search History</Run>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Setter Property="Background" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarMenuBackgroundGradientKey}}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarTextActiveKey}}"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.HelpSearchResultLinkSelectedKey}}"/>
+                                                                <Setter Property="TextDecorations" Value="Underline"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="AutoCompleteSearchBoxBorder" Property="BorderBrush" Value="{DynamicResource {x:Static vsfx:VsBrushes.CommandBarHoverOverSelectedIconBorderKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </controls:AutoCompleteBox.Template>
             </controls:AutoCompleteBox>
-
-            <!--
-            <Button Style="{StaticResource NoChromeButton}" Background="Gainsboro"
-                    Grid.Column="1" Click="TagCloudButton_Click"
-                    Height="25" ToolTip="Show tag cloud">
-                <Image Source="../Resources/cloud.png"/>
-            </Button>
-            -->
-
-            <Button Grid.Row="0" Grid.Column="2" Content="Search"  VerticalAlignment="Top" Height="25" Name="SearchButton" Command="{Binding SearchCommand}"
-                    CommandParameter="{Binding ElementName=SearchBox,Path=Text}" Margin="10,0,0,0"/>
         </Grid>
-
+            
+        <Popup Name="SearchBoxTooltip" PlacementTarget="{Binding ElementName=SearchBox}" Placement="Left"
+                        AllowsTransparency="True">
+            <Border BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}" BorderThickness="1,1,1,1">
+                <StackPanel Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"/>
+                            <Setter Property="Margin" Value="6,6,6,0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Add ALL relevant words (i.e., Google-style query)</Run>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Put exact phrases in quotes:</Run> <Run FontFamily="Courier New">"void StartMonitor("</Run>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Escape \ and " in quotes:</Run> <Run FontFamily="Courier New">"OpenFile(\"file.txt\");"</Run>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Put '-' before unwanted words:</Run> <Run FontFamily="Courier New">parse method -test</Run>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run FontFamily="Arial">Filter results by file extensions:</Run> <Run FontFamily="Courier New">image file:cs</Run>
+                    </TextBlock>
+                    <Rectangle Height="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,4,0,0" Fill="{DynamicResource {x:Static vsfx:VsBrushes.FileTabBorderKey}}"/>
+                    <CheckBox Margin="6,0,0,3" Name="SearchBoxTooltipNoShow" IsEnabled="True" Checked="SearchBoxTooltipNoShow_Checked">
+                        <Run FontFamily="Arial">Don't show again. Get query tips in Help (?).</Run>
+                    </CheckBox>
+                </StackPanel>
+            </Border>
+        </Popup>
 
         <ProgressBar Margin="5,2,5,0" Name="ProgBar" Grid.Row="2"
                  VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="3" IsIndeterminate="True" Visibility="{Binding ProgressBarVisibility}"/>
@@ -303,6 +542,6 @@
                 </StackPanel>
             </Border>
         </Expander>
-
+      
     </Grid>
 </UserControl>

@@ -22,6 +22,7 @@ using FocusTestVC;
 using ABB.SrcML.VisualStudio;
 using Thread = System.Threading.Thread;
 using Sando.Indexer.Searching.Criteria;
+using Configuration.OptionsPages;
 
 namespace Sando.UI.View
 {
@@ -172,10 +173,35 @@ namespace Sando.UI.View
                     this.SearchBox.ItemsSource = null;
                     this.UpdateRecommendedQueries(Enumerable.Empty<String>().AsQueryable());
 
-                    this.SearchButton.Command.Execute(this.SearchButton.CommandParameter);
-
+                    var searchButton = this.SearchBox.Template.FindName("SearchButton", this.SearchBox) as Button;
+                    searchButton.Command.Execute(searchButton.CommandParameter);
                 }
             }
+        }
+
+        private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (this.SearchBoxTooltipNoShow.IsChecked.Value)
+                return;
+            SearchBoxTooltip.PlacementTarget = this.SearchBox;
+            SearchBoxTooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+            //if(!this.SearchBoxTooltipNoShow.IsChecked.Value) 
+            SearchBoxTooltip.IsOpen = true;
+        }      
+
+
+        private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+            if (null != elementWithFocus)
+                if (elementWithFocus.Equals(SearchBoxTooltipNoShow))
+                    return;
+            SearchBoxTooltip.IsOpen = false;
+        }
+
+        private void SearchBoxTooltipNoShow_Checked(object sender, RoutedEventArgs e)
+        {
+            SearchBoxTooltip.IsOpen = false;            
         }
 
         private void UpdateMessage(string message)
@@ -330,7 +356,8 @@ namespace Sando.UI.View
                 var reformedQuery = (sender as SandoQueryHyperLink).Query;
                 this.SearchBox.Text = reformedQuery;
 
-                this.SearchButton.Command.Execute(this.SearchButton.CommandParameter);
+                var searchButton = this.SearchBox.Template.FindName("SearchButton", this.SearchBox) as Button;
+                searchButton.Command.Execute(searchButton.CommandParameter);
             }
         }
 
@@ -510,5 +537,15 @@ namespace Sando.UI.View
 
         #endregion
 
+        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var dc = this.DataContext as SearchViewModel;
+            dc.ClearSearchHistoryCommand.Execute(null);
+
+            this.SearchBox.ItemsSource = null;
+            this.UpdateRecommendedQueries(Enumerable.Empty<String>().AsQueryable());
+            
+            this.SearchBox.IsDropDownOpen = false;
+        }
     }
 }

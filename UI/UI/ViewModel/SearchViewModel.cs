@@ -56,6 +56,8 @@ namespace Sando.UI.ViewModel
 
         public ICommand OpenLogCommand { get; set; }
 
+        public ICommand ClearSearchHistoryCommand { get; set; }
+
         public ObservableCollection<IndexedFile> IndexedFiles { get; set; }
 
         public List<IndexedFile> ModifiedIndexedFile { get; set; }
@@ -147,6 +149,7 @@ namespace Sando.UI.ViewModel
             this.SearchCommand = new RelayCommand(Search);
             this.ResetCommand = new RelayCommand(Reset);
             this.OpenLogCommand = new RelayCommand(OpenLog);
+            this.ClearSearchHistoryCommand = new RelayCommand(ClearSearchHistory);
             
 
             this.IsIndexFileEnabled = false;
@@ -335,6 +338,12 @@ namespace Sando.UI.ViewModel
         {
             var dte = ServiceLocator.Resolve<DTE2>();
             dte.ItemOperations.OpenFile(SandoLogManager.DefaultLogFilePath, Constants.vsViewKindTextView);
+        }
+
+        private void ClearSearchHistory(object parameter)
+        {
+            var history = ServiceLocator.Resolve<SearchHistory>();
+            history.ClearHistory();
         }
 
         #endregion

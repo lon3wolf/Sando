@@ -94,7 +94,7 @@ namespace Sando.Recommender {
         private void AddTermRecommendationWeightedByPartOfSpeech(string term, Dictionary<string, int> recommendations) {
             const int normalWeight = 1;
 
-            var swumData = SwumManager.Instance.GetSwumForTerm(term);  
+            var swumData = SwumManager.Instance.GetSwumForTerm(term.ToLowerInvariant());
           
             foreach(var swumRecord in swumData) {
                 var actionWords = new Collection<WordNode>();

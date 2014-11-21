@@ -188,12 +188,16 @@ namespace Sando.Indexer
 
         public IEnumerable<string> GetDocumentList()
         {
+            var cache = new HashSet<string>();
             for (int i = 0; i < Reader.MaxDoc(); i++)
             {
                 if (Reader.IsDeleted(i))
                     continue;
                 Document doc = Reader.Document(i);
-                yield return doc.GetField(SandoField.FullFilePath.ToString()).StringValue();
+                // Prevent chunked files from being added/returned multiple times
+                var value = doc.GetField(SandoField.FullFilePath.ToString()).StringValue();
+                if (cache.Add(value))
+                    yield return value;
             }
         }
 

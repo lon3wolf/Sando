@@ -18,7 +18,7 @@ namespace Sando.IntegrationTests.Search
         {
             string keywords = "\"0.7.4.1\"";
             var expectedLowestRank = 2;
-            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("noclassclass.cs");
+            Predicate<CodeSearchResult> predicate = el => el.Name.ToLowerInvariant().Equals("noclassclass.cs");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 
@@ -28,7 +28,7 @@ namespace Sando.IntegrationTests.Search
         {
             string keywords = "\"<CommandTable xmlns\"";
             var expectedLowestRank = 3;
-            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("codemaidtest.txt");
+            Predicate<CodeSearchResult> predicate = el => el.Name.ToLowerInvariant().Equals("codemaidtest.txt");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 
@@ -37,7 +37,7 @@ namespace Sando.IntegrationTests.Search
         {
             string keywords = "\"IDSymbol name=\"IconUnlock\"";
             var expectedLowestRank = 3;
-            Predicate<CodeSearchResult> predicate = el => el.Name.Equals("codemaidtest.txt");
+            Predicate<CodeSearchResult> predicate = el => el.Name.ToLowerInvariant().Equals("codemaidtest.txt");
             List<CodeSearchResult> results = EnsureRankingPrettyGood(keywords, predicate, expectedLowestRank);
         }
 
