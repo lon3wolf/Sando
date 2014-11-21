@@ -186,7 +186,8 @@ namespace Sando.UI.View
             SearchBoxTooltip.PlacementTarget = this.SearchBox;
             SearchBoxTooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
             //if(!this.SearchBoxTooltipNoShow.IsChecked.Value) 
-            SearchBoxTooltip.IsOpen = true;
+            if (false)
+                SearchBoxTooltip.IsOpen = true;
         }      
 
 
