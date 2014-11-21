@@ -268,6 +268,13 @@ namespace Sando.Parser
 				nameElement = nameElement.Element(SRC.Name);
 				name = nameElement.Value;
 			}
+			else if(nameElement == null &&
+                target.Element(SRC.Macro) != null)
+            {
+                // srcML is wrapping enum names in macro elements
+                nameElement = target.Element(SRC.Macro).Element(SRC.Name);
+                name = nameElement.Value;
+            }
 			else if(nameElement == null)
 			{
 				//case of there is no resemblance of a name available
