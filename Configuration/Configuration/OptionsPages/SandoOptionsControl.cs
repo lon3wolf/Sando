@@ -113,7 +113,7 @@ namespace Configuration.OptionsPages
             // 
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.SearchResultsConfigurationNumberOfResultsReturnedTextBox);
             this.SearchResultsConfigurationGroupBox.Controls.Add(this.NumberOfResultsReturnedLabel);
-            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 194);
+            this.SearchResultsConfigurationGroupBox.Location = new System.Drawing.Point(3, 248);
             this.SearchResultsConfigurationGroupBox.Name = "SearchResultsConfigurationGroupBox";
             this.SearchResultsConfigurationGroupBox.Size = new System.Drawing.Size(445, 60);
             this.SearchResultsConfigurationGroupBox.TabIndex = 7;
@@ -125,7 +125,7 @@ namespace Configuration.OptionsPages
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.Location = new System.Drawing.Point(310, 29);
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.Name = "SearchResultsConfigurationNumberOfResultsReturnedTextBox";
-            this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.Size = new System.Drawing.Size(90, 20);
+            this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.Size = new System.Drawing.Size(90, 22);
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.TabIndex = 6;
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.SearchResultsConfigurationNumberOfResultsReturnedTextBox.TextChanged += new System.EventHandler(this.SearchResultsConfigurationNumberOfResultsReturnedTextBox_TextChanged);
@@ -135,7 +135,7 @@ namespace Configuration.OptionsPages
             this.NumberOfResultsReturnedLabel.AutoSize = true;
             this.NumberOfResultsReturnedLabel.Location = new System.Drawing.Point(10, 30);
             this.NumberOfResultsReturnedLabel.Name = "NumberOfResultsReturnedLabel";
-            this.NumberOfResultsReturnedLabel.Size = new System.Drawing.Size(134, 13);
+            this.NumberOfResultsReturnedLabel.Size = new System.Drawing.Size(182, 17);
             this.NumberOfResultsReturnedLabel.TabIndex = 4;
             this.NumberOfResultsReturnedLabel.Text = "Number of results returned:";
             // 
@@ -143,7 +143,7 @@ namespace Configuration.OptionsPages
             // 
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionCheckBox);
             this.ToggleLogCollectionGroupBox.Controls.Add(this.AllowCollectionLabel);
-            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 258);
+            this.ToggleLogCollectionGroupBox.Location = new System.Drawing.Point(3, 326);
             this.ToggleLogCollectionGroupBox.Name = "ToggleLogCollectionGroupBox";
             this.ToggleLogCollectionGroupBox.Size = new System.Drawing.Size(445, 56);
             this.ToggleLogCollectionGroupBox.TabIndex = 8;
@@ -157,7 +157,7 @@ namespace Configuration.OptionsPages
             this.AllowCollectionCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AllowCollectionCheckBox.Location = new System.Drawing.Point(385, 29);
             this.AllowCollectionCheckBox.Name = "AllowCollectionCheckBox";
-            this.AllowCollectionCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.AllowCollectionCheckBox.Size = new System.Drawing.Size(18, 17);
             this.AllowCollectionCheckBox.TabIndex = 5;
             this.AllowCollectionCheckBox.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.AllowCollectionCheckBox.UseVisualStyleBackColor = true;
@@ -168,7 +168,7 @@ namespace Configuration.OptionsPages
             this.AllowCollectionLabel.AutoSize = true;
             this.AllowCollectionLabel.Location = new System.Drawing.Point(10, 30);
             this.AllowCollectionLabel.Name = "AllowCollectionLabel";
-            this.AllowCollectionLabel.Size = new System.Drawing.Size(206, 13);
+            this.AllowCollectionLabel.Size = new System.Drawing.Size(273, 17);
             this.AllowCollectionLabel.TabIndex = 4;
             this.AllowCollectionLabel.Text = "Allow collection of anonymous usage logs:";
             // 
@@ -181,16 +181,17 @@ namespace Configuration.OptionsPages
             this.FileExtensionsGroupBox.Controls.Add(this.NoteOnFileExtensions);
             this.FileExtensionsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.FileExtensionsGroupBox.Name = "FileExtensionsGroupBox";
-            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 185);
+            this.FileExtensionsGroupBox.Size = new System.Drawing.Size(445, 239);
             this.FileExtensionsGroupBox.TabIndex = 8;
             this.FileExtensionsGroupBox.TabStop = false;
             this.FileExtensionsGroupBox.Text = "File extensions to index";
             // 
             // buttonDefault
             // 
-            this.buttonDefault.Location = new System.Drawing.Point(325, 77);
+            this.buttonDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.buttonDefault.Location = new System.Drawing.Point(325, 93);
             this.buttonDefault.Name = "buttonDefault";
-            this.buttonDefault.Size = new System.Drawing.Size(75, 23);
+            this.buttonDefault.Size = new System.Drawing.Size(75, 28);
             this.buttonDefault.TabIndex = 3;
             this.buttonDefault.Text = "Default";
             this.buttonDefault.UseVisualStyleBackColor = true;
@@ -198,9 +199,10 @@ namespace Configuration.OptionsPages
             // 
             // DeleteFileExtensionButton
             // 
-            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(325, 48);
+            this.DeleteFileExtensionButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.DeleteFileExtensionButton.Location = new System.Drawing.Point(325, 59);
             this.DeleteFileExtensionButton.Name = "DeleteFileExtensionButton";
-            this.DeleteFileExtensionButton.Size = new System.Drawing.Size(75, 23);
+            this.DeleteFileExtensionButton.Size = new System.Drawing.Size(75, 28);
             this.DeleteFileExtensionButton.TabIndex = 2;
             this.DeleteFileExtensionButton.Text = "Delete";
             this.DeleteFileExtensionButton.UseVisualStyleBackColor = true;
@@ -208,9 +210,10 @@ namespace Configuration.OptionsPages
             // 
             // NewFileExtensionButton
             // 
-            this.NewFileExtensionButton.Location = new System.Drawing.Point(325, 19);
+            this.NewFileExtensionButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.NewFileExtensionButton.Location = new System.Drawing.Point(325, 25);
             this.NewFileExtensionButton.Name = "NewFileExtensionButton";
-            this.NewFileExtensionButton.Size = new System.Drawing.Size(75, 23);
+            this.NewFileExtensionButton.Size = new System.Drawing.Size(75, 28);
             this.NewFileExtensionButton.TabIndex = 1;
             this.NewFileExtensionButton.Text = "New";
             this.NewFileExtensionButton.UseVisualStyleBackColor = true;
@@ -219,19 +222,20 @@ namespace Configuration.OptionsPages
             // FileExtensionsListBox
             // 
             this.FileExtensionsListBox.FormattingEnabled = true;
-            this.FileExtensionsListBox.Location = new System.Drawing.Point(13, 19);
+            this.FileExtensionsListBox.ItemHeight = 16;
+            this.FileExtensionsListBox.Location = new System.Drawing.Point(13, 25);
             this.FileExtensionsListBox.Name = "FileExtensionsListBox";
-            this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 134);
+            this.FileExtensionsListBox.Size = new System.Drawing.Size(306, 116);
             this.FileExtensionsListBox.TabIndex = 0;
             // 
             // NoteOnFileExtensions
             // 
             this.NoteOnFileExtensions.AutoSize = true;
             this.NoteOnFileExtensions.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.NoteOnFileExtensions.Location = new System.Drawing.Point(10, 145);
+            this.NoteOnFileExtensions.Location = new System.Drawing.Point(10, 151);
             this.NoteOnFileExtensions.MaximumSize = new System.Drawing.Size(420, 0);
             this.NoteOnFileExtensions.Name = "NoteOnFileExtensions";
-            this.NoteOnFileExtensions.Size = new System.Drawing.Size(402, 26);
+            this.NoteOnFileExtensions.Size = new System.Drawing.Size(412, 51);
             this.NoteOnFileExtensions.TabIndex = 4;
             this.NoteOnFileExtensions.Text = "Note: All files that Visual Studio designates as \'text\' or \'code\' will be indexed" +
     ". Ensure your favorite file is being indexed by adding its extension above.";
@@ -244,7 +248,7 @@ namespace Configuration.OptionsPages
             this.Controls.Add(this.ToggleLogCollectionGroupBox);
             this.Controls.Add(this.SearchResultsConfigurationGroupBox);
             this.Name = "SandoOptionsControl";
-            this.Size = new System.Drawing.Size(465, 299);
+            this.Size = new System.Drawing.Size(465, 404);
             this.SearchResultsConfigurationGroupBox.ResumeLayout(false);
             this.SearchResultsConfigurationGroupBox.PerformLayout();
             this.ToggleLogCollectionGroupBox.ResumeLayout(false);
