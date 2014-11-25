@@ -459,7 +459,7 @@
                     </StackPanel>
                 </DataTemplate>
             </Expander.HeaderTemplate>
-            <Border CornerRadius="5" BorderThickness="1" BorderBrush="Black" Margin="0,3,0,0">
+            <Border CornerRadius="5" BorderThickness="1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}" Margin="0,3,0,0">
                 <StackPanel Margin="5">
                     <!--Access Level-->
                     <Expander>
