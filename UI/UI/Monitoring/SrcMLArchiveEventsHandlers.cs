@@ -75,7 +75,7 @@ namespace Sando.UI.Monitoring
 
             LogEvents.UIMonitoringStopped(this);
             var currentIndexer = ServiceLocator.ResolveOptional<DocumentIndexer>();
-            if (currentIndexer != null)
+            if (currentIndexer != null && !currentIndexer.IsDisposingOrDisposed())
             {
                 currentIndexer.Dispose(false);  // Because in SolutionMonitor: public void StopMonitoring(bool killReaders = false)
             }
