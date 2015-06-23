@@ -97,6 +97,7 @@ namespace Sando.UI
         private SolutionEvents _solutionEvents;
         private ViewManager _viewManager;
         private ISrcMLGlobalService srcMLService;
+        private SandoGlobalService sandoService;
 
         #endregion Private Fields
 
@@ -185,7 +186,7 @@ namespace Sando.UI
             if (typeof(SSandoGlobalService) == serviceType)
             {
                 // Build the global service using this package as its service provider.
-                return new SandoGlobalService(this);
+                return GetSandoService();
             }
             if (typeof(SSandoLocalService) == serviceType)
             {
@@ -245,8 +246,13 @@ namespace Sando.UI
                     var srcMLArchiveEventsHandlers = ServiceLocator.Resolve<SrcMLArchiveEventsHandlers>();
                     //go through all files and delete necessary ones
                     foreach (var file in ServiceLocator.Resolve<DocumentIndexer>().GetDocumentList())
+                    {
                         if (!srcMLService.CurrentMonitor.IsMonitoringFile(file))
+                        {
                             srcMLArchiveEventsHandlers.SourceFileChanged(srcMLService, new FileEventRaisedArgs(FileEventType.FileDeleted, file));
+                        }
+                    }
+                    GetSandoService().OnSolutionOpened(EventArgs.Empty);
                 },
             new CancellationToken(false), TaskContinuationOptions.LongRunning, GetTaskSchedulerService());
         }
@@ -376,6 +382,16 @@ namespace Sando.UI
                 ServiceLocator.RegisterInstance<IFileExtensionRegistryService>(fileExtensionRegistry);
         }
 
+        private SandoGlobalService GetSandoService()
+        {
+            if (this.sandoService == null)
+            {
+                this.sandoService = new SandoGlobalService(this);
+                ServiceLocator.RegisterInstance(this.sandoService);
+            }
+            return this.sandoService;
+        }
+
         private TaskScheduler GetTaskSchedulerService()
         {
             if (taskSchedulerService == null)
@@ -416,6 +432,7 @@ namespace Sando.UI
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
+                GetSandoService().OnSolutionOpened(EventArgs.Empty);
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 

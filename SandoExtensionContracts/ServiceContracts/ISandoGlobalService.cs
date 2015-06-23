@@ -25,6 +25,13 @@ namespace Sando.ExtensionContracts.ServiceContracts
     [Guid("ba9fe7a3-e216-424e-87f9-dee001228d05")]
     [ComVisible(true)]
     public interface ISandoGlobalService {
+        /// <summary>
+        /// Event to indicate that the response to the solution being opened is complete.
+        /// The event is raised after any initial indexing tasks have been created, but
+        /// possibly (likely) before those initial indexing tasks have completed.
+        /// </summary>
+        event EventHandler SolutionOpened;
+
         void GlobalServiceFunction();
         int CallLocalService();
 
