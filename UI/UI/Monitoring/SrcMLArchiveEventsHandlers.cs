@@ -88,7 +88,9 @@ namespace Sando.UI.Monitoring
 
         public void SourceFileChanged(object sender, FileEventRaisedArgs args)
         {
-            SourceFileChanged(sender, args, false);
+            var currentIndexer = ServiceLocator.ResolveOptional<DocumentIndexer>();
+            if (currentIndexer != null && !currentIndexer.IsDisposingOrDisposed())
+                SourceFileChanged(sender, args, false);
         }
 
         public void SourceFileChanged(object sender, FileEventRaisedArgs args, bool commitImmediately = false)
