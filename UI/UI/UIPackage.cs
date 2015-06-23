@@ -95,7 +95,6 @@ namespace Sando.UI
         private ExtensionPointsConfiguration _extensionPointsConfiguration;
         private bool _setupHandlers = false;
         private SolutionEvents _solutionEvents;
-        private SrcMLArchive _srcMLArchive;
         private ViewManager _viewManager;
         private ISrcMLGlobalService srcMLService;
 
@@ -558,13 +557,6 @@ namespace Sando.UI
         {
             try
             {
-                if (_srcMLArchive != null)
-                {
-                    _srcMLArchive.Dispose();
-                    _srcMLArchive = null;
-                    ServiceLocator.Resolve<IndexFilterManager>().Dispose();
-                    ServiceLocator.Resolve<DocumentIndexer>().Dispose();
-                }
                 // XiGe: dispose the dictionary.
                 ServiceLocator.Resolve<DictionaryBasedSplitter>().Dispose();
                 ServiceLocator.Resolve<SearchHistory>().Dispose();
