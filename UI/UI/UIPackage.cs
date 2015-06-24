@@ -432,7 +432,7 @@ namespace Sando.UI
                         System.Threading.Thread.Sleep(3000);
                     }
                 }
-                GetSandoService().OnSolutionOpened(EventArgs.Empty);
+                ServiceLocator.Resolve<SandoGlobalService>().OnSolutionOpened(EventArgs.Empty);
             }, new CancellationToken(false), TaskCreationOptions.LongRunning, GetTaskSchedulerService());
         }
 
@@ -514,6 +514,7 @@ namespace Sando.UI
                 SetupDataLogging();
                 LogEvents.SolutionOpened(this, Path.GetFileName(key.GetSolutionPath()));
 
+                GetSandoService(); // Ensure that the service exists and is resolvable (by SrcMLArchiveEventHandlers)
                 if (isIndexRecreationRequired)
                 {
                     RecreateEntireIndex();

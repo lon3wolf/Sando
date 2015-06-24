@@ -62,6 +62,8 @@ namespace Sando.UI.Service {
         #region ISandoGlobalService Members
 
         public event EventHandler SolutionOpened;
+        public event EventHandler IndexUpdating;
+        public event EventHandler IndexUpdated;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters", MessageId = "Microsoft.Samples.VisualStudio.Services.HelperFunctions.WriteOnOutputWindow(System.IServiceProvider,System.String)")]
         public void GlobalServiceFunction()
@@ -130,6 +132,26 @@ namespace Sando.UI.Service {
         public void AddUISearchResultsListener(ISearchResultListener s)
         {
             //TODO - Delete
+        }
+
+        internal void OnIndexUpdating(EventArgs e) {
+            var handler = IndexUpdating;
+            if (handler != null) {
+                // Call the event listeners asynchronously
+                //  - All listeners are called on a single thread
+                //  - EndInvoke must be called to avoid a thread leak
+                handler.BeginInvoke(this, e, (asyncResult) => { handler.EndInvoke(asyncResult); }, null);
+            }
+        }
+
+        internal void OnIndexUpdated(EventArgs e) {
+            var handler = IndexUpdated;
+            if (handler != null) {
+                // Call the event listeners asynchronously
+                //  - All listeners are called on a single thread
+                //  - EndInvoke must be called to avoid a thread leak
+                handler.BeginInvoke(this, e, (asyncResult) => { handler.EndInvoke(asyncResult); }, null);
+            }
         }
 
         internal void OnSolutionOpened(EventArgs e) {

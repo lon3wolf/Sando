@@ -32,6 +32,10 @@ namespace Sando.ExtensionContracts.ServiceContracts
         /// </summary>
         event EventHandler SolutionOpened;
 
+        event EventHandler IndexUpdating;
+
+        event EventHandler IndexUpdated;
+
         void GlobalServiceFunction();
         int CallLocalService();
 

@@ -127,6 +127,10 @@ namespace Sando.UI.Monitoring
             {
                 if (tasks.Count() == 0)
                 {
+                    var sandoService = ServiceLocator.ResolveOptional<UI.Service.SandoGlobalService>();
+                    if (sandoService != null) {
+                        sandoService.OnIndexUpdating(EventArgs.Empty);
+                    }
                     if (WhenStartedFirstTask != null)
                     {
                         factory.StartNew(WhenStartedFirstTask);
@@ -261,6 +265,10 @@ namespace Sando.UI.Monitoring
                 cancellers.TryTake(out cancelToken);
                 if (tasks.Count() == 0)
                 {
+                    var sandoService = ServiceLocator.ResolveOptional<UI.Service.SandoGlobalService>();
+                    if (sandoService != null) {
+                        sandoService.OnIndexUpdated(EventArgs.Empty);
+                    }
                     if (WhenDoneWithTasks != null)
                     {
                         factory.StartNew(WhenDoneWithTasks);
