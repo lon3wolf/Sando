@@ -54,7 +54,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Lucene.Net.Contrib.2.9.4.1\lib\net40\Lucene.Net.Contrib.Snowball.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\LIBS\VisualStudio\Microsoft.VisualStudio.CoreUtility.dll</HintPath>
     </Reference>
